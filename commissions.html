@@ -4,66 +4,143 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Commissions — Amelia’s Gallery</title>
-  <meta name="description" content="Commission requests for Amelia’s Gallery (family managed)." />
+  <meta name="description" content="Request a commission from Amelia (family managed)." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
-<body>
+
+<body data-page="commissions">
+
   <header class="topbar">
     <div class="brand-left">
-      <img class="amark-img" src="./images/a-dad.jpg" alt="A monogram" onerror="this.style.display='none'">
-      <div class="amark-fallback" aria-hidden="true">A</div>
+      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram" />
     </div>
 
-    <nav class="nav nav-buttons">
-      <a class="btnlink" href="./index.html">Gallery</a>
-      <a class="btnlink active" href="./commissions.html">Commissions</a>
-      <a class="btnlink" href="./about.html">About / Contact</a>
-      <a class="btnlink admin" href="./admin.html">Login</a>
+    <nav class="nav">
+      <a class="navbtn" href="./gallery.html">Gallery</a>
+      <a class="navbtn active" href="./commissions.html">Commissions</a>
+      <a class="navbtn" href="./about.html">About / Contact</a>
+      <a class="navbtn admin" href="./admin.html">Login</a>
     </nav>
   </header>
 
   <main class="shell">
-    <section class="about">
-      <h3>Commission Requests</h3>
-      <p>
-        Tell us what you’d like. A grown-up will confirm details and pricing.
-      </p>
+    <section class="section">
+      <div class="section-head">
+        <h2>Commission Request</h2>
+        <p>Family-managed • A grown-up reviews messages first ✨</p>
+      </div>
 
-      <form class="commission-form" id="commissionForm">
-        <div class="form-row">
-          <label>Your name</label>
-          <input type="text" required placeholder="Your name" />
+      <div class="panel">
+        <div class="panel-left">
+          <h3>Tell Amelia what you’d like</h3>
+          <p class="muted">
+            Describe your idea. If you have a reference picture (e.g. your pet, a Roblox scene, a pose),
+            you can attach it below.
+          </p>
+
+          <form id="commissionForm" class="commission-form" novalidate>
+            <div class="form-row two">
+              <div class="field">
+                <label for="name">Your name</label>
+                <input id="name" name="name" type="text" placeholder="e.g. James R." required />
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" placeholder="you@email.com" required />
+              </div>
+            </div>
+
+            <div class="form-row two">
+              <div class="field">
+                <label for="type">Commission type</label>
+                <select id="type" name="type" required>
+                  <option value="">Choose…</option>
+                  <option>Character</option>
+                  <option>Animal / Pet</option>
+                  <option>Landscape</option>
+                  <option>Roblox Scene</option>
+                  <option>Fantasy</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="deadline">Ideal date (optional)</label>
+                <input id="deadline" name="deadline" type="date" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label for="details">Describe your idea</label>
+                <textarea id="details" name="details" rows="6" placeholder="What would you like Amelia to draw? Any colours, background, pose, style…"></textarea>
+              </div>
+            </div>
+
+            <!-- Upload -->
+            <div class="upload-box">
+              <div class="upload-head">
+                <div>
+                  <h4>Reference image upload (optional)</h4>
+                  <p class="muted small">Images only (JPG/PNG/WebP), max 10MB. Files will be scanned server-side once the backend is live.</p>
+                </div>
+                <label class="upload-btn">
+                  <input id="refFile" type="file" accept="image/png,image/jpeg,image/webp" />
+                  Upload Image
+                </label>
+              </div>
+
+              <div class="upload-body">
+                <div class="preview" id="preview" aria-hidden="true">
+                  <img id="previewImg" alt="Upload preview" />
+                </div>
+
+                <div class="filemeta" id="filemeta" aria-hidden="true"></div>
+
+                <div class="fineprint">
+                  Tip: If you’re uploading a photo of a child, avoid faces and personal info.
+                  This is family-managed and kept private.
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn" type="submit">Send Commission Request</button>
+              <button class="btn ghost" type="button" id="clearBtn">Clear</button>
+            </div>
+
+            <div class="status" id="status" role="status" aria-live="polite"></div>
+          </form>
         </div>
 
-        <div class="form-row">
-          <label>Email</label>
-          <input type="email" required placeholder="you@email.com" />
-        </div>
-
-        <div class="form-row">
-          <label>What would you like Amelia to draw?</label>
-          <textarea required rows="5" placeholder="Describe your idea..."></textarea>
-        </div>
-
-        <div class="form-row two">
-          <div>
-            <label>Size</label>
-            <select>
-              <option>A5</option>
-              <option selected>A4</option>
-              <option>A3</option>
-              <option>Digital Only</option>
-            </select>
+        <aside class="panel-right">
+          <div class="cardbox">
+            <h4>What happens next?</h4>
+            <ol>
+              <li>Family reviews the request.</li>
+              <li>We reply with a price + timescale.</li>
+              <li>Once agreed, Amelia starts drawing ✨</li>
+            </ol>
           </div>
-          <div>
-            <label>Deadline (optional)</label>
-            <input type="text" placeholder="e.g. 2 weeks" />
-          </div>
-        </div>
 
-        <button class="btn" type="submit">Send Request</button>
-        <p class="fineprint">This form is currently a demo. Tonight we can wire it to the backend.</p>
-      </form>
+          <div class="cardbox">
+            <h4>Quick contact</h4>
+            <p class="muted">
+              If you’d rather email directly:
+              <br />
+              <strong id="contactEmail">hello@ameliasgallery.co.uk</strong>
+            </p>
+            <button class="btn small" id="copyEmailBtn" type="button">Copy Email</button>
+          </div>
+
+          <div class="cardbox soft">
+            <h4>Safety note</h4>
+            <p class="muted">
+              Uploads are limited to images only. A virus scan will be applied once the backend is live.
+              For now, uploads stay in-browser and are not publicly visible.
+            </p>
+          </div>
+        </aside>
+      </div>
     </section>
 
     <footer class="footer">
@@ -71,13 +148,163 @@
     </footer>
   </main>
 
-  <script>
-    // Demo submit
-    document.getElementById('commissionForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert('Request saved (demo). We will wire this to the backend next.');
-      e.target.reset();
-    });
-  </script>
+  <script src="./commissions.js"></script>
+
+  <!-- Page-only styles -->
+  <style>
+    .amark-img{
+      width:42px;height:42px;
+      border-radius:14px;
+      object-fit:cover;
+      background:rgba(255,255,255,.72);
+      border:1px solid var(--stroke);
+    }
+    .navbtn{
+      text-decoration:none;
+      color:rgba(42,37,48,.62);
+      font-weight:900;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid transparent;
+      background:transparent;
+    }
+    .navbtn:hover{ color:rgba(42,37,48,.90) }
+    .navbtn.active{
+      background:rgba(255,255,255,.72);
+      border:1px solid var(--stroke);
+      color:rgba(42,37,48,.85);
+    }
+
+    .panel{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: 1.3fr .9fr;
+      gap:14px;
+      align-items:start;
+      padding:0 14px 14px;
+    }
+
+    .panel-left{
+      border-radius:var(--r);
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.55);
+      box-shadow:0 14px 30px rgba(20,12,5,.06);
+      padding:16px;
+    }
+
+    .panel-left h3{margin:0 0 6px; font-weight:1000;}
+    .muted{color:var(--muted); font-weight:800; margin:0 0 10px;}
+    .muted.small{font-size:12px; margin:4px 0 0;}
+    .commission-form{margin-top:12px; display:grid; gap:12px;}
+
+    .form-row{display:grid; gap:10px;}
+    .form-row.two{grid-template-columns:1fr 1fr; gap:12px;}
+    .field label{
+      font-weight:950;
+      color:rgba(42,37,48,.78);
+      font-size:13px;
+    }
+    .field input,.field textarea,.field select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.82);
+      font-weight:800;
+      color:rgba(42,37,48,.85);
+      outline:none;
+    }
+    .field textarea{resize:vertical;}
+
+    .upload-box{
+      border-radius:18px;
+      border:1px solid rgba(55,40,20,.12);
+      background:rgba(255,255,255,.62);
+      padding:14px;
+    }
+    .upload-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .upload-head h4{margin:0;font-weight:1000;}
+    .upload-btn{
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:1000;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.75);
+      user-select:none;
+      white-space:nowrap;
+    }
+    .upload-btn input{display:none;}
+    .upload-body{margin-top:12px; display:grid; gap:10px;}
+    .preview{
+      border-radius:18px;
+      border:1px solid rgba(55,40,20,.12);
+      overflow:hidden;
+      background:rgba(255,255,255,.70);
+    }
+    .preview img{width:100%; height:auto; display:block;}
+    .filemeta{
+      font-weight:900;
+      color:rgba(42,37,48,.78);
+      font-size:13px;
+    }
+    .fineprint{
+      font-weight:800;
+      color:rgba(42,37,48,.55);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .form-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .btn.ghost{
+      background:rgba(255,255,255,.70);
+      color:rgba(42,37,48,.80);
+    }
+    .btn.small{
+      padding:10px 12px;
+      font-size:13px;
+    }
+
+    .status{
+      font-weight:950;
+      color:rgba(42,37,48,.78);
+      padding-top:4px;
+      min-height:18px;
+    }
+    .status.ok{color:rgba(26,120,80,.92);}
+    .status.bad{color:rgba(170,60,60,.92);}
+
+    .panel-right{display:grid; gap:12px;}
+    .cardbox{
+      border-radius:var(--r);
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.55);
+      box-shadow:0 14px 30px rgba(20,12,5,.06);
+      padding:14px;
+    }
+    .cardbox.soft{background:rgba(255,255,255,.48);}
+    .cardbox h4{margin:0 0 6px; font-weight:1000;}
+    .cardbox ol{margin:10px 0 0; padding-left:18px; color:rgba(42,37,48,.72); font-weight:850;}
+    .cardbox p{margin:8px 0 0;}
+
+    @media (max-width: 980px){
+      .panel{grid-template-columns:1fr; padding:0;}
+      .form-row.two{grid-template-columns:1fr;}
+    }
+  </style>
+
 </body>
 </html>
