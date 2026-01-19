@@ -7,16 +7,20 @@
   <meta name="description" content="Amelia’s Gallery — artwork & commissions (family managed)." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
-<body>
-  <!-- Minimal top bar: ONLY A-mark + page buttons -->
+
+<body data-page="home">
+
+  <!-- Topbar -->
   <header class="topbar">
     <div class="brand-left">
-      <img class="amark-img" src="./images/a-dad.jpg" alt="A monogram" onerror="this.style.display='none'">
+      <!-- Placeholder A — replace file later with same name -->
+      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram" onerror="this.style.display='none'">
       <div class="amark-fallback" aria-hidden="true">A</div>
     </div>
 
     <nav class="nav nav-buttons">
-      <a class="btnlink active" href="./index.html">Gallery</a>
+      <a class="btnlink active" href="./index.html">Home</a>
+      <a class="btnlink" href="./gallery.html">Gallery</a>
       <a class="btnlink" href="./commissions.html">Commissions</a>
       <a class="btnlink" href="./about.html">About / Contact</a>
       <a class="btnlink admin" href="./admin.html">Login</a>
@@ -24,37 +28,53 @@
   </header>
 
   <main class="shell">
-    <!-- Hero header image -->
+
+    <!-- Hero -->
     <section class="hero">
       <div class="hero-banner image-header">
+        <!-- Your illustrated header -->
         <div class="header-crop">
           <img src="./amelias-header.png" alt="Amelia’s Gallery header illustration" />
         </div>
       </div>
     </section>
 
-    <!-- Gallery -->
+    <!-- Welcome -->
     <section class="section">
       <div class="section-head">
-        <h2>Original Artwork & Illustrations</h2>
-        <p>Click any image to view it bigger ✨</p>
+        <h2>Welcome to Amelia’s Gallery ✨</h2>
+        <p>Browse artwork, request commissions, and support a young artist (family managed).</p>
       </div>
 
-      <div class="grid" id="galleryGrid"></div>
+      <div class="home-actions">
+        <a class="btn" href="./gallery.html">Explore Gallery</a>
+        <a class="btn ghost" href="./commissions.html">Request a Commission</a>
+      </div>
+    </section>
+
+    <!-- Featured Preview -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Featured</h2>
+        <p>Click to view bigger ✨</p>
+      </div>
+
+      <div class="grid" id="homeGrid"></div>
     </section>
 
     <!-- CTA -->
     <section class="cta">
       <div>
-        <h3>Interested in a custom drawing?</h3>
-        <p>Request a commission — a grown-up will reply.</p>
+        <h3>Got an idea for a drawing?</h3>
+        <p>Send a commission request — a grown-up will reply.</p>
       </div>
-      <a class="btn btnlink-like" href="./commissions.html">Request a Commission</a>
+      <a class="btn" href="./commissions.html">Request a Commission</a>
     </section>
 
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
     </footer>
+
   </main>
 
   <!-- Lightbox -->
@@ -67,5 +87,62 @@
   </div>
 
   <script src="./script.js"></script>
+
+  <!-- Page-only tweaks -->
+  <style>
+    .amark-img{
+      width:48px;
+      height:auto;
+      object-fit:contain;
+      padding:4px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.72);
+    }
+    .amark-fallback{
+      display:grid;
+      place-items:center;
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.72);
+      font-family:"Georgia","Times New Roman",serif;
+      font-style:italic;
+      font-weight:800;
+      color:rgba(42,37,48,.70);
+    }
+    .home-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      padding:0 14px;
+      margin-top:12px;
+    }
+    .btn.ghost{
+      background:rgba(255,255,255,.70);
+      color:rgba(42,37,48,.80);
+    }
+
+    /* Crop header image to keep it clean */
+    .header-crop{
+      border-radius:18px;
+      overflow:hidden;
+    }
+    .header-crop img{
+      width:112%;
+      margin-left:-6%;
+      display:block;
+      transform:translateY(-6px);
+    }
+    @media (max-width: 720px){
+      .header-crop img{
+        width:120%;
+        margin-left:-10%;
+        transform:translateY(-4px);
+      }
+    }
+  </style>
+
 </body>
 </html>
