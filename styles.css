@@ -73,6 +73,23 @@ body{
   border-radius:999px;
   background:rgba(255,255,255,.70);
   border:1px solid var(--stroke);
+}.nav{
+  width:260px;
+  display:flex;
+  justify-content:flex-end;
+  gap:14px;
+  font-weight:700;
+}
+.nav a{
+  text-decoration:none;
+  color:rgba(42,37,48,.62);
+}
+.nav a:hover{color:rgba(42,37,48,.90)}
+.nav a.admin{
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.70);
+  border:1px solid var(--stroke);
 }
 /* === Header override: A + button nav === */
 
