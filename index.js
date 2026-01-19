@@ -1,153 +1,148 @@
 const express = require("express");
 const cors = require("cors");
-const helmet = require("helmet");
-const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
+
+const FRONTEND_ORIGIN =
+  process.env.FRONTEND_ORIGIN || "http://localhost:5500";
+
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "change-me";
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 
-app.use(helmet());
-app.use(express.json({ limit: "2mb" }));
-
+/* Middleware */
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN === "*" ? true : FRONTEND_ORIGIN,
-    credentials: true
+    origin: FRONTEND_ORIGIN,
+    credentials: false
   })
 );
+app.use(express.json({ limit: "2mb" }));
 
-const DATA_DIR = path.join(__dirname, "data");
-const UPLOAD_DIR = path.join(__dirname, "uploads");
-const COMMISSIONS_FILE = path.join(DATA_DIR, "commissions.json");
+/* Root / Health */
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "amelias-gallery-backend" });
+});
 
-function ensureDirs() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
-  if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
-  if (!fs.existsSync(COMMISSIONS_FILE)) fs.writeFileSync(COMMISSIONS_FILE, "[]");
+app.get("/health", (req, res) => {
+  res.json({
+    ok: true,
+    service: "amelias-gallery-backend",
+    version: "0.1.0",
+    time: new Date().toISOString()
+  });
+});
+
+/* TEMP Auth (MVP) */
+app.post("/auth/login", (req, res) => {
+  const { email, password } = req.body || {};
+  const ok = email === ADMIN_EMAIL && password === ADMIN_PASSWORD;
+  if (!ok) return res.status(401).json({ ok: false, message: "Invalid login" });
+
+  const token = Buffer.from(`${email}:${Date.now()}`).toString("base64");
+  res.json({ ok: true, token, email });
+});
+
+/* Commissions JSON store */
+const dataDir = path.join(__dirname, "data");
+const commissionsFile = path.join(dataDir, "commissions.json");
+
+function ensureDataStore() {
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(commissionsFile)) fs.writeFileSync(commissionsFile, "[]");
 }
-ensureDirs();
+ensureDataStore();
 
 function readCommissions() {
   try {
-    return JSON.parse(fs.readFileSync(COMMISSIONS_FILE, "utf8"));
+    return JSON.parse(fs.readFileSync(commissionsFile, "utf8") || "[]");
   } catch {
     return [];
   }
 }
-
 function writeCommissions(items) {
-  fs.writeFileSync(COMMISSIONS_FILE, JSON.stringify(items, null, 2));
+  fs.writeFileSync(commissionsFile, JSON.stringify(items, null, 2));
 }
-
-function signToken(payload) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
-}
-
-function requireAuth(req, res, next) {
-  const header = req.headers.authorization || "";
-  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-  if (!token) return res.status(401).json({ error: "Missing token" });
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    return next();
-  } catch {
-    return res.status(401).json({ error: "Invalid token" });
-  }
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => {
-    const safeBase = path
-      .basename(file.originalname)
-      .replace(/[^a-zA-Z0-9._-]/g, "_");
-    cb(null, `${Date.now()}_${safeBase}`);
-  }
-});
-
-const allowedMime = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf"
-]);
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 8 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (!allowedMime.has(file.mimetype)) return cb(new Error("File type not allowed"));
-    cb(null, true);
-  }
-});
-
-app.use("/uploads", express.static(UPLOAD_DIR));
-
-app.get("/health", (req, res) => {
-  res.json({ ok: true, service: "amelias-gallery-backend" });
-});
-
-app.post("/auth/login", (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: "Missing fields" });
-
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-    const token = signToken({ role: "admin", email });
-    return res.json({ token });
-  }
-  return res.status(401).json({ error: "Invalid login" });
-});
-
-app.get("/auth/me", requireAuth, (req, res) => {
-  res.json({ user: req.user });
-});
 
 app.post("/commissions", (req, res) => {
-  const { name, email, message, referenceUrl } = req.body || {};
+  const { name, email, message, referenceImageUrl } = req.body || {};
   if (!name || !email || !message) {
-    return res.status(400).json({ error: "name, email, message required" });
+    return res.status(400).json({
+      ok: false,
+      message: "Missing required fields: name, email, message"
+    });
   }
 
   const items = readCommissions();
-  const newItem = {
+  const record = {
     id: `c_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    status: "new",
     name,
     email,
     message,
-    referenceUrl: referenceUrl || null
+    referenceImageUrl: referenceImageUrl || null,
+    status: "new",
+    createdAt: new Date().toISOString()
   };
-
-  items.unshift(newItem);
+  items.unshift(record);
   writeCommissions(items);
 
-  res.json({ ok: true, commission: newItem });
+  res.json({ ok: true, commission: record });
 });
 
-app.get("/admin/commissions", requireAuth, (req, res) => {
-  if (req.user?.role !== "admin") return res.status(403).json({ error: "Forbidden" });
-  res.json({ items: readCommissions() });
+app.get("/admin/commissions", (req, res) => {
+  const token = req.headers["x-admin-token"];
+  if (!token) return res.status(401).json({ ok: false, message: "No token" });
+
+  const items = readCommissions();
+  res.json({ ok: true, items });
 });
+
+/* Uploads (images only) */
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+function fileFilter(req, file, cb) {
+  const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (!allowed.includes(file.mimetype)) {
+    return cb(new Error("Only image files are allowed"), false);
+  }
+  cb(null, true);
+}
+
+const upload = multer({
+  dest: uploadsDir,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter
+});
+
+app.use("/uploads", express.static(uploadsDir));
 
 app.post("/upload", upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  const url = `/uploads/${req.file.filename}`;
-  res.json({ ok: true, url });
+  if (!req.file) return res.status(400).json({ ok: false, message: "No file" });
+
+  const ext = (req.file.originalname.split(".").pop() || "").toLowerCase();
+  const safeExt = ["jpg", "jpeg", "png", "webp", "gif"].includes(ext)
+    ? ext
+    : "png";
+
+  const newName = `img_${Date.now()}_${Math.random()
+    .toString(16)
+    .slice(2)}.${safeExt}`;
+
+  fs.renameSync(req.file.path, path.join(uploadsDir, newName));
+
+  res.json({ ok: true, url: `/uploads/${newName}` });
 });
 
+/* Error handler */
 app.use((err, req, res, next) => {
-  res.status(400).json({ error: err?.message || "Server error" });
+  res.status(400).json({ ok: false, message: err.message || "Error" });
 });
 
-app.listen(PORT, () => console.log(`Backend running on ${PORT}`));
+/* Start */
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
