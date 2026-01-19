@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commissions — Amelia’s Gallery</title>
+  <meta name="description" content="Commission requests for Amelia’s Gallery (family managed)." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-left">
+      <img class="amark-img" src="./images/a-dad.jpg" alt="A monogram" onerror="this.style.display='none'">
+      <div class="amark-fallback" aria-hidden="true">A</div>
+    </div>
+
+    <nav class="nav nav-buttons">
+      <a class="btnlink" href="./index.html">Gallery</a>
+      <a class="btnlink active" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Login</a>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <section class="about">
+      <h3>Commission Requests</h3>
+      <p>
+        Tell us what you’d like. A grown-up will confirm details and pricing.
+      </p>
+
+      <form class="commission-form" id="commissionForm">
+        <div class="form-row">
+          <label>Your name</label>
+          <input type="text" required placeholder="Your name" />
+        </div>
+
+        <div class="form-row">
+          <label>Email</label>
+          <input type="email" required placeholder="you@email.com" />
+        </div>
+
+        <div class="form-row">
+          <label>What would you like Amelia to draw?</label>
+          <textarea required rows="5" placeholder="Describe your idea..."></textarea>
+        </div>
+
+        <div class="form-row two">
+          <div>
+            <label>Size</label>
+            <select>
+              <option>A5</option>
+              <option selected>A4</option>
+              <option>A3</option>
+              <option>Digital Only</option>
+            </select>
+          </div>
+          <div>
+            <label>Deadline (optional)</label>
+            <input type="text" placeholder="e.g. 2 weeks" />
+          </div>
+        </div>
+
+        <button class="btn" type="submit">Send Request</button>
+        <p class="fineprint">This form is currently a demo. Tonight we can wire it to the backend.</p>
+      </form>
+    </section>
+
+    <footer class="footer">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </footer>
+  </main>
+
+  <script>
+    // Demo submit
+    document.getElementById('commissionForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Request saved (demo). We will wire this to the backend next.');
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>
