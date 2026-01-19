@@ -91,6 +91,25 @@ body{
   box-shadow:var(--shadow);
   overflow:hidden;
 }
+/* Header image variant */
+.hero-banner.image-header{
+  background: none;
+  padding: 12px;
+}
+
+.hero-banner.image-header img{
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: block;
+  border-radius: 18px;
+  box-shadow: none;
+}
+
+/* Safety: if hero-art is still present anywhere, hide it */
+.hero-banner.image-header .hero-art{
+  display: none;
+}
 .hero-art{
   height:230px;
   background:
