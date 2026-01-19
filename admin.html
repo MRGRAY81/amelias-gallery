@@ -3,159 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Amelia’s Gallery</title>
-  <meta name="description" content="Admin login and uploads for Amelia’s Gallery." />
+  <title>Amelia’s Gallery — Admin</title>
+  <meta name="description" content="Admin login for Amelia’s Gallery." />
   <link rel="stylesheet" href="./styles.css" />
   <style>
-    /* Minimal page-specific layout */
-    .admin-shell{max-width:1100px;margin:18px auto 28px;padding:0 16px 20px}
-    .admin-grid{display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start}
-    .panel{border-radius:var(--r);border:1px solid var(--stroke);background:rgba(255,255,255,.70);box-shadow:var(--shadow);padding:16px}
-    .panel h2{margin:0 0 8px;font-size:18px;font-weight:950}
-    .panel p{margin:0;color:var(--muted);font-weight:750}
-    .form{margin-top:12px;display:grid;gap:10px}
-    .row{display:grid;gap:6px}
+    /* Small page-specific tweaks, keeps your main styles.css intact */
+    .admin-shell{max-width:1200px;margin:10px auto 26px;padding:0 16px 20px}
+    .panel{
+      margin-top:16px;
+      padding:16px;
+      border-radius:var(--r);
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.62);
+      box-shadow:var(--shadow);
+    }
+    .row{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+    .row.one{grid-template-columns:1fr}
     label{font-weight:900;color:rgba(42,37,48,.78);font-size:13px}
-    input, select, textarea{
-      width:100%;padding:12px 12px;border-radius:14px;border:1px solid var(--stroke);
-      background:rgba(255,255,255,.82);font-weight:800;color:rgba(42,37,48,.88)
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.82);
+      font-weight:800;
+      color:rgba(42,37,48,.90);
     }
-    .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .tiny{font-size:12px;color:var(--muted);font-weight:800;margin:8px 0 0}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+    .pill{
+      padding:8px 12px;border-radius:999px;border:1px solid var(--stroke);
+      background:rgba(255,255,255,.70);font-weight:900;color:rgba(42,37,48,.70)
+    }
     .status{margin-top:10px;font-weight:900}
-    .status.ok{color:rgba(0,120,70,.95)}
-    .status.bad{color:rgba(170,0,0,.95)}
-    .hide{display:none !important}
-
-    .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
-    .kpi .cardlet{border:1px solid var(--stroke);background:rgba(255,255,255,.62);border-radius:18px;padding:12px}
-    .cardlet .t{font-size:12px;color:var(--muted);font-weight:900}
-    .cardlet .v{font-size:18px;font-weight:950;margin-top:4px}
-
-    .upload-box{margin-top:12px;border:1px dashed rgba(42,37,48,.25);border-radius:18px;padding:14px;background:rgba(255,255,255,.55)}
-    .upload-box .hint{margin:6px 0 0;color:var(--muted);font-weight:800}
-    .file-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
-    .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,.70);font-weight:900;color:rgba(42,37,48,.78)}
-    .list{margin-top:12px;display:grid;gap:10px}
-    .item{display:flex;gap:10px;align-items:center;border:1px solid var(--stroke);background:rgba(255,255,255,.62);border-radius:18px;padding:10px}
-    .thumb{width:64px;height:48px;border-radius:12px;object-fit:cover;border:1px solid rgba(0,0,0,.06)}
-    .meta{flex:1;min-width:0}
-    .meta .name{font-weight:950}
-    .meta .sub{color:var(--muted);font-weight:850;font-size:12px;margin-top:2px}
-    .danger{background:rgba(240,90,90,.10);border-color:rgba(240,90,90,.25)}
-    .logout{margin-left:auto}
-    @media (max-width: 980px){
-      .admin-grid{grid-template-columns:1fr}
-      .logout{margin-left:0}
-    }
+    .status.good{color:rgba(20,120,70,.95)}
+    .status.bad{color:rgba(180,40,40,.95)}
+    .hint{color:var(--muted);font-weight:800;margin-top:8px}
+    .hr{height:1px;background:rgba(55,40,20,.10);margin:14px 0}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .small{font-size:12px}
+    @media (max-width:720px){.row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <!-- Same top bar style (uses your CSS variables) -->
+
+  <!-- Header matches your site -->
   <header class="topbar">
     <div class="brand-left">
-      <!-- Keep gap for Dad’s A. Use a-dad.jpg for now -->
-      <a href="./index.html" title="Back home" aria-label="Back home">
-        <img src="./a-dad.jpg" alt="A (handwritten)" style="width:42px;height:42px;object-fit:contain;border-radius:12px;background:rgba(255,255,255,.72);border:1px solid var(--stroke);padding:6px;">
+      <!-- Keep gap for Dad's A file -->
+      <a href="./index.html" class="amark" aria-label="Back to home">
+        <img src="./a-dad.jpg" alt="A" style="width:100%;height:100%;object-fit:contain;border-radius:12px" onerror="this.style.display='none';this.parentElement.textContent='A';" />
       </a>
+    </div>
+
+    <div class="brand-center">
+      <!-- hidden by your CSS override -->
+      <h1 class="title">Amelia’s Gallery</h1>
     </div>
 
     <nav class="nav nav-buttons" aria-label="Primary">
       <a class="btnlink" href="./gallery.html">Gallery</a>
       <a class="btnlink" href="./commissions.html">Commissions</a>
-      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink" href="./about.html">About</a>
       <a class="btnlink admin active" href="./admin.html">Admin</a>
     </nav>
   </header>
 
   <main class="admin-shell">
-    <div class="admin-grid">
 
-      <!-- LOGIN PANEL -->
-      <section class="panel" id="loginPanel">
-        <h2>Admin Login</h2>
-        <p>Family-managed access only.</p>
+    <section class="hero">
+      <div class="hero-banner image-header">
+        <img src="./amelias-header.jpg" alt="Amelia’s Gallery header artwork" />
+      </div>
+    </section>
 
-        <form class="form" id="loginForm" autocomplete="on">
-          <div class="row">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="admin@email.com" required />
-          </div>
+    <section class="panel" id="loginPanel">
+      <h2 style="margin:0;font-size:18px;font-weight:950">Admin Login</h2>
+      <p class="hint">Use the admin email + password you set in Render environment variables.</p>
 
-          <div class="row">
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" placeholder="••••••••••••" required />
-          </div>
-
-          <div class="actions">
-            <button class="btn" type="submit">Log In</button>
-            <button class="pill logout hide" type="button" id="logoutBtn">Log Out</button>
-          </div>
-
-          <div class="tiny">
-            This uses the backend API on Render. If the backend is “asleep” (free tier), first login can take ~30–60 seconds.
-          </div>
-
-          <div class="status" id="loginStatus" aria-live="polite"></div>
-        </form>
-      </section>
-
-      <!-- DASHBOARD PANEL -->
-      <section class="panel hide" id="dashPanel">
-        <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
-          <div>
-            <h2 style="margin:0">Admin Dashboard</h2>
-            <p style="margin-top:4px">Uploads + basic checks (safe family workflow).</p>
-          </div>
-          <button class="pill logout" type="button" id="logoutBtn2">Log Out</button>
+      <div class="row">
+        <div class="form-row">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="username" placeholder="admin@email.com" />
         </div>
-
-        <div class="kpi">
-          <div class="cardlet">
-            <div class="t">Auth</div>
-            <div class="v" id="kpiAuth">—</div>
-          </div>
-          <div class="cardlet">
-            <div class="t">Gallery items</div>
-            <div class="v" id="kpiCount">—</div>
-          </div>
-          <div class="cardlet">
-            <div class="t">Backend</div>
-            <div class="v" id="kpiApi">—</div>
-          </div>
+        <div class="form-row">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••••" />
         </div>
+      </div>
 
-        <div class="upload-box">
-          <h3 style="margin:0;font-size:16px;font-weight:950">Upload a new image</h3>
-          <div class="hint">PNG/JPG/WEBP only. Keep it kid-safe & family-approved.</div>
+      <div class="actions">
+        <button class="btn" id="loginBtn" type="button">Log In</button>
+        <button class="pill" id="logoutBtn" type="button" style="display:none">Log Out</button>
+        <span class="pill">Backend: <span id="backendUrl" class="mono small"></span></span>
+      </div>
 
-          <div class="file-row">
-            <input id="file" type="file" accept="image/png,image/jpeg,image/webp" />
-            <input id="title" type="text" placeholder="Title (e.g., ‘Unicorn in a Meadow’)" />
-            <select id="category">
-              <option value="featured">Featured</option>
-              <option value="animals">Animals</option>
-              <option value="nature">Nature</option>
-              <option value="characters">Characters</option>
-              <option value="roblox">Roblox Scenes</option>
-              <option value="other">Other</option>
-            </select>
-            <button class="btn" id="uploadBtn" type="button">Upload</button>
-          </div>
+      <div id="status" class="status"></div>
 
-          <div class="status" id="uploadStatus" aria-live="polite"></div>
-          <div class="tiny">Note: “Virus checking” on a simple Node backend usually means: strict file type allow-list + size limits + storing outside executable paths. We’ll add those server-side.</div>
+      <div class="hr"></div>
+
+      <div class="small">
+        <div class="hint">
+          Quick checks:
+          <ul>
+            <li>Backend <span class="mono">/</span> should return <span class="mono">{ ok: true }</span></li>
+            <li>After login, token is stored in <span class="mono">localStorage</span></li>
+          </ul>
         </div>
+      </div>
+    </section>
 
-        <div style="margin-top:14px;display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap">
-          <h3 style="margin:0;font-size:16px;font-weight:950">Latest uploads</h3>
-          <button class="pill" id="refreshBtn" type="button">Refresh list</button>
-        </div>
+    <section class="panel" id="adminPanel" style="display:none">
+      <h2 style="margin:0;font-size:18px;font-weight:950">Admin Tools (Step 1)</h2>
+      <p class="hint">This is just the wiring stage — we’ll build the full dashboard next.</p>
 
-        <div class="list" id="uploadList"></div>
-      </section>
+      <div class="actions">
+        <button class="pill" id="pingBtn" type="button">Ping Backend</button>
+        <button class="pill" id="whoamiBtn" type="button">Who am I?</button>
+      </div>
 
-    </div>
+      <div id="adminOut" class="panel" style="margin-top:12px;background:rgba(255,255,255,.50);box-shadow:none">
+        <div class="mono small" id="adminOutText">No actions yet.</div>
+      </div>
+
+      <p class="hint" style="margin-top:10px">
+        Next: Gallery upload + commissions viewer (protected).
+      </p>
+    </section>
+
+    <footer class="footer">
+      Admin area • Site managed by family • Supported by Uncle G & Del 💛
+    </footer>
+
   </main>
 
   <script src="./admin.js"></script>
