@@ -3,192 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Amelia’s Gallery</title>
-  <meta name="description" content="Amelia’s Gallery admin dashboard (family managed)." />
-  <link rel="stylesheet" href="./admin.css" />
+  <title>Amelia’s Gallery</title>
+  <meta name="description" content="Amelia’s Gallery — artwork & commissions (family managed)." />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <div class="wrap">
+  <!-- Minimal top bar: ONLY A-mark + page buttons -->
+  <header class="topbar">
+    <div class="brand-left">
+      <img class="amark-img" src="./images/a-dad.jpg" alt="A monogram" onerror="this.style.display='none'">
+      <div class="amark-fallback" aria-hidden="true">A</div>
+    </div>
 
-    <!-- Top bar -->
-    <header class="topbar">
-      <a class="back" href="./index.html">← Back to Gallery</a>
+    <nav class="nav nav-buttons">
+      <a class="btnlink active" href="./index.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Login</a>
+    </nav>
+  </header>
 
-      <!-- Keep the top-left gap for your Dad’s handwritten A (upload later) -->
-      <div class="mark-slot">
-        <img class="amark-img" src="./images/a-dad.png" alt="A monogram" onerror="this.style.display='none'">
-        <div class="amark-fallback" aria-hidden="true">A</div>
+  <main class="shell">
+    <!-- Hero header image -->
+    <section class="hero">
+      <div class="hero-banner image-header">
+        <div class="header-crop">
+          <img src="./amelias-header.png" alt="Amelia’s Gallery header illustration" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Original Artwork & Illustrations</h2>
+        <p>Click any image to view it bigger ✨</p>
       </div>
 
-      <div class="brand">Amelia’s Gallery</div>
-    </header>
+      <div class="grid" id="galleryGrid"></div>
+    </section>
 
-    <!-- Main -->
-    <main class="grid">
+    <!-- CTA -->
+    <section class="cta">
+      <div>
+        <h3>Interested in a custom drawing?</h3>
+        <p>Request a commission — a grown-up will reply.</p>
+      </div>
+      <a class="btn btnlink-like" href="./commissions.html">Request a Commission</a>
+    </section>
 
-      <!-- LEFT: Login / Profile card -->
-      <section class="card" id="loginCard">
-        <h1 class="h1">Admin Login</h1>
-        <p class="sub">
-          Family-managed access only. Use your admin login to view orders and commission requests.
-        </p>
-
-        <form class="form" id="loginForm">
-          <label class="label" for="email">Email</label>
-          <input class="input" id="email" name="email" type="email" placeholder="admin@ameliasgallery.co.uk" autocomplete="username" required>
-
-          <label class="label" for="password">Password</label>
-          <input class="input" id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
-
-          <button class="btn primary" type="submit">Login</button>
-
-          <p class="fine">
-            This is a static demo login for now. We’ll secure it properly when the backend is connected.
-          </p>
-        </form>
-      </section>
-
-      <!-- RIGHT: Dashboard -->
-      <section class="card" id="dashCard" style="display:none;">
-        <div class="dash-head">
-          <div>
-            <h2 class="h2">Dashboard</h2>
-            <p class="sub2">Orders, requests and quick actions.</p>
-          </div>
-          <button class="btn" id="logoutBtn" type="button">Logout</button>
-        </div>
-
-        <!-- Stats -->
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-num" id="statOrders">6</div>
-            <div class="stat-label">Orders</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" id="statRequests">3</div>
-            <div class="stat-label">Commission Requests</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" id="statNew">2</div>
-            <div class="stat-label">New Today</div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="actions">
-          <button class="btn primary" type="button">Add New Artwork</button>
-          <button class="btn" type="button">Manage Gallery</button>
-          <button class="btn" type="button">Export Orders</button>
-        </div>
-
-        <!-- Orders table -->
-        <div class="panel">
-          <div class="panel-head">
-            <h3 class="h3">Latest Orders</h3>
-            <div class="chips">
-              <span class="chip active">All</span>
-              <span class="chip">New</span>
-              <span class="chip">In Progress</span>
-              <span class="chip">Completed</span>
-            </div>
-          </div>
-
-          <div class="table">
-            <div class="row head">
-              <div>Order</div>
-              <div>Item</div>
-              <div>Status</div>
-              <div>Customer</div>
-              <div>Action</div>
-            </div>
-
-            <div class="row">
-              <div>#1006</div>
-              <div>Print — “Sky Island”</div>
-              <div><span class="pill new">New</span></div>
-              <div>Sarah</div>
-              <div><button class="mini">View</button></div>
-            </div>
-
-            <div class="row">
-              <div>#1005</div>
-              <div>Commission — Character</div>
-              <div><span class="pill prog">In Progress</span></div>
-              <div>Tom</div>
-              <div><button class="mini">View</button></div>
-            </div>
-
-            <div class="row">
-              <div>#1004</div>
-              <div>Print — “Cloud Home”</div>
-              <div><span class="pill done">Completed</span></div>
-              <div>Lisa</div>
-              <div><button class="mini">View</button></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Requests -->
-        <div class="panel">
-          <div class="panel-head">
-            <h3 class="h3">Commission Requests</h3>
-            <span class="muted">Newest first</span>
-          </div>
-
-          <div class="requests">
-            <div class="req">
-              <div class="req-top">
-                <div class="req-title">A drawing of a cat wizard</div>
-                <span class="pill new">New</span>
-              </div>
-              <div class="req-meta">Requested by: Mia • Colours: purple, gold</div>
-            </div>
-
-            <div class="req">
-              <div class="req-top">
-                <div class="req-title">Roblox-style avatar portrait</div>
-                <span class="pill prog">In Progress</span>
-              </div>
-              <div class="req-meta">Requested by: Ben • Notes: smiling, hoodie</div>
-            </div>
-
-            <div class="req">
-              <div class="req-top">
-                <div class="req-title">A landscape with a house in the clouds</div>
-                <span class="pill done">Completed</span>
-              </div>
-              <div class="req-meta">Requested by: Ellie • A4 print</div>
-            </div>
-          </div>
-        </div>
-
-      </section>
-    </main>
-
-    <footer class="foot">
-      Family-managed admin • Supported by Uncle G & Del 💛
+    <footer class="footer">
+      Site managed by family • Supported by Uncle G & Del 💛
     </footer>
+  </main>
 
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-inner" role="dialog" aria-modal="true">
+      <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
+      <img id="lightboxImg" alt="Artwork enlarged" />
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
   </div>
 
-  <script>
-    // Simple UI state toggle (static demo)
-    const loginForm = document.getElementById('loginForm');
-    const loginCard = document.getElementById('loginCard');
-    const dashCard = document.getElementById('dashCard');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      loginCard.style.display = 'none';
-      dashCard.style.display = 'block';
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      dashCard.style.display = 'none';
-      loginCard.style.display = 'block';
-      loginForm.reset();
-    });
-  </script>
+  <script src="./script.js"></script>
 </body>
-  </html>
+</html>
