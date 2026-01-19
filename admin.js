@@ -1,16 +1,16 @@
-// Amelia's Gallery — Admin JS (placeholder)
-// This file will handle admin dashboard logic once backend is added.
-// Safe to include now.
+// Amelia's Gallery — Admin JS (UI only for now)
+// Backend hooks will be added later.
 
-(function () {
+(function(){
   const page = document.body?.dataset?.page;
-
-  // Only run on admin page
   if (page !== "admin") return;
 
-  // Future hooks (examples)
-  // loadOrders();
-  // loadCommissionRequests();
-  // wireSettingsSave();
-  console.log("Admin JS loaded ✅");
+  const form = document.getElementById("loginForm");
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      // UI-only: fake login success
+      alert("✅ Logged in (demo). Backend auth comes next.");
+    });
+  }
 })();
