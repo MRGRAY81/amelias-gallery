@@ -4,197 +4,218 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — Amelia’s Gallery</title>
-  <meta name="description" content="Amelia’s Gallery admin portal (family managed)." />
-  <link rel="stylesheet" href="./styles.css" />
+  <meta name="description" content="Amelia’s Gallery admin dashboard (family managed)." />
+  <link rel="stylesheet" href="./admin.css" />
 </head>
-<body>
 
-  <!-- Topbar (matches frontend buttons) -->
-  <header class="topbar admin-topbar">
-    <div class="brand-left">
-      <img class="amark-img" src="./images/a-dad.jpg" alt="A monogram" onerror="this.style.display='none'">
-      <div class="amark-fallback" aria-hidden="true">A</div>
-    </div>
+<body data-page="admin">
+  <div class="app">
 
-    <nav class="nav nav-buttons">
-      <a class="btnlink" href="./index.html">Home</a>
-      <a class="btnlink" href="./gallery.html">Gallery</a>
-      <a class="btnlink" href="./commissions.html">Commissions</a>
-      <a class="btnlink" href="./about.html">About / Contact</a>
-      <a class="btnlink admin active" href="./admin.html">Admin</a>
-    </nav>
-  </header>
+    <!-- Left: Login Panel + Sidebar -->
+    <aside class="left">
 
-  <main class="shell admin-shell">
+      <div class="brand">
+        <div class="logo">Amelia’s Gallery</div>
+      </div>
 
-    <section class="admin-layout">
+      <section class="loginCard">
+        <div class="avatar" aria-hidden="true"></div>
 
-      <!-- LEFT PANEL -->
-      <aside class="admin-left">
+        <h1>Welcome back,<br><span>Amelia!</span> 🍯</h1>
 
-        <!-- Login Card -->
-        <div class="admin-card admin-login" id="loginCard">
-          <div class="admin-avatar">
-            <div class="admin-avatar-img" aria-hidden="true"></div>
-          </div>
+        <form class="loginForm" id="loginForm" autocomplete="on">
+          <label class="field">
+            <span>Email</span>
+            <input type="email" value="amelia@email.com" required />
+          </label>
 
-          <h2 class="admin-welcome">Welcome back,<br><span>Amelia!</span> 👋</h2>
-
-          <form class="admin-form" id="loginForm">
-            <div class="form-row">
-              <label for="email">Email</label>
-              <input id="email" type="email" value="amelia@email.com" required />
+          <label class="field">
+            <span>Password</span>
+            <div class="pwRow">
+              <input type="password" value="password" required />
+              <button class="iconBtn" type="button" aria-label="Login">
+                →
+              </button>
             </div>
+          </label>
 
-            <div class="form-row">
-              <label for="password">Password</label>
-              <div class="admin-pass">
-                <input id="password" type="password" value="password" required />
-                <button class="admin-pass-go" type="submit" aria-label="Login">→</button>
-              </div>
-            </div>
+          <button class="primary" type="submit">Log In</button>
 
-            <button class="admin-login-btn" type="submit">Log In</button>
+          <label class="check">
+            <input type="checkbox" />
+            <span>Remember me</span>
+          </label>
+        </form>
 
-            <label class="admin-remember">
-              <input type="checkbox" checked />
-              Remember me
-            </label>
-          </form>
-
-          <div class="admin-left-art" aria-hidden="true"></div>
-        </div>
-
-        <!-- Side Nav -->
-        <div class="admin-card admin-sidenav">
-          <button class="side-item active" data-view="dashboard">
-            <span class="ico">🏠</span> Dashboard
-          </button>
-          <button class="side-item" data-view="orders">
-            <span class="ico">📦</span> Orders <span class="pill-dot">1</span>
-          </button>
-          <button class="side-item" data-view="gallery">
-            <span class="ico">🖼️</span> Gallery
-          </button>
-          <button class="side-item" data-view="settings">
-            <span class="ico">⚙️</span> Settings
-          </button>
-          <button class="side-item dim" disabled>
-            <span class="ico">📊</span> Analytics <span class="beta">(Beta)</span>
-          </button>
-
-          <div class="side-sep"></div>
-
-          <button class="side-item">
-            <span class="ico">🛡️</span> Admin Portal
-            <span class="chev">▾</span>
-          </button>
-
-          <div class="side-profile">
-            <div class="side-profile-dot"></div>
-            <div class="side-profile-name">Amelia</div>
-            <div class="chev">▾</div>
-          </div>
-        </div>
-
-      </aside>
-
-      <!-- RIGHT CONTENT -->
-      <section class="admin-main">
-
-        <!-- Top tabs bar like your mock -->
-        <div class="admin-tabs">
-          <div class="tab-group">
-            <button class="tab active" data-view="dashboard">Dashboard</button>
-            <button class="tab" data-view="orders">Orders</button>
-            <button class="tab" data-view="gallery">Gallery</button>
-            <button class="tab" data-view="settings">Settings</button>
-          </div>
-
-          <div class="tab-icons">
-            <button class="icon-btn" aria-label="Settings">⚙️</button>
-            <button class="icon-btn" aria-label="Profile">👩‍🎨</button>
-            <button class="icon-btn bell" aria-label="Notifications">
-              🔔 <span class="dot"></span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Banner art -->
-        <div class="admin-hero">
-          <div class="admin-hero-art" aria-hidden="true"></div>
-          <h1 class="admin-hero-title">Welcome, Amelia!</h1>
-        </div>
-
-        <!-- Alert -->
-        <div class="admin-alert">
-          <div class="alert-ico">✉️</div>
-          <div class="alert-text">
-            You have <strong id="newCount">3</strong> new commission requests!
-          </div>
-          <button class="alert-btn" id="viewRequestsBtn">View Requests</button>
-        </div>
-
-        <!-- ORDERS PANEL -->
-        <div class="admin-panel">
-
-          <div class="panel-top">
-            <div class="panel-title">
-              <h2>Orders</h2>
-              <div class="panel-tabs">
-                <button class="ptab active" data-filter="all">All</button>
-                <button class="ptab" data-filter="inprogress">In Progress</button>
-                <button class="ptab" data-filter="completed">Completed</button>
-                <button class="ptab" data-filter="archived">Archived</button>
-              </div>
-            </div>
-
-            <div class="panel-tools">
-              <div class="search">
-                <input id="searchInput" placeholder="Search" />
-                <span class="search-ico">🔍</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel-meta" id="resultsMeta">1–5 of 12 results</div>
-
-          <div class="orders" id="ordersList"></div>
-
-          <div class="panel-footer">
-            <div class="pager">
-              <button class="pg" disabled>‹</button>
-              <button class="pg active">1</button>
-              <button class="pg">2</button>
-              <button class="pg">3</button>
-              <button class="pg">Next ›</button>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- UPDATE GALLERY STRIP -->
-        <div class="admin-panel admin-panel-tight">
-          <div class="update-bar">
-            <button class="update-btn" type="button">✏️ Update Gallery</button>
-          </div>
-
-          <div class="thumb-row" id="thumbRow"></div>
-
-          <div class="panel-footer">
-            <div class="pager">
-              <button class="pg active">1</button>
-              <button class="pg">2</button>
-              <button class="pg">Next ›</button>
-            </div>
-          </div>
-        </div>
-
+        <div class="miniScene" aria-hidden="true"></div>
       </section>
 
-    </section>
+      <nav class="sideNav">
+        <a class="navItem active" href="./admin.html"><span class="ic">⚙️</span> Dashboard</a>
+        <a class="navItem" href="#orders"><span class="ic">📦</span> Orders <span class="badge">1</span></a>
+        <a class="navItem" href="#gallery"><span class="ic">🖼️</span> Gallery</a>
+        <a class="navItem" href="#settings"><span class="ic">🛠️</span> Settings</a>
+        <a class="navItem muted" href="#analytics"><span class="ic">📊</span> Analytics (Beta)</a>
 
-  </main>
+        <div class="adminPortal">
+          <span class="ic">🔐</span> Admin Portal
+          <span class="chev">▾</span>
+        </div>
+      </nav>
+
+      <div class="userChip">
+        <div class="userPic" aria-hidden="true"></div>
+        <div class="userMeta">
+          <div class="name">Amelia</div>
+          <div class="sub">Artist</div>
+        </div>
+        <div class="chev">▾</div>
+      </div>
+
+    </aside>
+
+    <!-- Right: Dashboard -->
+    <main class="main">
+
+      <!-- Top Tabs -->
+      <header class="topTabs">
+        <div class="tabs">
+          <a class="tab active" href="./admin.html">Dashboard</a>
+          <a class="tab" href="#orders">Orders</a>
+          <a class="tab" href="#gallery">Gallery</a>
+          <a class="tab" href="#settings">Settings</a>
+          <button class="gear" type="button" aria-label="Settings">⚙️</button>
+        </div>
+
+        <div class="topRight">
+          <div class="avatarMini" aria-hidden="true"></div>
+          <button class="bell" type="button" aria-label="Notifications">
+            🔔
+            <span class="dot" aria-hidden="true"></span>
+          </button>
+          <button class="chevBtn" type="button" aria-label="Account">▾</button>
+        </div>
+      </header>
+
+      <!-- Banner -->
+      <section class="welcomeBanner">
+        <div class="bannerArt" aria-hidden="true"></div>
+        <h2>Welcome, Amelia!</h2>
+
+        <div class="notice">
+          <div class="mail" aria-hidden="true">✉️</div>
+          <div class="noticeText">You have <strong>3</strong> new commission requests!</div>
+          <button class="pillBtn" type="button">View Requests</button>
+        </div>
+      </section>
+
+      <!-- Orders -->
+      <section class="panel" id="orders">
+        <div class="panelTop">
+          <div class="panelTitle">Orders</div>
+
+          <div class="filters">
+            <button class="chip active" type="button">All</button>
+            <button class="chip" type="button">In Progress</button>
+            <button class="chip" type="button">Completed</button>
+            <button class="chip" type="button">Archived</button>
+          </div>
+
+          <div class="search">
+            <input type="search" placeholder="Search" />
+            <span class="mag">⌕</span>
+          </div>
+        </div>
+
+        <div class="listHead">
+          <div class="big">Orders</div>
+          <div class="small">1–5 of 12 results</div>
+        </div>
+
+        <div class="orderList">
+          <article class="order">
+            <div class="pico cat" aria-hidden="true"></div>
+            <div class="info">
+              <div class="who">James R. <span class="heart">♡</span></div>
+              <div class="what">Requested: my cat’s as a detective</div>
+            </div>
+            <div class="meta">Apr 22 ▾</div>
+            <div class="status new">New Request</div>
+            <div class="delta">+2! this week</div>
+          </article>
+
+          <article class="order">
+            <div class="pico girl" aria-hidden="true"></div>
+            <div class="info">
+              <div class="who">Ellie M. <span class="spark">✦</span></div>
+              <div class="what">Ordered my Roblox scene</div>
+            </div>
+            <div class="meta">Apr 22 ▾</div>
+            <div class="status progress">In Progress</div>
+            <div class="delta">+30 this</div>
+          </article>
+
+          <article class="order">
+            <div class="pico fox" aria-hidden="true"></div>
+            <div class="info">
+              <div class="who">Sarah T. <span class="heart">♡</span></div>
+              <div class="what">Requested a baby fox in a garden</div>
+            </div>
+            <div class="meta">Apr 20 ▾</div>
+            <div class="status new">New Request</div>
+            <div class="delta">+2 this</div>
+          </article>
+
+          <article class="order">
+            <div class="pico boy" aria-hidden="true"></div>
+            <div class="info">
+              <div class="who">David P. <span class="spark">✦</span></div>
+              <div class="what">Magical animals around a waterfall</div>
+            </div>
+            <div class="meta">Apr 18 ▾</div>
+            <div class="status done">Completed</div>
+            <div class="delta">+2 this</div>
+          </article>
+        </div>
+
+        <div class="pager">
+          <div class="small">1–5 of 12 results</div>
+          <div class="pages">
+            <button class="pageBtn" type="button">‹</button>
+            <button class="pageNum active" type="button">1</button>
+            <button class="pageNum" type="button">2</button>
+            <button class="pageNum" type="button">3</button>
+            <button class="pageBtn" type="button">Next ›</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Update Gallery -->
+      <section class="panel" id="gallery">
+        <div class="panelTop">
+          <div class="panelTitle">Update Gallery</div>
+          <button class="softBtn" type="button">✏️ Update Gallery</button>
+        </div>
+
+        <div class="thumbRow">
+          <div class="thumb one" aria-hidden="true"></div>
+          <div class="thumb two" aria-hidden="true"></div>
+          <div class="thumb three" aria-hidden="true"></div>
+          <div class="thumb four" aria-hidden="true"></div>
+        </div>
+
+        <div class="pager mini">
+          <div class="pages">
+            <button class="pageNum active" type="button">1</button>
+            <button class="pageNum" type="button">2</button>
+            <button class="pageBtn" type="button">Next ›</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
 
   <script src="./admin.js"></script>
 </body>
