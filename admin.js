@@ -1,263 +1,169 @@
-// Amelia's Gallery — Admin client
-// Requires backend routes:
-// POST /auth/login  -> { token }
-// GET  /me          -> { ok:true, email }
-// GET  /gallery     -> { items:[...] }
-// POST /upload      -> multipart/form-data (file, title, category)
+// Amelia's Gallery — Admin wiring (Step 1)
+// - Checks backend health
+// - Logs in with email/password
+// - Stores JWT in localStorage
+// - Provides helper for authenticated fetch
 
-const API = "https://amelias-gallery-backend.onrender.com";
-const TOKEN_KEY = "amelia_admin_token_v1";
+(function () {
+  // ✅ SET THIS to your Render backend URL
+  // (your screenshot shows: https://amelias-gallery-backend.onrender.com)
+  const API_BASE = "https://amelias-gallery-backend.onrender.com";
 
-const $ = (id) => document.getElementById(id);
+  const els = {
+    backendUrl: document.getElementById("backendUrl"),
+    status: document.getElementById("status"),
+    email: document.getElementById("email"),
+    password: document.getElementById("password"),
+    loginBtn: document.getElementById("loginBtn"),
+    logoutBtn: document.getElementById("logoutBtn"),
+    loginPanel: document.getElementById("loginPanel"),
+    adminPanel: document.getElementById("adminPanel"),
+    pingBtn: document.getElementById("pingBtn"),
+    whoamiBtn: document.getElementById("whoamiBtn"),
+    adminOutText: document.getElementById("adminOutText"),
+  };
 
-const loginPanel = $("loginPanel");
-const dashPanel = $("dashPanel");
+  const TOKEN_KEY = "amelias_admin_token";
 
-const loginForm = $("loginForm");
-const loginStatus = $("loginStatus");
-
-const logoutBtn = $("logoutBtn");
-const logoutBtn2 = $("logoutBtn2");
-
-const kpiAuth = $("kpiAuth");
-const kpiCount = $("kpiCount");
-const kpiApi = $("kpiApi");
-
-const fileInput = $("file");
-const titleInput = $("title");
-const categoryInput = $("category");
-const uploadBtn = $("uploadBtn");
-const uploadStatus = $("uploadStatus");
-
-const uploadList = $("uploadList");
-const refreshBtn = $("refreshBtn");
-
-function setStatus(el, msg, ok=true){
-  el.textContent = msg || "";
-  el.classList.remove("ok","bad");
-  if (!msg) return;
-  el.classList.add(ok ? "ok" : "bad");
-}
-
-function getToken(){
-  return localStorage.getItem(TOKEN_KEY);
-}
-function setToken(t){
-  if (t) localStorage.setItem(TOKEN_KEY, t);
-  else localStorage.removeItem(TOKEN_KEY);
-}
-
-async function apiFetch(path, opts={}){
-  const token = getToken();
-  const headers = new Headers(opts.headers || {});
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-  return fetch(`${API}${path}`, { ...opts, headers });
-}
-
-function showDash(){
-  loginPanel.classList.add("hide");
-  dashPanel.classList.remove("hide");
-  logoutBtn.classList.add("hide");
-  setStatus(loginStatus, "");
-}
-
-function showLogin(){
-  dashPanel.classList.add("hide");
-  loginPanel.classList.remove("hide");
-  logoutBtn.classList.remove("hide");
-}
-
-async function checkBackend(){
-  try{
-    const r = await fetch(`${API}/`);
-    const j = await r.json();
-    kpiApi.textContent = j?.ok ? "Online" : "Unknown";
-  }catch{
-    kpiApi.textContent = "Offline";
-  }
-}
-
-async function whoAmI(){
-  try{
-    const r = await apiFetch("/me");
-    if (!r.ok) throw new Error("not authed");
-    const j = await r.json();
-    kpiAuth.textContent = j?.email ? "Logged in" : "Logged in";
-    return true;
-  }catch{
-    kpiAuth.textContent = "Logged out";
-    return false;
-  }
-}
-
-function fmtTime(ts){
-  try{
-    const d = new Date(ts);
-    return d.toLocaleString();
-  }catch{ return ""; }
-}
-
-function renderList(items){
-  uploadList.innerHTML = "";
-  if (!items || !items.length){
-    uploadList.innerHTML = `<div class="pill">No uploads yet.</div>`;
-    return;
+  function setStatus(msg, ok = true) {
+    els.status.textContent = msg;
+    els.status.className = "status " + (ok ? "good" : "bad");
   }
 
-  items.slice(0, 12).forEach(it => {
-    const row = document.createElement("div");
-    row.className = "item";
+  function setAdminOut(obj) {
+    try {
+      els.adminOutText.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+    } catch {
+      els.adminOutText.textContent = String(obj);
+    }
+  }
 
-    const img = document.createElement("img");
-    img.className = "thumb";
-    img.src = it.thumbUrl || it.url || it.src || "";
-    img.alt = it.title || "Artwork";
+  function getToken() {
+    return localStorage.getItem(TOKEN_KEY) || "";
+  }
 
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    meta.innerHTML = `
-      <div class="name">${it.title || "Untitled"}</div>
-      <div class="sub">${(it.category || "uncategorised")} • ${it.createdAt ? fmtTime(it.createdAt) : ""}</div>
-    `;
+  function setToken(token) {
+    if (!token) localStorage.removeItem(TOKEN_KEY);
+    else localStorage.setItem(TOKEN_KEY, token);
+  }
 
-    const link = document.createElement("a");
-    link.className = "pill";
-    link.href = it.url || it.src || it.fullUrl || "#";
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.textContent = "Open";
+  function authedHeaders(extra = {}) {
+    const token = getToken();
+    const headers = { ...extra };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    return headers;
+  }
 
-    row.appendChild(img);
-    row.appendChild(meta);
-    row.appendChild(link);
+  async function apiFetch(path, opts = {}) {
+    const url = API_BASE.replace(/\/$/, "") + path;
+    const res = await fetch(url, {
+      ...opts,
+      headers: authedHeaders(opts.headers || {}),
+    });
 
-    uploadList.appendChild(row);
+    let data = null;
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) data = await res.json();
+    else data = await res.text();
+
+    if (!res.ok) {
+      const msg = (data && data.error) ? data.error : `Request failed: ${res.status}`;
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  function setLoggedInUI(isLoggedIn) {
+    els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    els.adminPanel.style.display = isLoggedIn ? "block" : "none";
+  }
+
+  async function healthCheck() {
+    try {
+      const data = await apiFetch("/", { method: "GET" });
+      setStatus(`Backend OK ✅ (${API_BASE})`, true);
+      return data;
+    } catch (e) {
+      setStatus(`Backend not reachable ❌ (${e.message})`, false);
+      return null;
+    }
+  }
+
+  async function login() {
+    const email = (els.email.value || "").trim();
+    const password = els.password.value || "";
+
+    if (!email || !password) {
+      setStatus("Enter email + password.", false);
+      return;
+    }
+
+    setStatus("Logging in…", true);
+
+    try {
+      // Expected backend route:
+      // POST /api/admin/login  { email, password } -> { token }
+      const data = await apiFetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const token = data && (data.token || data.jwt || data.accessToken);
+      if (!token) throw new Error("No token returned from backend.");
+
+      setToken(token);
+      setLoggedInUI(true);
+      setStatus("Logged in ✅ Token saved.", true);
+      setAdminOut({ ok: true, message: "Logged in", tokenPreview: token.slice(0, 18) + "…" });
+    } catch (e) {
+      setToken("");
+      setLoggedInUI(false);
+      setStatus(`Login failed ❌ (${e.message})`, false);
+    }
+  }
+
+  async function logout() {
+    setToken("");
+    setLoggedInUI(false);
+    setStatus("Logged out.", true);
+    setAdminOut("Logged out.");
+  }
+
+  async function whoami() {
+    try {
+      // Expected backend route:
+      // GET /api/admin/me -> { email, role }
+      const data = await apiFetch("/api/admin/me", { method: "GET" });
+      setAdminOut(data);
+    } catch (e) {
+      setAdminOut({ error: e.message });
+    }
+  }
+
+  async function ping() {
+    const data = await healthCheck();
+    if (data) setAdminOut(data);
+  }
+
+  // Init
+  els.backendUrl.textContent = API_BASE;
+  els.loginBtn.addEventListener("click", login);
+  els.logoutBtn.addEventListener("click", logout);
+  els.pingBtn.addEventListener("click", ping);
+  els.whoamiBtn.addEventListener("click", whoami);
+
+  // Enter key submits
+  [els.email, els.password].forEach((el) => {
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
   });
 
-  kpiCount.textContent = String(items.length);
-}
+  // If token exists, show admin panel and verify in background
+  const existingToken = getToken();
+  setLoggedInUI(!!existingToken);
 
-async function loadGallery(){
-  try{
-    const r = await fetch(`${API}/gallery`);
-    if (!r.ok) throw new Error("gallery fetch failed");
-    const j = await r.json();
-    const items = j.items || [];
-    renderList(items);
-  }catch(e){
-    renderList([]);
-  }
-}
-
-async function login(email, password){
-  const r = await fetch(`${API}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type":"application/json" },
-    body: JSON.stringify({ email, password })
-  });
-
-  if (!r.ok){
-    const text = await r.text();
-    throw new Error(text || "Login failed");
-  }
-  const j = await r.json();
-  if (!j.token) throw new Error("No token returned");
-  setToken(j.token);
-}
-
-async function uploadImage(file, title, category){
-  // client-side sanity checks
-  const allowed = ["image/png","image/jpeg","image/webp"];
-  if (!allowed.includes(file.type)) throw new Error("Only PNG/JPG/WEBP allowed.");
-  if (file.size > 8 * 1024 * 1024) throw new Error("File too big. Max 8MB.");
-
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("title", title || "");
-  fd.append("category", category || "other");
-
-  const r = await apiFetch("/upload", { method:"POST", body: fd });
-  if (!r.ok){
-    const text = await r.text();
-    throw new Error(text || "Upload failed");
-  }
-  return r.json();
-}
-
-function doLogout(){
-  setToken(null);
-  showLogin();
-  kpiAuth.textContent = "Logged out";
-  setStatus(uploadStatus, "");
-  setStatus(loginStatus, "Logged out.", true);
-}
-
-logoutBtn?.addEventListener("click", doLogout);
-logoutBtn2?.addEventListener("click", doLogout);
-
-loginForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  setStatus(loginStatus, "Logging in… (backend may take up to a minute on free tier)", true);
-
-  const email = $("email").value.trim();
-  const password = $("password").value;
-
-  try{
-    await login(email, password);
-    await whoAmI();
-    showDash();
-    await loadGallery();
-    setStatus(loginStatus, "");
-  }catch(err){
-    setToken(null);
-    setStatus(loginStatus, "Login failed. Check email/password (or backend waking up).", false);
-  }
-});
-
-uploadBtn?.addEventListener("click", async () => {
-  setStatus(uploadStatus, "Uploading…", true);
-
-  const file = fileInput.files?.[0];
-  const title = titleInput.value.trim();
-  const category = categoryInput.value;
-
-  if (!file){
-    setStatus(uploadStatus, "Choose a file first.", false);
-    return;
-  }
-
-  try{
-    await uploadImage(file, title, category);
-    setStatus(uploadStatus, "Uploaded ✅", true);
-    fileInput.value = "";
-    titleInput.value = "";
-    categoryInput.value = "featured";
-    await loadGallery();
-  }catch(err){
-    setStatus(uploadStatus, err?.message || "Upload failed.", false);
-  }
-});
-
-refreshBtn?.addEventListener("click", async () => {
-  await loadGallery();
-});
-
-(async function init(){
-  await checkBackend();
-
-  const token = getToken();
-  if (!token){
-    showLogin();
-    return;
-  }
-
-  // If token exists, try to validate and show dashboard
-  const ok = await whoAmI();
-  if (ok){
-    showDash();
-    await loadGallery();
-  }else{
-    setToken(null);
-    showLogin();
-  }
+  // Always do a health check on load
+  healthCheck();
 })();
