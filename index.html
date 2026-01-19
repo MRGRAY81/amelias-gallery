@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amelia’s Gallery</title>
+  <meta name="description" content="Amelia’s Gallery — artwork & commissions (family managed)." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-left">
+      <div class="amark" aria-hidden="true">A</div>
+    </div>
+
+    <div class="brand-center">
+      <h1 class="title">Amelia’s Gallery</h1>
+    </div>
+
+    <nav class="nav">
+      <a href="#gallery">Gallery</a>
+      <a href="#commissions">Commissions</a>
+      <a href="#about">About</a>
+      <a class="admin" href="./admin.html">Admin</a>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-banner">
+        <div class="hero-art" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section id="gallery" class="section">
+      <div class="section-head">
+        <h2>Original Artwork & Illustrations</h2>
+        <p>Click any image to view it bigger ✨</p>
+      </div>
+
+      <div class="grid" id="galleryGrid"></div>
+    </section>
+
+    <section id="commissions" class="cta">
+      <div>
+        <h3>Interested in a custom drawing?</h3>
+        <p>Request a commission — a grown-up will reply.</p>
+      </div>
+      <button class="btn">Request a Commission</button>
+    </section>
+
+    <section id="about" class="about">
+      <h3>About</h3>
+      <p>
+        Amelia’s Gallery is a safe, family-managed place to share artwork and handle commission requests.
+      </p>
+    </section>
+
+    <footer class="footer">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </footer>
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-inner" role="dialog" aria-modal="true">
+      <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
+      <img id="lightboxImg" alt="Artwork enlarged" />
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+      </html>
