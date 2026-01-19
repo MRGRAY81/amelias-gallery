@@ -1,167 +1,123 @@
-// Amelia's Gallery — Commissions form + safe image pre-check + preview
-(function () {
-  const form = document.getElementById("commissionForm");
-  const status = document.getElementById("status");
-  const fileInput = document.getElementById("refFile");
-  const preview = document.getElementById("preview");
-  const previewImg = document.getElementById("previewImg");
-  const filemeta = document.getElementById("filemeta");
-  const clearBtn = document.getElementById("clearBtn");
-  const copyEmailBtn = document.getElementById("copyEmailBtn");
-  const contactEmail = document.getElementById("contactEmail");
+// Amelia's Gallery — Commissions
+// Backend targets (we'll implement in backend step):
+// GET  /           -> { ok:true }
+// POST /commissions -> accepts multipart/form-data OR json (we'll do multipart)
 
-  // Upload constraints (front-end checks; real virus scan is backend later)
-  const MAX_BYTES = 10 * 1024 * 1024; // 10MB
-  const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
+const API = "https://amelias-gallery-backend.onrender.com";
 
-  let selectedFile = null;
-  let selectedFileDataUrl = null;
+const $ = (id) => document.getElementById(id);
 
-  function setStatus(msg, kind) {
-    status.textContent = msg || "";
-    status.className = "status" + (kind ? ` ${kind}` : "");
+const form = $("commissionForm");
+const statusEl = $("formStatus");
+const backendPill = $("backendState");
+
+const refs = $("refs");
+const thumbs = $("thumbs");
+const clearFiles = $("clearFiles");
+
+function setStatus(msg, ok=true){
+  statusEl.textContent = msg || "";
+  statusEl.classList.remove("ok","bad");
+  if (!msg) return;
+  statusEl.classList.add(ok ? "ok" : "bad");
+}
+
+async function pingBackend(){
+  try{
+    const r = await fetch(`${API}/`);
+    const j = await r.json();
+    backendPill.textContent = j?.ok ? "Backend: online" : "Backend: unknown";
+  }catch{
+    backendPill.textContent = "Backend: offline";
   }
+}
 
-  function resetUploadUI() {
-    selectedFile = null;
-    selectedFileDataUrl = null;
-    if (fileInput) fileInput.value = "";
-    if (preview) {
-      preview.setAttribute("aria-hidden", "true");
-      preview.style.display = "none";
-    }
-    if (filemeta) {
-      filemeta.textContent = "";
-      filemeta.setAttribute("aria-hidden", "true");
-    }
+function validateFiles(files){
+  const allowed = ["image/png","image/jpeg","image/webp"];
+  const list = Array.from(files || []);
+
+  if (list.length > 3) throw new Error("Max 3 reference images.");
+  list.forEach(f => {
+    if (!allowed.includes(f.type)) throw new Error("Only PNG/JPG/WEBP allowed.");
+    if (f.size > 8 * 1024 * 1024) throw new Error("Each file must be under 8MB.");
+  });
+
+  return list;
+}
+
+function renderThumbs(files){
+  thumbs.innerHTML = "";
+  const list = Array.from(files || []);
+  if (!list.length) return;
+
+  list.forEach(file => {
+    const img = document.createElement("img");
+    img.alt = "Reference";
+    img.src = URL.createObjectURL(file);
+    thumbs.appendChild(img);
+  });
+}
+
+refs.addEventListener("change", () => {
+  try{
+    const list = validateFiles(refs.files);
+    renderThumbs(list);
+    setStatus("", true);
+  }catch(e){
+    refs.value = "";
+    thumbs.innerHTML = "";
+    setStatus(e.message || "Invalid files.", false);
   }
+});
 
-  function humanSize(bytes) {
-    const units = ["B", "KB", "MB", "GB"];
-    let i = 0;
-    let n = bytes;
-    while (n >= 1024 && i < units.length - 1) {
-      n /= 1024;
-      i++;
-    }
-    return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+clearFiles.addEventListener("click", () => {
+  refs.value = "";
+  thumbs.innerHTML = "";
+  setStatus("", true);
+});
+
+async function submitCommission(payload){
+  // We send as multipart so we can attach images
+  const fd = new FormData();
+  fd.append("name", payload.name);
+  fd.append("email", payload.email);
+  fd.append("type", payload.type);
+  fd.append("size", payload.size);
+  fd.append("brief", payload.brief);
+
+  payload.files.forEach(f => fd.append("refs", f));
+
+  const r = await fetch(`${API}/commissions`, {
+    method: "POST",
+    body: fd
+  });
+
+  if (!r.ok){
+    const text = await r.text();
+    throw new Error(text || "Failed to send request.");
   }
+  return r.json();
+}
 
-  async function fileToDataUrl(file) {
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(String(r.result || ""));
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setStatus("Sending… (backend may take up to a minute on free tier)", true);
+
+  const name = $("name").value.trim();
+  const email = $("email").value.trim();
+  const type = $("type").value;
+  const size = $("size").value;
+  const brief = $("brief").value.trim();
+
+  try{
+    const files = validateFiles(refs.files);
+    await submitCommission({ name, email, type, size, brief, files });
+    setStatus("Request sent ✅ We’ll reply by email soon.", true);
+    form.reset();
+    thumbs.innerHTML = "";
+  }catch(err){
+    setStatus(err?.message || "Could not send request.", false);
   }
+});
 
-  if (fileInput) {
-    fileInput.addEventListener("change", async () => {
-      setStatus("");
-
-      const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
-      if (!file) {
-        resetUploadUI();
-        return;
-      }
-
-      // basic type checks
-      if (!ALLOWED.includes(file.type)) {
-        resetUploadUI();
-        setStatus("Please upload a JPG, PNG, or WebP image only.", "bad");
-        return;
-      }
-
-      // size checks
-      if (file.size > MAX_BYTES) {
-        resetUploadUI();
-        setStatus("That file is too large. Please keep uploads under 10MB.", "bad");
-        return;
-      }
-
-      // Create preview (in-browser only)
-      selectedFile = file;
-      selectedFileDataUrl = await fileToDataUrl(file);
-
-      previewImg.src = selectedFileDataUrl;
-      preview.style.display = "block";
-      preview.setAttribute("aria-hidden", "false");
-
-      filemeta.textContent = `Attached: ${file.name} • ${humanSize(file.size)}`;
-      filemeta.setAttribute("aria-hidden", "false");
-
-      setStatus("Image attached (will be scanned server-side once backend is live).", "ok");
-    });
-  }
-
-  if (copyEmailBtn && contactEmail) {
-    copyEmailBtn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(contactEmail.textContent.trim());
-        setStatus("Email copied ✅", "ok");
-      } catch {
-        setStatus("Couldn’t copy automatically — you can copy the email manually.", "bad");
-      }
-    });
-  }
-
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      form.reset();
-      resetUploadUI();
-      setStatus("");
-    });
-  }
-
-  if (form) {
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      setStatus("");
-
-      const fd = new FormData(form);
-      const payload = {
-        name: String(fd.get("name") || "").trim(),
-        email: String(fd.get("email") || "").trim(),
-        type: String(fd.get("type") || "").trim(),
-        deadline: String(fd.get("deadline") || "").trim(),
-        details: String(fd.get("details") || "").trim(),
-        // attach file data for backend later:
-        attachment: selectedFile
-          ? {
-              filename: selectedFile.name,
-              mime: selectedFile.type,
-              size: selectedFile.size,
-              dataUrl: selectedFileDataUrl // backend will decode + scan
-            }
-          : null
-      };
-
-      // Basic validation
-      if (!payload.name || !payload.email || !payload.type) {
-        setStatus("Please fill in Name, Email, and Commission type.", "bad");
-        return;
-      }
-
-      // Static-site behavior for now (no backend):
-      // - We store the request in localStorage so Admin can read it later (temporary)
-      // - When backend goes live, we swap this to fetch('/api/commissions', { ... })
-      const key = "amelias_commission_requests";
-      const existing = JSON.parse(localStorage.getItem(key) || "[]");
-      existing.unshift({
-        ...payload,
-        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-        status: "New Request",
-        createdAt: new Date().toISOString()
-      });
-      localStorage.setItem(key, JSON.stringify(existing));
-
-      setStatus("Sent ✅ (Saved locally for now — backend will make this live.)", "ok");
-      form.reset();
-      resetUploadUI();
-    });
-  }
-
-  // initial
-  resetUploadUI();
-})();
+pingBackend();
