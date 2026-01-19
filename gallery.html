@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Amelia’s Gallery</title>
+  <meta name="description" content="Artwork gallery by Amelia — family managed." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand-left">
+      <img class="amark-img" src="./images/a-dad.jpg" alt="A monogram" onerror="this.style.display='none'">
+      <div class="amark-fallback" aria-hidden="true">A</div>
+    </div>
+
+    <nav class="nav nav-buttons">
+      <a class="btnlink active" href="./gallery.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Login</a>
+    </nav>
+  </header>
+
+  <main class="shell">
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Gallery</h2>
+        <p>Swipe, scroll, or click any piece ✨</p>
+      </div>
+
+      <!-- Infinite carousel rows -->
+      <div class="rows" id="galleryRows"></div>
+    </section>
+
+    <footer class="footer">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </footer>
+
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-inner" role="dialog" aria-modal="true">
+      <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
+      <img id="lightboxImg" alt="Artwork enlarged" />
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+  </div>
+
+  <script src="./gallery.js"></script>
+</body>
+</html>
