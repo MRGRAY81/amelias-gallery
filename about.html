@@ -4,323 +4,163 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About / Contact — Amelia’s Gallery</title>
-  <meta name="description" content="About Amelia’s Gallery and how to contact us (family managed)." />
+  <meta name="description" content="About Amelia’s Gallery and how to get in touch for commissions, enquiries, and artwork orders." />
   <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .page-shell{max-width:1200px;margin:10px auto 26px;padding:0 16px 20px}
+    .panel{
+      margin-top:12px;
+      border-radius:var(--r);
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.70);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panel-head{padding:16px 16px 0}
+    .panel-head h1{margin:0;font-size:22px;font-weight:950}
+    .panel-head p{margin:6px 0 0;color:var(--muted);font-weight:800}
+
+    .panel-body{padding:16px;display:grid;grid-template-columns:1.1fr .9fr;gap:12px}
+    .cardlet{
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.62);
+      border-radius:18px;
+      padding:14px;
+    }
+    .cardlet h2{margin:0 0 8px;font-size:16px;font-weight:950}
+    .cardlet p{margin:0;color:var(--muted);font-weight:800;line-height:1.4}
+
+    .facts{margin-top:12px;display:grid;gap:10px}
+    .fact{
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.55);
+      border-radius:16px;
+      padding:12px;
+    }
+    .fact .t{font-size:12px;color:var(--muted);font-weight:900}
+    .fact .v{font-size:14px;font-weight:950;margin-top:3px}
+
+    .form{margin-top:12px;display:grid;gap:10px}
+    .row{display:grid;gap:6px}
+    label{font-weight:900;color:rgba(42,37,48,.78);font-size:13px}
+    input, textarea{
+      width:100%;padding:12px 12px;border-radius:14px;border:1px solid var(--stroke);
+      background:rgba(255,255,255,.82);font-weight:800;color:rgba(42,37,48,.88)
+    }
+    textarea{min-height:120px;resize:vertical}
+
+    .btn2{
+      border:1px solid var(--stroke);
+      background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
+      color:#fff;
+      padding:12px 16px;
+      border-radius:999px;
+      font-weight:950;
+      cursor:pointer;
+      width:max-content;
+    }
+    .btn2:hover{filter:brightness(.98)}
+    .tiny{font-size:12px;color:var(--muted);font-weight:800;margin-top:10px}
+
+    @media (max-width: 980px){
+      .panel-body{grid-template-columns:1fr}
+    }
+  </style>
 </head>
-
-<body data-page="about">
-
+<body>
   <header class="topbar">
     <div class="brand-left">
-      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram" />
+      <a href="./index.html" title="Back home" aria-label="Back home">
+        <img src="./a-dad.jpg" alt="A (handwritten)" style="width:42px;height:42px;object-fit:contain;border-radius:12px;background:rgba(255,255,255,.72);border:1px solid var(--stroke);padding:6px;">
+      </a>
     </div>
 
-    <nav class="nav">
-      <a class="navbtn" href="./gallery.html">Gallery</a>
-      <a class="navbtn" href="./commissions.html">Commissions</a>
-      <a class="navbtn active" href="./about.html">About / Contact</a>
-      <a class="navbtn admin" href="./admin.html">Login</a>
+    <nav class="nav nav-buttons" aria-label="Primary">
+      <a class="btnlink" href="./gallery.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink active" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Admin</a>
     </nav>
   </header>
 
-  <main class="shell">
-    <section class="section">
-      <div class="section-head">
-        <h2>About / Contact</h2>
-        <p>Family-managed • Safe & friendly ✨</p>
+  <main class="page-shell">
+    <section class="panel">
+      <div class="panel-head">
+        <h1>About Amelia’s Gallery</h1>
+        <p>A safe, family-managed place where Amelia can share artwork and take commission requests.</p>
       </div>
 
-      <div class="about-grid">
-        <!-- About -->
-        <article class="box">
-          <h3>About Amelia’s Gallery</h3>
-          <p class="muted">
-            Amelia’s Gallery is a calm, family-managed space to share Amelia’s artwork and accept commission requests.
-            Messages are reviewed by family first.
+      <div class="panel-body">
+        <!-- ABOUT -->
+        <div class="cardlet">
+          <h2>About</h2>
+          <p>
+            Amelia loves creating art and illustrations. This website is a small online gallery where you can view her work,
+            request commissions, and (soon) purchase pieces from the shop.
           </p>
 
-          <div class="info-cards">
-            <div class="info">
-              <div class="k">Artwork</div>
-              <div class="v">Originals • prints • digital</div>
+          <div class="facts">
+            <div class="fact">
+              <div class="t">Commissions</div>
+              <div class="v">Portraits • Pets • Characters • Roblox scenes • Custom ideas</div>
             </div>
-            <div class="info">
-              <div class="k">Commissions</div>
-              <div class="v">Pets • characters • Roblox • landscapes</div>
+            <div class="fact">
+              <div class="t">How replies work</div>
+              <div class="v">A grown-up reviews requests and replies by email</div>
             </div>
-            <div class="info">
-              <div class="k">Privacy</div>
-              <div class="v">No public personal details</div>
+            <div class="fact">
+              <div class="t">Friendly reminder</div>
+              <div class="v">Please keep requests kid-safe and avoid sharing personal info</div>
             </div>
           </div>
 
-          <div class="soft-note">
-            Tip: If your request includes children, avoid faces and personal information.
+          <div class="tiny">
+            Supported by Uncle G & Del 💛
           </div>
-        </article>
+        </div>
 
-        <!-- Contact -->
-        <article class="box">
-          <h3>Contact</h3>
-          <p class="muted">
-            For enquiries, commissions, or orders, contact the family team here:
-          </p>
+        <!-- CONTACT -->
+        <div class="cardlet">
+          <h2>Contact / Enquiries</h2>
+          <p>Send a message and we’ll get back to you soon.</p>
 
-          <div class="contact-row">
-            <div class="contact-pill" id="contactEmail">hello@ameliasgallery.co.uk</div>
-            <button class="btn small" id="copyEmailBtn" type="button">Copy</button>
-          </div>
-
-          <div class="contact-actions">
-            <a class="btn" id="mailtoBtn" href="mailto:hello@ameliasgallery.co.uk?subject=Amelia%27s%20Gallery%20Enquiry">Email Amelia</a>
-            <a class="btn ghost" href="./commissions.html">Request a Commission</a>
-          </div>
-
-          <hr class="sep" />
-
-          <h4>Quick Enquiry Form</h4>
-          <form class="enquiry-form" id="enquiryForm" novalidate>
-            <div class="row two">
-              <div class="field">
-                <label for="ename">Your name</label>
-                <input id="ename" name="name" type="text" placeholder="Your name" required />
-              </div>
-              <div class="field">
-                <label for="eemail">Email</label>
-                <input id="eemail" name="email" type="email" placeholder="you@email.com" required />
-              </div>
+          <!-- For now this is a UI form.
+               In step #4 (backend), we’ll wire it to POST /enquiries. -->
+          <form class="form" id="contactForm">
+            <div class="row">
+              <label for="cname">Your name</label>
+              <input id="cname" name="cname" type="text" placeholder="Your name" required />
             </div>
 
             <div class="row">
-              <div class="field">
-                <label for="msg">Message</label>
-                <textarea id="msg" name="message" rows="6" placeholder="How can we help?"></textarea>
-              </div>
+              <label for="cemail">Email</label>
+              <input id="cemail" name="cemail" type="email" placeholder="you@email.com" required />
             </div>
 
-            <div class="actions">
-              <button class="btn" type="submit">Send Enquiry</button>
-              <button class="btn ghost" type="button" id="clearBtn">Clear</button>
+            <div class="row">
+              <label for="cmsg">Message</label>
+              <textarea id="cmsg" name="cmsg" placeholder="How can we help?" required></textarea>
             </div>
 
-            <div class="status" id="status" role="status" aria-live="polite"></div>
-            <p class="fineprint">For now this saves locally (demo). Backend will make this live.</p>
+            <button class="btn2" type="submit">Send Message</button>
+
+            <div class="tiny">
+              We don’t accept sensitive personal documents here. Keep it simple and safe.
+            </div>
           </form>
-        </article>
+        </div>
       </div>
     </section>
-
-    <footer class="footer">
-      Site managed by family • Supported by Uncle G & Del 💛
-    </footer>
   </main>
 
   <script>
-    (function(){
-      const copyBtn = document.getElementById("copyEmailBtn");
-      const emailEl = document.getElementById("contactEmail");
-      const form = document.getElementById("enquiryForm");
-      const clearBtn = document.getElementById("clearBtn");
-      const status = document.getElementById("status");
-
-      function setStatus(msg, kind){
-        status.textContent = msg || "";
-        status.className = "status" + (kind ? ` ${kind}` : "");
-      }
-
-      if (copyBtn && emailEl){
-        copyBtn.addEventListener("click", async () => {
-          try{
-            await navigator.clipboard.writeText(emailEl.textContent.trim());
-            setStatus("Email copied ✅", "ok");
-          }catch{
-            setStatus("Couldn’t copy automatically — please copy manually.", "bad");
-          }
-        });
-      }
-
-      if (clearBtn){
-        clearBtn.addEventListener("click", () => {
-          form.reset();
-          setStatus("");
-        });
-      }
-
-      if (form){
-        form.addEventListener("submit", (e) => {
-          e.preventDefault();
-          setStatus("");
-
-          const fd = new FormData(form);
-          const payload = {
-            id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
-            name: String(fd.get("name") || "").trim(),
-            email: String(fd.get("email") || "").trim(),
-            message: String(fd.get("message") || "").trim(),
-            createdAt: new Date().toISOString()
-          };
-
-          if (!payload.name || !payload.email){
-            setStatus("Please fill in Name and Email.", "bad");
-            return;
-          }
-
-          const key = "amelias_enquiries";
-          const existing = JSON.parse(localStorage.getItem(key) || "[]");
-          existing.unshift(payload);
-          localStorage.setItem(key, JSON.stringify(existing));
-
-          setStatus("Sent ✅ (Saved locally for now — backend will make this live.)", "ok");
-          form.reset();
-        });
-      }
-    })();
+    // Temporary front-end-only handler (until backend wiring in step #4)
+    const form = document.getElementById("contactForm");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      alert("Thanks! Your message has been noted. We’ll reply by email soon.");
+      form.reset();
+    });
   </script>
-
-  <!-- Page-only styles -->
-  <style>
-    .amark-img{
-      width:42px;height:42px;
-      border-radius:14px;
-      object-fit:cover;
-      background:rgba(255,255,255,.72);
-      border:1px solid var(--stroke);
-    }
-    .navbtn{
-      text-decoration:none;
-      color:rgba(42,37,48,.62);
-      font-weight:900;
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid transparent;
-      background:transparent;
-    }
-    .navbtn:hover{ color:rgba(42,37,48,.90) }
-    .navbtn.active{
-      background:rgba(255,255,255,.72);
-      border:1px solid var(--stroke);
-      color:rgba(42,37,48,.85);
-    }
-
-    .about-grid{
-      margin-top:14px;
-      padding:0 14px 14px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
-      align-items:start;
-    }
-
-    .box{
-      border-radius:var(--r);
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.55);
-      box-shadow:0 14px 30px rgba(20,12,5,.06);
-      padding:16px;
-    }
-
-    .box h3{margin:0 0 8px; font-weight:1000;}
-    .box h4{margin:0 0 8px; font-weight:1000;}
-    .muted{color:var(--muted); font-weight:800; margin:0 0 12px;}
-
-    .info-cards{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:10px;
-      margin-top:10px;
-    }
-    .info{
-      border-radius:18px;
-      border:1px solid rgba(55,40,20,.12);
-      background:rgba(255,255,255,.62);
-      padding:12px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      font-weight:900;
-    }
-    .info .k{opacity:.78}
-    .info .v{opacity:.90}
-
-    .soft-note{
-      margin-top:12px;
-      padding:12px;
-      border-radius:18px;
-      border:1px solid rgba(243,162,126,.25);
-      background:rgba(243,162,126,.10);
-      font-weight:900;
-      color:rgba(42,37,48,.75);
-    }
-
-    .contact-row{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    .contact-pill{
-      flex:1;
-      min-width:220px;
-      border-radius:999px;
-      border:1px solid rgba(55,40,20,.12);
-      background:rgba(255,255,255,.62);
-      padding:12px 14px;
-      font-weight:950;
-      color:rgba(42,37,48,.80);
-    }
-
-    .contact-actions{
-      margin-top:12px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .btn.small{padding:10px 12px; font-size:13px;}
-    .btn.ghost{background:rgba(255,255,255,.70); color:rgba(42,37,48,.80);}
-
-    .sep{
-      border:none;
-      border-top:1px solid rgba(55,40,20,.10);
-      margin:14px 0;
-    }
-
-    .enquiry-form{display:grid; gap:12px;}
-    .row{display:grid; gap:10px;}
-    .row.two{grid-template-columns:1fr 1fr; gap:12px;}
-    .field label{
-      font-weight:950;
-      color:rgba(42,37,48,.78);
-      font-size:13px;
-    }
-    .field input,.field textarea{
-      width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.82);
-      font-weight:800;
-      color:rgba(42,37,48,.85);
-      outline:none;
-    }
-    .actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-    .status{min-height:18px; font-weight:950;}
-    .status.ok{color:rgba(26,120,80,.92);}
-    .status.bad{color:rgba(170,60,60,.92);}
-    .fineprint{
-      margin:0;
-      color:rgba(42,37,48,.55);
-      font-weight:800;
-      font-size:12px;
-      line-height:1.4;
-    }
-
-    @media (max-width: 980px){
-      .about-grid{grid-template-columns:1fr; padding:0;}
-      .row.two{grid-template-columns:1fr;}
-    }
-  </style>
-
 </body>
 </html>
