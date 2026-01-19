@@ -74,7 +74,52 @@ body{
   background:rgba(255,255,255,.70);
   border:1px solid var(--stroke);
 }
+/* === Header override: A + button nav === */
 
+.brand-center,
+.title{
+  display:none;
+}
+
+.brand-left{
+  width:56px;
+  display:grid;
+  place-items:center;
+}
+
+/* Button-style navigation */
+.nav.nav-buttons{
+  width:auto;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+
+.btnlink{
+  text-decoration:none;
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.70);
+  border:1px solid var(--stroke);
+  color:rgba(42,37,48,.72);
+  font-weight:900;
+}
+
+.btnlink:hover{
+  background:rgba(255,255,255,.82);
+  color:rgba(42,37,48,.92);
+}
+
+.btnlink.active{
+  background:rgba(255,255,255,.88);
+  box-shadow:0 12px 28px rgba(20,12,5,.08);
+}
+
+.btnlink.admin{
+  background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
+  color:#fff;
+}
 .shell{
   max-width:1200px;
   margin:10px auto 26px;
