@@ -4,204 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Commissions — Amelia’s Gallery</title>
-  <meta name="description" content="Request a commission from Amelia. Upload reference images to help describe your idea." />
+  <meta name="description" content="Request a commission from Amelia’s Gallery (family managed)." />
   <link rel="stylesheet" href="./styles.css" />
-  <style>
-    .page-shell{max-width:1200px;margin:10px auto 26px;padding:0 16px 20px}
-    .panel{
-      margin-top:12px;
-      border-radius:var(--r);
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.70);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-    .panel-head{padding:16px 16px 0}
-    .panel-head h1{margin:0;font-size:22px;font-weight:950}
-    .panel-head p{margin:6px 0 0;color:var(--muted);font-weight:800}
-
-    .panel-body{padding:16px;display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
-    .cardlet{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.62);
-      border-radius:18px;
-      padding:14px;
-    }
-    .cardlet h2{margin:0 0 8px;font-size:16px;font-weight:950}
-    .cardlet p{margin:0;color:var(--muted);font-weight:800}
-
-    .form{margin-top:12px;display:grid;gap:10px}
-    .row{display:grid;gap:6px}
-    label{font-weight:900;color:rgba(42,37,48,.78);font-size:13px}
-    input, select, textarea{
-      width:100%;padding:12px 12px;border-radius:14px;border:1px solid var(--stroke);
-      background:rgba(255,255,255,.82);font-weight:800;color:rgba(42,37,48,.88)
-    }
-    textarea{min-height:120px;resize:vertical}
-
-    .row.two{grid-template-columns:1fr 1fr;gap:10px}
-
-    .uploader{
-      margin-top:12px;
-      border:1px dashed rgba(42,37,48,.25);
-      border-radius:18px;
-      padding:14px;
-      background:rgba(255,255,255,.55);
-    }
-    .uploader .hint{margin:6px 0 0;color:var(--muted);font-weight:800}
-    .file-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
-    .pill{
-      padding:8px 12px;border-radius:999px;border:1px solid var(--stroke);
-      background:rgba(255,255,255,.70);font-weight:900;color:rgba(42,37,48,.78)
-    }
-    .btn2{
-      border:1px solid var(--stroke);
-      background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
-      color:#fff;
-      padding:12px 16px;
-      border-radius:999px;
-      font-weight:950;
-      cursor:pointer;
-    }
-    .btn2:hover{filter:brightness(.98)}
-
-    .status{margin-top:10px;font-weight:900}
-    .status.ok{color:rgba(0,120,70,.95)}
-    .status.bad{color:rgba(170,0,0,.95)}
-
-    .thumbs{margin-top:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .thumbs img{width:100%;height:110px;object-fit:cover;border-radius:14px;border:1px solid rgba(0,0,0,.06)}
-    .tiny{font-size:12px;color:var(--muted);font-weight:800;margin-top:8px}
-
-    .faq{display:grid;gap:10px;margin-top:12px}
-    .faq .q{font-weight:950}
-    .faq .a{color:var(--muted);font-weight:800;margin-top:4px}
-
-    @media (max-width: 980px){
-      .panel-body{grid-template-columns:1fr}
-      .thumbs{grid-template-columns:repeat(2,minmax(0,1fr))}
-    }
-  </style>
 </head>
-<body>
+
+<body data-page="commissions">
+
   <header class="topbar">
-    <div class="brand-left">
-      <a href="./index.html" title="Back home" aria-label="Back home">
-        <img src="./a-dad.jpg" alt="A (handwritten)" style="width:42px;height:42px;object-fit:contain;border-radius:12px;background:rgba(255,255,255,.72);border:1px solid var(--stroke);padding:6px;">
-      </a>
-    </div>
+    <nav class="nav nav-buttons">
+      <a class="btnlink" href="./index.html">Home</a>
+      <a class="btnlink" href="./gallery.html">Gallery</a>
+      <a class="btnlink active" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Login</a>
+    </nav>
+  </header>
 
-    <header class="topbar">
-  <nav class="nav nav-buttons">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink" href="./gallery.html">Gallery</a>
-    <a class="btnlink" href="./commissions.html">Commissions</a>
-    <a class="btnlink" href="./about.html">About / Contact</a>
-    <a class="btnlink admin" href="./admin.html">Login</a>
-  </nav>
-</header>
-
-  <main class="page-shell">
-    <section class="panel">
-      <div class="panel-head">
-        <h1>Commission a Drawing</h1>
-        <p>Tell Amelia what you’d like, and upload reference pictures if it helps.</p>
-      </div>
-
-      <div class="panel-body">
-        <!-- FORM -->
-        <div class="cardlet">
-          <h2>Request form</h2>
-          <p>We’ll reply by email to confirm price + timeline.</p>
-
-          <form class="form" id="commissionForm">
-            <div class="row two">
-              <div class="row">
-                <label for="name">Your name</label>
-                <input id="name" name="name" type="text" placeholder="Your name" required />
-              </div>
-              <div class="row">
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" placeholder="you@email.com" required />
-              </div>
-            </div>
-
-            <div class="row two">
-              <div class="row">
-                <label for="type">Artwork type</label>
-                <select id="type" name="type" required>
-                  <option value="portrait">Portrait</option>
-                  <option value="pet">Pet</option>
-                  <option value="character">Character</option>
-                  <option value="roblox">Roblox Scene</option>
-                  <option value="custom">Custom Idea</option>
-                </select>
-              </div>
-              <div class="row">
-                <label for="size">Size / format</label>
-                <select id="size" name="size" required>
-                  <option value="digital">Digital (PNG)</option>
-                  <option value="a5">A5</option>
-                  <option value="a4">A4</option>
-                  <option value="a3">A3</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row">
-              <label for="brief">Describe your idea</label>
-              <textarea id="brief" name="brief" placeholder="Example: ‘My cat as a detective, wearing a tiny hat, in a cute style…’" required></textarea>
-            </div>
-
-            <div class="uploader">
-              <div style="font-weight:950">Reference images (optional)</div>
-              <div class="hint">PNG/JPG/WEBP only • Max 3 files • Max 8MB each</div>
-
-              <div class="file-row">
-                <input id="refs" type="file" accept="image/png,image/jpeg,image/webp" multiple />
-                <button class="pill" id="clearFiles" type="button">Clear</button>
-              </div>
-
-              <div class="thumbs" id="thumbs"></div>
-              <div class="tiny">Client-side checks only. Real safety is enforced server-side (allow-list, size limit, storage rules).</div>
-            </div>
-
-            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px">
-              <button class="btn2" type="submit">Send Request</button>
-              <span class="pill" id="backendState">Backend: checking…</span>
-            </div>
-
-            <div class="status" id="formStatus" aria-live="polite"></div>
-          </form>
-        </div>
-
-        <!-- INFO -->
-        <div class="cardlet">
-          <h2>How it works</h2>
-          <div class="faq">
-            <div>
-              <div class="q">1) Send your request</div>
-              <div class="a">Tell us what you want and upload any helpful pics.</div>
-            </div>
-            <div>
-              <div class="q">2) We confirm price + timeline</div>
-              <div class="a">We’ll email you back with a plan and options.</div>
-            </div>
-            <div>
-              <div class="q">3) Amelia creates your artwork</div>
-              <div class="a">You’ll get updates and the final art when it’s ready.</div>
-            </div>
-          </div>
-
-          <div style="margin-top:14px;border-top:1px solid var(--stroke);padding-top:12px">
-            <h2 style="margin:0 0 8px">Good to know</h2>
-            <p style="margin:0;color:var(--muted);font-weight:800">
-              Please don’t upload anything private or sensitive (IDs, addresses, medical info). For kids — keep it friendly and safe.
-            </p>
-          </div>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-banner image-header">
+        <div class="header-crop">
+          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration"
+               onerror="this.onerror=null;this.src='./amelias-header.png';" />
         </div>
       </div>
     </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Request a Commission ✨</h2>
+        <p>Tell us what you’d like — a grown-up will reply.</p>
+      </div>
+
+      <!-- Keep your existing commission form markup if you already have it -->
+      <div class="about">
+        <h3>Commission Form</h3>
+        <p>If you already have a form in your current file, paste it here.</p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </footer>
   </main>
 
   <script src="./commissions.js"></script>
