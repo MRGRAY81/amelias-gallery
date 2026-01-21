@@ -4,42 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gallery — Amelia’s Gallery</title>
-  <meta name="description" content="Browse artwork from Amelia’s Gallery (family managed)." />
+  <meta name="description" content="Browse Amelia’s artwork." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body data-page="gallery">
 
-  <!-- Topbar (A badge ON Gallery) -->
   <header class="topbar">
-    <div class="brand-left">
-      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram"
-           onerror="this.style.display='none';document.querySelector('.amark-fallback').style.display='grid';">
-      <div class="amark-fallback" aria-hidden="true" style="display:none;">A</div>
+    <div class="topbar-inner">
+      <nav class="nav nav-buttons">
+        <a class="btnlink" href="./index.html">Home</a>
+        <a class="btnlink active" href="./gallery.html">Gallery</a>
+        <a class="btnlink" href="./commissions.html">Commissions</a>
+        <a class="btnlink" href="./about.html">About / Contact</a>
+        <a class="btnlink admin" href="./admin.html">Login</a>
+      </nav>
     </div>
-
-    <nav class="nav nav-buttons">
-      <a class="btnlink" href="./index.html">Home</a>
-      <a class="btnlink active" href="./gallery.html">Gallery</a>
-      <a class="btnlink" href="./commissions.html">Commissions</a>
-      <a class="btnlink" href="./about.html">About / Contact</a>
-      <a class="btnlink admin" href="./admin.html">Login</a>
-    </nav>
   </header>
 
   <main class="shell">
 
-    <!-- Hero -->
     <section class="hero">
       <div class="hero-banner image-header">
         <div class="header-crop">
-          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration"
-               onerror="this.onerror=null;this.src='./amelias-header.png';" />
+          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration" />
         </div>
       </div>
     </section>
 
-    <!-- Gallery -->
     <section class="section">
       <div class="section-head">
         <h2>Gallery ✨</h2>
@@ -55,7 +47,6 @@
 
   </main>
 
-  <!-- Lightbox -->
   <div class="lightbox" id="lightbox" aria-hidden="true">
     <div class="lightbox-inner" role="dialog" aria-modal="true">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
