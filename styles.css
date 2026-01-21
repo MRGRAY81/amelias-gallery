@@ -396,6 +396,4 @@ body{
   font-weight:900;
 }
 
-/* Lightbox show helper (if not already in your CSS) */
-.lightbox{ display:none; }
-.lightbox.show{ display:flex; }
+
