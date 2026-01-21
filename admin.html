@@ -4,22 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login — Amelia’s Gallery</title>
-  <meta name="description" content="Family login (private)." />
+  <meta name="description" content="Admin login — family only." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body data-page="admin">
 
   <header class="topbar">
-    <div class="topbar-inner">
-      <nav class="nav nav-buttons">
-        <a class="btnlink" href="./index.html">Home</a>
-        <a class="btnlink" href="./gallery.html">Gallery</a>
-        <a class="btnlink" href="./commissions.html">Commissions</a>
-        <a class="btnlink" href="./about.html">About / Contact</a>
-        <a class="btnlink admin active" href="./admin.html">Login</a>
-      </nav>
-    </div>
+    <a class="brand-left" href="./index.html" aria-label="Home">
+      <img class="amark-img" src="./a-mark.png" alt="Amelia’s Gallery mark" onerror="this.style.display='none'">
+      <span class="amark-fallback" aria-hidden="true">A</span>
+    </a>
+
+    <nav class="nav nav-buttons" aria-label="Primary">
+      <a class="btnlink" href="./index.html">Home</a>
+      <a class="btnlink" href="./gallery.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin active" href="./admin.html">Login</a>
+    </nav>
   </header>
 
   <main class="shell">
@@ -38,19 +41,20 @@
         <p>For family use only.</p>
       </div>
 
-      <div class="formcard">
-        <p style="margin:0; color:rgba(42,37,48,.72); font-weight:750;">
-          Your current <strong>admin.js</strong> can keep handling login as it already does.
-        </p>
+      <div class="panel">
+        <h3>Login</h3>
+        <p>Your current admin JS can keep handling login as it already does.</p>
+        <!-- If you already have admin.js, keep it. -->
       </div>
     </section>
 
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
     </footer>
-
   </main>
 
-  <script src="./admin.js"></script>
+  <!-- If you have an admin script already, keep this line. -->
+  <!-- <script src="./admin.js"></script> -->
+
 </body>
 </html>
