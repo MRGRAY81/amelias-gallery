@@ -10,36 +10,31 @@
 
 <body data-page="home">
 
-  <!-- Topbar -->
+  <!-- Topbar (A badge on HOME) -->
   <header class="topbar">
     <div class="brand-left">
-      <!-- Placeholder A — replace file later with same name -->
-      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram" onerror="this.style.display='none'">
-      <div class="amark-fallback" aria-hidden="true">A</div>
+      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram"
+           onerror="this.style.display='none';document.querySelector('.amark-fallback').style.display='grid';">
+      <div class="amark-fallback" aria-hidden="true" style="display:none;">A</div>
     </div>
 
-    <header class="topbar">
-  <nav class="nav nav-buttons">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink" href="./gallery.html">Gallery</a>
-    <a class="btnlink" href="./commissions.html">Commissions</a>
-    <a class="btnlink" href="./about.html">About / Contact</a>
-    <a class="btnlink admin" href="./admin.html">Login</a>
-  </nav>
-</header>
+    <nav class="nav nav-buttons">
+      <a class="btnlink active" href="./index.html">Home</a>
+      <a class="btnlink" href="./gallery.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Login</a>
+    </nav>
+  </header>
 
   <main class="shell">
 
     <!-- Hero -->
     <section class="hero">
       <div class="hero-banner image-header">
-        <!-- Your illustrated header -->
         <div class="header-crop">
-          <img
-            src="./amelias-header.jpg"
-            alt="Amelia’s Gallery header illustration"
-            onerror="this.onerror=null;this.src='./amelias-header.png';"
-          />
+          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration"
+               onerror="this.onerror=null;this.src='./amelias-header.png';" />
         </div>
       </div>
     </section>
@@ -92,62 +87,5 @@
   </div>
 
   <script src="./script.js"></script>
-
-  <!-- Page-only tweaks -->
-  <style>
-    .amark-img{
-      width:48px;
-      height:auto;
-      object-fit:contain;
-      padding:4px;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.72);
-    }
-    .amark-fallback{
-      display:grid;
-      place-items:center;
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.72);
-      font-family:"Georgia","Times New Roman",serif;
-      font-style:italic;
-      font-weight:800;
-      color:rgba(42,37,48,.70);
-    }
-    .home-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      padding:0 14px;
-      margin-top:12px;
-    }
-    .btn.ghost{
-      background:rgba(255,255,255,.70);
-      color:rgba(42,37,48,.80);
-    }
-
-    /* Crop header image to keep it clean */
-    .header-crop{
-      border-radius:18px;
-      overflow:hidden;
-    }
-    .header-crop img{
-      width:112%;
-      margin-left:-6%;
-      display:block;
-      transform:translateY(-6px);
-    }
-    @media (max-width: 720px){
-      .header-crop img{
-        width:120%;
-        margin-left:-10%;
-        transform:translateY(-4px);
-      }
-    }
-  </style>
-
 </body>
 </html>
