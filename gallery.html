@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gallery — Amelia’s Gallery</title>
-  <meta name="description" content="Gallery — Amelia’s Gallery." />
+  <meta name="description" content="Artwork gallery by Amelia — family managed." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body data-page="gallery">
 
+  <!-- Topbar -->
   <header class="topbar">
     <a class="brand-left" href="./index.html" aria-label="Home">
-      <img class="amark-img" src="./a-mark.png" alt="Amelia’s Gallery mark" onerror="this.style.display='none'">
+      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram" onerror="this.style.display='none'">
       <span class="amark-fallback" aria-hidden="true">A</span>
     </a>
 
@@ -27,29 +28,36 @@
 
   <main class="shell">
 
+    <!-- Hero -->
     <section class="hero">
       <div class="hero-banner image-header">
         <div class="header-crop">
-          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration" />
+          <img src="./amelias-header.png" alt="Amelia’s Gallery header illustration" />
         </div>
       </div>
     </section>
 
+    <!-- Gallery -->
     <section class="section">
       <div class="section-head">
         <h2>Gallery ✨</h2>
         <p>Tap to view bigger</p>
       </div>
 
+      <!-- Category chips -->
       <div class="chips" id="chipBar"></div>
-<div class="rows" id="galleryRows"></div>
+
+      <!-- Carousel rows -->
+      <div class="rows" id="galleryRows"></div>
     </section>
 
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
     </footer>
+
   </main>
 
+  <!-- Lightbox -->
   <div class="lightbox" id="lightbox" aria-hidden="true">
     <div class="lightbox-inner" role="dialog" aria-modal="true">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
@@ -59,5 +67,6 @@
   </div>
 
   <script src="./gallery.js"></script>
+
 </body>
 </html>
