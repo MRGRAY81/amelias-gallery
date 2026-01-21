@@ -4,28 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Commissions — Amelia’s Gallery</title>
-  <meta name="description" content="Request a commission from Amelia’s Gallery (family managed)." />
+  <meta name="description" content="Request a commission from Amelia (family managed)." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body data-page="commissions">
 
   <header class="topbar">
-    <nav class="nav nav-buttons">
-      <a class="btnlink" href="./index.html">Home</a>
-      <a class="btnlink" href="./gallery.html">Gallery</a>
-      <a class="btnlink active" href="./commissions.html">Commissions</a>
-      <a class="btnlink" href="./about.html">About / Contact</a>
-      <a class="btnlink admin" href="./admin.html">Login</a>
-    </nav>
+    <div class="topbar-inner">
+      <nav class="nav nav-buttons">
+        <a class="btnlink" href="./index.html">Home</a>
+        <a class="btnlink" href="./gallery.html">Gallery</a>
+        <a class="btnlink active" href="./commissions.html">Commissions</a>
+        <a class="btnlink" href="./about.html">About / Contact</a>
+        <a class="btnlink admin" href="./admin.html">Login</a>
+      </nav>
+    </div>
   </header>
 
   <main class="shell">
+
     <section class="hero">
       <div class="hero-banner image-header">
         <div class="header-crop">
-          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration"
-               onerror="this.onerror=null;this.src='./amelias-header.png';" />
+          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration" />
         </div>
       </div>
     </section>
@@ -36,18 +38,62 @@
         <p>Tell us what you’d like — a grown-up will reply.</p>
       </div>
 
-      <!-- Keep your existing commission form markup if you already have it -->
-      <div class="about">
-        <h3>Commission Form</h3>
-        <p>If you already have a form in your current file, paste it here.</p>
+      <div class="formcard">
+        <form id="commissionForm">
+          <div class="field">
+            <label for="name">Your name</label>
+            <input id="name" name="name" required />
+          </div>
+
+          <div class="field">
+            <label for="email">Your email</label>
+            <input id="email" name="email" type="email" required />
+          </div>
+
+          <div class="field">
+            <label for="idea">What would you like Amelia to draw?</label>
+            <textarea id="idea" name="idea" required placeholder="Describe your idea… (characters, theme, colours, size, deadline)"></textarea>
+          </div>
+
+          <div class="field">
+            <button class="btn" type="submit">Send Request</button>
+          </div>
+
+          <p style="margin:12px 0 0; color:rgba(42,37,48,.65); font-weight:750;">
+            This opens your email app so the family can reply safely.
+          </p>
+        </form>
       </div>
     </section>
 
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
     </footer>
+
   </main>
 
-  <script src="./commissions.js"></script>
+  <script>
+    (function(){
+      const form = document.getElementById("commissionForm");
+      if(!form) return;
+
+      // TODO: replace with your real family email
+      const TO_EMAIL = "graemeholland@hotmail.com";
+
+      form.addEventListener("submit", function(e){
+        e.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const idea = document.getElementById("idea").value.trim();
+
+        const subject = encodeURIComponent("Amelia’s Gallery — Commission Request");
+        const body = encodeURIComponent(
+          `Name: ${name}\nEmail: ${email}\n\nRequest:\n${idea}\n`
+        );
+
+        window.location.href = `mailto:${TO_EMAIL}?subject=${subject}&body=${body}`;
+      });
+    })();
+  </script>
 </body>
 </html>
