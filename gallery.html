@@ -4,43 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gallery — Amelia’s Gallery</title>
-  <meta name="description" content="Amelia’s Gallery — artwork gallery." />
+  <meta name="description" content="Browse artwork from Amelia’s Gallery (family managed)." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body data-page="gallery">
 
-  <!-- Topbar -->
+  <!-- Topbar (A badge ON Gallery) -->
   <header class="topbar">
     <div class="brand-left">
-      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram" onerror="this.style.display='none'">
-      <div class="amark-fallback" aria-hidden="true">A</div>
+      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram"
+           onerror="this.style.display='none';document.querySelector('.amark-fallback').style.display='grid';">
+      <div class="amark-fallback" aria-hidden="true" style="display:none;">A</div>
     </div>
 
-    <header class="topbar">
-  <nav class="nav nav-buttons">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink" href="./gallery.html">Gallery</a>
-    <a class="btnlink" href="./commissions.html">Commissions</a>
-    <a class="btnlink" href="./about.html">About / Contact</a>
-    <a class="btnlink admin" href="./admin.html">Login</a>
-  </nav>
-</header>
+    <nav class="nav nav-buttons">
+      <a class="btnlink" href="./index.html">Home</a>
+      <a class="btnlink active" href="./gallery.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Login</a>
+    </nav>
+  </header>
 
   <main class="shell">
 
-    <section class="section">
-      <div class="section-head">
-        <h2>Gallery</h2>
-        <p>Endless carousels — tap any artwork to view it bigger ✨</p>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-banner image-header">
+        <div class="header-crop">
+          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration"
+               onerror="this.onerror=null;this.src='./amelias-header.png';" />
+        </div>
       </div>
-
-      <!-- Filter chips -->
-      <div class="chips" id="chips"></div>
     </section>
 
-    <!-- Carousel rows mount here -->
-    <section class="rows" id="rows"></section>
+    <!-- Gallery -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Gallery ✨</h2>
+        <p>Tap to view bigger</p>
+      </div>
+
+      <div class="grid" id="galleryGrid"></div>
+    </section>
 
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
@@ -57,21 +64,6 @@
     </div>
   </div>
 
-  <script src="./gallery.js"></script>
-
-  <!-- Small page-only styles for monogram -->
-  <style>
-    .amark-img{
-      width:48px;height:auto;object-fit:contain;padding:4px;border-radius:14px;
-      border:1px solid var(--stroke);background:rgba(255,255,255,.72);
-    }
-    .amark-fallback{
-      display:grid;place-items:center;width:42px;height:42px;border-radius:14px;
-      border:1px solid var(--stroke);background:rgba(255,255,255,.72);
-      font-family:"Georgia","Times New Roman",serif;font-style:italic;font-weight:800;
-      color:rgba(42,37,48,.70);
-    }
-  </style>
-
+  <script src="./script.js"></script>
 </body>
-        </html>
+</html>
