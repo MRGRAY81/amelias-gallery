@@ -4,24 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gallery — Amelia’s Gallery</title>
-  <meta name="description" content="Amelia’s Gallery — browse artwork by themes and collections." />
+  <meta name="description" content="Amelia’s Gallery — artwork gallery." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body data-page="gallery">
 
-  <!-- Top bar matches your frontend style -->
+  <!-- Topbar -->
   <header class="topbar">
     <div class="brand-left">
-      <!-- Swap this src with your Dad’s final file later -->
-      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram" />
+      <img class="amark-img" src="./a-dad.jpg" alt="Amelia’s Gallery monogram" onerror="this.style.display='none'">
+      <div class="amark-fallback" aria-hidden="true">A</div>
     </div>
 
-    <nav class="nav">
-      <a class="navbtn active" href="./gallery.html">Gallery</a>
-      <a class="navbtn" href="./commissions.html">Commissions</a>
-      <a class="navbtn" href="./about.html">About / Contact</a>
-      <a class="navbtn admin" href="./admin.html">Login</a>
+    <nav class="nav nav-buttons">
+      <a class="btnlink" href="./index.html">Home</a>
+      <a class="btnlink active" href="./gallery.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Login</a>
     </nav>
   </header>
 
@@ -30,22 +31,23 @@
     <section class="section">
       <div class="section-head">
         <h2>Gallery</h2>
-        <p>Endless carousel rows — click any piece to view ✨</p>
+        <p>Endless carousels — tap any artwork to view it bigger ✨</p>
       </div>
 
-      <!-- Category chips -->
-      <div class="gallery-chips" id="chips"></div>
-
-      <!-- Rows injected by JS -->
-      <div class="gallery-rows" id="rows"></div>
+      <!-- Filter chips -->
+      <div class="chips" id="chips"></div>
     </section>
+
+    <!-- Carousel rows mount here -->
+    <section class="rows" id="rows"></section>
 
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
     </footer>
+
   </main>
 
-  <!-- Lightbox (same IDs as your existing script/lightbox) -->
+  <!-- Lightbox -->
   <div class="lightbox" id="lightbox" aria-hidden="true">
     <div class="lightbox-inner" role="dialog" aria-modal="true">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
@@ -56,134 +58,19 @@
 
   <script src="./gallery.js"></script>
 
-  <!-- Minimal page-only styles (kept inline so you don't need extra files) -->
+  <!-- Small page-only styles for monogram -->
   <style>
     .amark-img{
-      width:42px;height:42px;
-      border-radius:14px;
-      object-fit:cover;
-      background:rgba(255,255,255,.72);
-      border:1px solid var(--stroke);
+      width:48px;height:auto;object-fit:contain;padding:4px;border-radius:14px;
+      border:1px solid var(--stroke);background:rgba(255,255,255,.72);
     }
-    .navbtn{
-      text-decoration:none;
-      color:rgba(42,37,48,.62);
-      font-weight:900;
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid transparent;
-      background:transparent;
-    }
-    .navbtn:hover{ color:rgba(42,37,48,.90) }
-    .navbtn.active{
-      background:rgba(255,255,255,.72);
-      border:1px solid var(--stroke);
-      color:rgba(42,37,48,.85);
-    }
-
-    .gallery-chips{
-      margin-top:12px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      padding:0 14px;
-    }
-    .chipbtn{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.70);
-      border-radius:999px;
-      padding:10px 14px;
-      font-weight:950;
-      cursor:pointer;
-      color:rgba(42,37,48,.80);
-    }
-    .chipbtn.active{
-      background:rgba(255,255,255,.90);
-      color:rgba(42,37,48,.92);
-    }
-
-    .gallery-rows{ margin-top:14px; display:grid; gap:16px; }
-    .row{
-      border-radius:var(--r);
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.55);
-      box-shadow:0 14px 30px rgba(20,12,5,.06);
-      overflow:hidden;
-    }
-    .rowhead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px 14px;
-      border-bottom:1px solid rgba(55,40,20,.08);
-    }
-    .rowhead h3{ margin:0; font-size:16px; font-weight:1000; }
-    .rowhead .hint{ margin:0; color:var(--muted); font-weight:850; font-size:13px; }
-
-    /* Infinite strip container */
-    .stripWrap{
-      position:relative;
-      overflow:hidden;
-      padding:12px;
-    }
-    .strip{
-      display:flex;
-      gap:12px;
-      will-change:transform;
-      /* movement handled by JS */
-    }
-    .tile{
-      width:220px;
-      flex:0 0 auto;
-      border-radius:18px;
-      border:1px solid rgba(55,40,20,.12);
-      background:rgba(255,255,255,.62);
-      box-shadow:0 10px 24px rgba(20,12,5,.06);
-      overflow:hidden;
-      cursor:pointer;
-      padding:0;
-    }
-    .tile img{
-      width:100%;
-      height:150px;
-      object-fit:cover;
-      display:block;
-    }
-    .tile .cap{
-      padding:10px 10px 12px;
-      font-weight:950;
-      color:rgba(42,37,48,.82);
-      font-size:13px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    /* Subtle edge fade */
-    .stripWrap:before, .stripWrap:after{
-      content:"";
-      position:absolute;
-      top:0; bottom:0;
-      width:52px;
-      pointer-events:none;
-      z-index:2;
-    }
-    .stripWrap:before{
-      left:0;
-      background:linear-gradient(90deg, rgba(251,247,242,.95), rgba(251,247,242,0));
-    }
-    .stripWrap:after{
-      right:0;
-      background:linear-gradient(270deg, rgba(251,247,242,.95), rgba(251,247,242,0));
-    }
-
-    @media (max-width: 720px){
-      .tile{ width:170px; }
-      .tile img{ height:120px; }
-      .rowhead{ flex-direction:column; align-items:flex-start; }
+    .amark-fallback{
+      display:grid;place-items:center;width:42px;height:42px;border-radius:14px;
+      border:1px solid var(--stroke);background:rgba(255,255,255,.72);
+      font-family:"Georgia","Times New Roman",serif;font-style:italic;font-weight:800;
+      color:rgba(42,37,48,.70);
     }
   </style>
 
 </body>
-</html>
+        </html>
