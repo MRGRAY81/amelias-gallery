@@ -11,6 +11,7 @@
 }
 
 *{box-sizing:border-box}
+html,body{height:100%}
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
@@ -21,7 +22,9 @@ body{
     linear-gradient(var(--bg), var(--bg2));
 }
 
-/* ===== Header / Nav ===== */
+/* =========================
+   HEADER / TOPBAR (LOCKED)
+   ========================= */
 .topbar{
   max-width:1200px;
   margin:18px auto 0;
@@ -29,30 +32,26 @@ body{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:12px;
+  gap:14px;
 }
 
-/* Keep space top-left for A image */
 .brand-left{
-  width:56px;
+  width:64px;
+  min-width:64px;
   display:grid;
   place-items:center;
 }
 
-/* Hide old centered title mode by default (we’re using button nav now) */
-.brand-center,
-.title{
-  display:none;
-}
-
-/* Button-style navigation (default) */
+/* Pill nav */
 .nav{
-  width:auto;
   display:flex;
-  gap:10px;
+  align-items:center;
   justify-content:flex-end;
-  flex-wrap:wrap;
-  font-weight:900;
+  gap:10px;
+  flex-wrap:nowrap;            /* IMPORTANT: stops “stacked” look */
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:2px;
 }
 
 .nav a{
@@ -62,6 +61,9 @@ body{
   background:rgba(255,255,255,.70);
   border:1px solid var(--stroke);
   color:rgba(42,37,48,.72);
+  font-weight:900;
+  white-space:nowrap;
+  flex:0 0 auto;
 }
 
 .nav a:hover{
@@ -79,14 +81,42 @@ body{
   color:#fff;
 }
 
-/* ===== Layout Shell ===== */
+/* A badge styles (only used on Home + Gallery) */
+.amark-img{
+  width:48px;
+  height:auto;
+  object-fit:contain;
+  padding:4px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.72);
+}
+.amark-fallback{
+  display:grid;
+  place-items:center;
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.72);
+  font-family:"Georgia","Times New Roman",serif;
+  font-style:italic;
+  font-weight:800;
+  color:rgba(42,37,48,.70);
+}
+
+/* =========================
+   LAYOUT SHELL
+   ========================= */
 .shell{
   max-width:1200px;
   margin:10px auto 26px;
   padding:0 16px 20px;
 }
 
-/* ===== Hero ===== */
+/* =========================
+   HERO
+   ========================= */
 .hero{ margin-top:10px; }
 
 .hero-banner{
@@ -97,31 +127,44 @@ body{
   overflow:hidden;
 }
 
-/* Header image variant (amelias-header.png) */
+/* Image header variant */
 .hero-banner.image-header{
   background:none;
   padding:12px;
+  position:relative;
 }
 
-.hero-banner.image-header img{
-  width:100%;
-  max-width:1200px;
-  margin:0 auto;
-  display:block;
+/* Crop wrapper */
+.header-crop{
   border-radius:18px;
-  box-shadow:none;
+  overflow:hidden;
 }
 
-/* Safety: if hero-art exists, hide inside image header variant */
-.hero-banner.image-header .hero-art{ display:none; }
-
-.hero-art{
-  height:230px;
-  background:
-    radial-gradient(circle at 30% 25%, rgba(255,255,255,.90), rgba(122,167,215,.20) 55%, rgba(243,162,126,.18) 100%);
+/* Image crop style */
+.header-crop img{
+  width:112%;
+  margin-left:-6%;
+  display:block;
+  transform:translateY(-6px);
 }
 
-/* ===== Sections ===== */
+/* Mask baked-in text on header image (top-right) */
+.hero-banner.image-header::after{
+  content:"";
+  position:absolute;
+  top:18px;
+  right:18px;
+  width:220px;
+  height:64px;
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(6px);
+  border-radius:18px;
+  pointer-events:none;
+}
+
+/* =========================
+   SECTIONS
+   ========================= */
 .section{ margin-top:18px; }
 
 .section-head{
@@ -135,7 +178,37 @@ body{
 .section-head h2{ margin:0; font-size:18px; font-weight:950; }
 .section-head p{ margin:0; color:var(--muted); font-weight:750; }
 
-/* ===== Grid / Cards ===== */
+/* Buttons */
+.btn{
+  border:1px solid var(--stroke);
+  background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
+  color:#fff;
+  padding:12px 16px;
+  border-radius:999px;
+  font-weight:950;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.btn:hover{ filter:brightness(.98); }
+
+.btn.ghost{
+  background:rgba(255,255,255,.70);
+  color:rgba(42,37,48,.80);
+}
+
+.home-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  padding:0 14px;
+  margin-top:12px;
+}
+
+/* Grid */
 .grid{
   margin-top:14px;
   display:grid;
@@ -160,7 +233,7 @@ body{
   display:block;
 }
 
-/* ===== CTA ===== */
+/* CTA */
 .cta{
   margin-top:16px;
   padding:16px;
@@ -172,39 +245,10 @@ body{
   justify-content:space-between;
   gap:12px;
 }
-
 .cta h3{ margin:0; font-size:18px; font-weight:950; }
 .cta p{ margin:6px 0 0; color:var(--muted); font-weight:750; }
 
-.btn{
-  border:1px solid var(--stroke);
-  background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
-  color:#fff;
-  padding:12px 16px;
-  border-radius:999px;
-  font-weight:950;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-}
-
-.btn:hover{ filter:brightness(.98); }
-
-/* ===== About box (if used on homepage) ===== */
-.about{
-  margin-top:16px;
-  padding:16px;
-  border-radius:var(--r);
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.55);
-}
-.about h3{ margin:0 0 6px; font-weight:950; }
-.about p{ margin:0; color:var(--muted); font-weight:750; }
-
-/* ===== Footer ===== */
+/* Footer */
 .footer{
   margin-top:16px;
   text-align:center;
@@ -213,7 +257,7 @@ body{
   padding:10px 0;
 }
 
-/* ===== Lightbox ===== */
+/* Lightbox */
 .lightbox{
   position:fixed;
   inset:0;
@@ -234,7 +278,6 @@ body{
   border:1px solid rgba(255,255,255,.22);
   box-shadow:0 28px 70px rgba(0,0,0,.35);
 }
-
 .lightbox-inner img{ width:100%; height:auto; display:block; }
 
 .lightbox-close{
@@ -248,59 +291,39 @@ body{
   font-size:18px;
   font-weight:900;
 }
-
 .lightbox-caption{
   padding:10px 14px 14px;
   color:rgba(42,37,48,.70);
   font-weight:800;
 }
-/* =========================================
-   Mask baked-in text on header image
-   (Gallery / Commissions / About)
-   ========================================= */
 
-.hero-banner.image-header{
-  position: relative;
+/* Responsive */
+@media (max-width: 980px){
+  .grid{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
 }
-
-.hero-banner.image-header::after{
-  content:"";
-  position:absolute;
-  top:18px;
-  right:18px;
-
-  /* adjust these if needed */
-  width:220px;
-  height:64px;
-
-  background: rgba(255,255,255,.88);
-  backdrop-filter: blur(6px);
-  border-radius:18px;
-  pointer-events:none;
-}
-
-/* Mobile tweak */
 @media (max-width: 720px){
+  .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+
+  /* on small screens allow nav to wrap nicely */
+  .nav{ flex-wrap:wrap; justify-content:flex-start; }
   .hero-banner.image-header::after{
     top:14px;
     right:14px;
     width:200px;
     height:58px;
   }
-}
-/* ===== Responsive ===== */
-@media (max-width: 980px){
-  .grid{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
-}
-
-@media (max-width: 720px){
-  .topbar{ flex-wrap:wrap; }
-  .brand-left{ width:auto; }
-  .nav{ width:auto; justify-content:flex-start; }
-  .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .header-crop img{
+    width:120%;
+    margin-left:-10%;
+    transform:translateY(-4px);
+  }
   .cta{ flex-direction:column; align-items:flex-start; }
 }
-/* ===== Gallery carousel rows ===== */
+
+/* =========================
+   GALLERY CAROUSEL ROWS
+   (kept, in case your gallery uses it)
+   ========================= */
 .chips{
   display:flex;
   flex-wrap:wrap;
@@ -321,14 +344,12 @@ body{
   color:white;
   border-color:rgba(0,0,0,.06);
 }
-
 .rows{
   display:flex;
   flex-direction:column;
   gap:18px;
   padding-bottom:18px;
 }
-
 .row{
   background:rgba(255,255,255,.62);
   border:1px solid var(--stroke);
@@ -336,7 +357,6 @@ body{
   box-shadow:var(--shadow);
   overflow:hidden;
 }
-
 .rowhead{
   display:flex;
   align-items:flex-end;
@@ -344,28 +364,15 @@ body{
   gap:12px;
   padding:16px 16px 10px;
 }
-.rowhead h3{
-  margin:0;
-  font-size:18px;
-}
+.rowhead h3{ margin:0; font-size:18px; }
 .rowhead .hint{
   margin:0;
   color:rgba(42,37,48,.60);
   font-weight:800;
   font-size:13px;
 }
-
-.stripWrap{
-  overflow:hidden;
-  padding:12px 12px 16px;
-}
-
-.strip{
-  display:flex;
-  gap:12px;
-  will-change:transform;
-}
-
+.stripWrap{ overflow:hidden; padding:12px 12px 16px; }
+.strip{ display:flex; gap:12px; will-change:transform; }
 .tile{
   min-width:260px;
   max-width:260px;
@@ -378,22 +385,6 @@ body{
   text-align:left;
   padding:0;
 }
-.tile img{
-  width:100%;
-  height:170px;
-  object-fit:cover;
-  display:block;
-}
-.tile .cap{
-  padding:10px 12px 12px;
-  font-weight:900;
-  color:rgba(42,37,48,.78);
-}
-
-.emptyRow{
-  padding:18px;
-  color:rgba(42,37,48,.62);
-  font-weight:900;
-}
-
-
+.tile img{ width:100%; height:170px; object-fit:cover; display:block; }
+.tile .cap{ padding:10px 12px 12px; font-weight:900; color:rgba(42,37,48,.78); }
+.emptyRow{ padding:18px; color:rgba(42,37,48,.62); font-weight:900; }
