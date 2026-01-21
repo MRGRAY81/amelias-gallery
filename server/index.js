@@ -1,19 +1,3 @@
-/**
- * Amelia's Gallery Backend (Render) — CommonJS build
- * Fixes: "Cannot use import statement outside a module"
- *
- * Supports BOTH route styles:
- * - Legacy (frontend friendly): /gallery /commissions /enquiries /auth/login /upload
- * - API style: /api/gallery /api/commissions /api/enquiries /api/auth/login /api/upload
- *
- * ENV (Render):
- *  ADMIN_EMAIL
- *  ADMIN_PASSWORD
- *  JWT_SECRET
- *  FRONTEND_ORIGIN   (use * for now)
- *  MAX_UPLOAD_MB     (default 10)
- */
-
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -22,20 +6,32 @@ const fs = require("fs");
 const crypto = require("crypto");
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
-// --------------------
-// ENV
-// --------------------
+/**
+ * =========================
+ * ENV
+ * =========================
+ * Required (Render):
+ * - ADMIN_EMAIL
+ * - ADMIN_PASSWORD
+ * - JWT_SECRET (any long string)
+ *
+ * Optional:
+ * - FRONTEND_ORIGIN (use * for now)
+ * - MAX_UPLOAD_MB (default 10)
+ */
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "change-me";
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB || "10");
 
-// --------------------
-// Middleware
-// --------------------
+/**
+ * =========================
+ * CORS + JSON
+ * =========================
+ */
 app.use(
   cors({
     origin: FRONTEND_ORIGIN === "*" ? true : FRONTEND_ORIGIN,
@@ -45,9 +41,11 @@ app.use(
 
 app.use(express.json({ limit: "2mb" }));
 
-// --------------------
-// Storage
-// --------------------
+/**
+ * =========================
+ * Storage paths
+ * =========================
+ */
 const DATA_DIR = path.join(__dirname, "data");
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 
@@ -63,7 +61,7 @@ function ensureStore() {
 
   for (const key of Object.keys(DB_FILES)) {
     const file = DB_FILES[key];
-    if (!fs.existsSync(file)) fs.writeFileSync(file, "[]", "utf8");
+    if (!fs.existsSync(file)) fs.writeFileSync(file, "[]");
   }
 }
 ensureStore();
@@ -78,16 +76,23 @@ function readJson(file) {
 }
 
 function writeJson(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-// --------------------
-// Simple signed token (Bearer)
-// token = base64url(payload).base64url(hmac)
-// --------------------
+/**
+ * =========================
+ * Token helpers (simple signed token)
+ * =========================
+ * token = base64(payload).base64(hmac)
+ */
 function makeToken(email) {
-  const payload = { email, role: "admin", iat: Date.now() };
-  const b64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const payload = {
+    email,
+    role: "admin",
+    iat: Date.now()
+  };
+  const json = JSON.stringify(payload);
+  const b64 = Buffer.from(json).toString("base64url");
   const sig = crypto.createHmac("sha256", JWT_SECRET).update(b64).digest("base64url");
   return `${b64}.${sig}`;
 }
@@ -102,7 +107,8 @@ function verifyToken(token) {
   if (sig !== expected) return null;
 
   try {
-    return JSON.parse(Buffer.from(b64, "base64url").toString("utf8"));
+    const payload = JSON.parse(Buffer.from(b64, "base64url").toString("utf8"));
+    return payload;
   } catch {
     return null;
   }
@@ -112,16 +118,20 @@ function requireAdmin(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
   const payload = verifyToken(token);
+
   if (!payload || payload.role !== "admin") {
     return res.status(401).json({ ok: false, message: "Unauthorized" });
   }
+
   req.admin = payload;
   next();
 }
 
-// --------------------
-// Upload config (disk)
-// --------------------
+/**
+ * =========================
+ * Upload config
+ * =========================
+ */
 const allowedMime = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const storage = multer.diskStorage({
@@ -143,51 +153,58 @@ const upload = multer({
   }
 });
 
+// Serve uploaded images
 app.use("/uploads", express.static(UPLOAD_DIR));
 
-// --------------------
-// Routes
-// --------------------
+/**
+ * =========================
+ * Routes
+ * =========================
+ */
 app.get("/", (req, res) => {
   res.json({ ok: true, service: "amelias-gallery-backend" });
 });
 
 app.get("/health", (req, res) => {
-  res.json({ ok: true });
+  res.json({
+    ok: true,
+    service: "amelias-gallery-backend",
+    version: "0.2.0",
+    time: new Date().toISOString()
+  });
 });
 
-// ---- AUTH (both paths) ----
-function loginHandler(req, res) {
+/**
+ * Auth
+ */
+app.post("/auth/login", (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password) return res.status(400).json({ ok: false, message: "Missing fields" });
 
-  if (String(email).trim() === ADMIN_EMAIL && String(password) === ADMIN_PASSWORD) {
-    const token = makeToken(ADMIN_EMAIL);
-    return res.json({ ok: true, token, email: ADMIN_EMAIL });
+  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    const token = makeToken(email);
+    return res.json({ ok: true, token, email });
   }
   return res.status(401).json({ ok: false, message: "Invalid login" });
-}
-
-app.post("/auth/login", loginHandler);
-app.post("/api/auth/login", loginHandler);
+});
 
 app.get("/me", requireAdmin, (req, res) => {
   res.json({ ok: true, email: req.admin.email, role: req.admin.role });
 });
-app.get("/api/auth/me", requireAdmin, (req, res) => {
-  res.json({ ok: true, email: req.admin.email, role: req.admin.role });
-});
 
-// ---- GALLERY (both paths) ----
-function galleryListHandler(req, res) {
+/**
+ * Gallery (PUBLIC)
+ */
+app.get("/gallery", (req, res) => {
   const items = readJson(DB_FILES.gallery);
   res.json({ ok: true, items });
-}
-app.get("/gallery", galleryListHandler);
-app.get("/api/gallery", galleryListHandler);
+});
 
-// ---- UPLOAD (admin-only) (both paths) ----
-function uploadHandler(req, res) {
+/**
+ * Upload (ADMIN)
+ * Accepts multipart/form-data: file + title + category
+ */
+app.post("/upload", requireAdmin, upload.single("file"), (req, res) => {
   if (!req.file) return res.status(400).json({ ok: false, message: "No file uploaded" });
 
   const title = String(req.body.title || "").trim() || "Untitled";
@@ -198,8 +215,8 @@ function uploadHandler(req, res) {
     id: `g_${Date.now()}`,
     title,
     category,
-    url,
-    thumbUrl: url,
+    url: `${url}`,
+    thumbUrl: `${url}`,
     createdAt: new Date().toISOString()
   };
 
@@ -208,15 +225,15 @@ function uploadHandler(req, res) {
   writeJson(DB_FILES.gallery, items);
 
   res.json({ ok: true, item });
-}
+});
 
-app.post("/upload", requireAdmin, upload.single("file"), uploadHandler);
-app.post("/api/upload", requireAdmin, upload.single("file"), uploadHandler);
-
-// ---- COMMISSIONS (public submit) (both paths) ----
+/**
+ * Commissions (PUBLIC)
+ * multipart: refs (up to 3 images) + fields
+ */
 const refsUpload = upload.fields([{ name: "refs", maxCount: 3 }]);
 
-function commissionsCreateHandler(req, res) {
+app.post("/commissions", refsUpload, (req, res) => {
   const name = String(req.body.name || "").trim();
   const email = String(req.body.email || "").trim();
   const type = String(req.body.type || "").trim();
@@ -247,6 +264,60 @@ function commissionsCreateHandler(req, res) {
     refs
   };
 
+  const items = readJson(DB_FILES.commissions);
+  items.unshift(record);
+  writeJson(DB_FILES.commissions, items);
+
+  res.json({ ok: true, commission: record });
+});
+
+/**
+ * Admin commissions list
+ */
+app.get("/admin/commissions", requireAdmin, (req, res) => {
+  const items = readJson(DB_FILES.commissions);
+  res.json({ ok: true, items });
+});
+
+/**
+ * Enquiries (PUBLIC)
+ * JSON body: { name, email, message }
+ * Also supports legacy field names: cname, cemail, cmsg
+ */
+app.post("/enquiries", (req, res) => {
+  const name = String(req.body.cname || req.body.name || "").trim();
+  const email = String(req.body.cemail || req.body.email || "").trim();
+  const message = String(req.body.cmsg || req.body.message || "").trim();
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ ok: false, message: "name, email, message required" });
+  }
+
+  const record = {
+    id: `e_${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    name,
+    email,
+    message
+  };
+
+  const items = readJson(DB_FILES.enquiries);
+  items.unshift(record);
+  writeJson(DB_FILES.enquiries, items);
+
+  res.json({ ok: true });
+});
+
+/**
+ * Error handler
+ */
+app.use((err, req, res, next) => {
+  res.status(400).json({ ok: false, message: err?.message || "Error" });
+});
+
+app.listen(PORT, () => {
+  console.log(`Amelia backend running on port ${PORT}`);
+});
   const items = readJson(DB_FILES.commissions);
   items.unshift(record);
   writeJson(DB_FILES.commissions, items);
