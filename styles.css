@@ -254,7 +254,40 @@ body{
   color:rgba(42,37,48,.70);
   font-weight:800;
 }
+/* =========================================
+   Mask baked-in text on header image
+   (Gallery / Commissions / About)
+   ========================================= */
 
+.hero-banner.image-header{
+  position: relative;
+}
+
+.hero-banner.image-header::after{
+  content:"";
+  position:absolute;
+  top:18px;
+  right:18px;
+
+  /* adjust these if needed */
+  width:220px;
+  height:64px;
+
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(6px);
+  border-radius:18px;
+  pointer-events:none;
+}
+
+/* Mobile tweak */
+@media (max-width: 720px){
+  .hero-banner.image-header::after{
+    top:14px;
+    right:14px;
+    width:200px;
+    height:58px;
+  }
+}
 /* ===== Responsive ===== */
 @media (max-width: 980px){
   .grid{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
