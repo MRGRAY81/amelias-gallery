@@ -1,16 +1,18 @@
+// Amelia’s Gallery — Gallery Page JS
+// Handles gallery grid, carousel rows, and lightbox
+
 (function () {
-  const rowsEl = document.getElementById("rows");
-  if (!rowsEl) return;
+  const galleryGrid = document.getElementById("galleryGrid");
+  const rowsWrap = document.getElementById("galleryRows");
 
-  const chipBar = document.getElementById("chipBar");
-
-  // Lightbox elements (shared IDs)
+  // Lightbox
   const lightbox = document.getElementById("lightbox");
   const lightboxImg = document.getElementById("lightboxImg");
   const lightboxCaption = document.getElementById("lightboxCaption");
   const lightboxClose = document.getElementById("lightboxClose");
 
   function openLightbox(src, caption) {
+    if (!lightbox) return;
     lightboxImg.src = src;
     lightboxCaption.textContent = caption || "";
     lightbox.classList.add("show");
@@ -18,71 +20,141 @@
   }
 
   function closeLightbox() {
+    if (!lightbox) return;
     lightbox.classList.remove("show");
     lightbox.setAttribute("aria-hidden", "true");
     lightboxImg.src = "";
     lightboxCaption.textContent = "";
   }
 
-  lightboxClose?.addEventListener("click", closeLightbox);
-  lightbox?.addEventListener("click", (e) => {
-    if (e.target === lightbox) closeLightbox();
-  });
+  if (lightboxClose) {
+    lightboxClose.addEventListener("click", closeLightbox);
+  }
+
+  if (lightbox) {
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+  }
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeLightbox();
   });
 
-  // TEMP demo rows (swap later to Amelia’s real sets or your backend)
-  const rows = [
+  // =========================
+  // TEMP GALLERY DATA
+  // Replace with Amelia’s real images later
+  // =========================
+  const galleryItems = [
     {
-      key: "all",
-      title: "All Artworks",
-      hint: "Swipe to browse",
-      items: seeds("all", 10)
+      title: "Forest Path",
+      thumb: "https://picsum.photos/seed/amelia-gal-1/600/450",
+      full: "https://picsum.photos/seed/amelia-gal-1/1600/1100",
+      row: "Nature"
     },
     {
-      key: "landscapes",
-      title: "Landscapes",
-      hint: "Swipe to browse",
-      items: seeds("land", 10)
+      title: "Coastal Walk",
+      thumb: "https://picsum.photos/seed/amelia-gal-2/600/450",
+      full: "https://picsum.photos/seed/amelia-gal-2/1600/1100",
+      row: "Nature"
     },
     {
-      key: "animals",
-      title: "Animals",
-      hint: "Swipe to browse",
-      items: seeds("pets", 10)
+      title: "Mountain View",
+      thumb: "https://picsum.photos/seed/amelia-gal-3/600/450",
+      full: "https://picsum.photos/seed/amelia-gal-3/1600/1100",
+      row: "Nature"
     },
     {
-      key: "characters",
-      title: "Characters",
-      hint: "Swipe to browse",
-      items: seeds("chars", 10)
+      title: "Lighthouse",
+      thumb: "https://picsum.photos/seed/amelia-gal-4/600/450",
+      full: "https://picsum.photos/seed/amelia-gal-4/1600/1100",
+      row: "Places"
+    },
+    {
+      title: "City Lines",
+      thumb: "https://picsum.photos/seed/amelia-gal-5/600/450",
+      full: "https://picsum.photos/seed/amelia-gal-5/1600/1100",
+      row: "Places"
+    },
+    {
+      title: "Quiet Room",
+      thumb: "https://picsum.photos/seed/amelia-gal-6/600/450",
+      full: "https://picsum.photos/seed/amelia-gal-6/1600/1100",
+      row: "Mood"
     }
   ];
 
-  // Chips filter
-  if (chipBar) {
-    chipBar.innerHTML = rows.map((r, i) => (
-      `<button class="chipbtn ${i === 0 ? "active" : ""}" type="button" data-key="${r.key}">${escapeHtml(r.title)}</button>`
-    )).join("");
-
-    chipBar.addEventListener("click", (e) => {
-      const btn = e.target.closest(".chipbtn");
-      if (!btn) return;
-      const key = btn.getAttribute("data-key");
-
-      chipBar.querySelectorAll(".chipbtn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      render(key);
+  // =========================
+  // GRID VIEW (basic gallery)
+  // =========================
+  if (galleryGrid) {
+    galleryGrid.innerHTML = "";
+    galleryItems.forEach(item => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "card";
+      btn.innerHTML = `
+        <img src="${item.thumb}" alt="${escapeHtml(item.title)}" loading="lazy" />
+      `;
+      btn.addEventListener("click", () =>
+        openLightbox(item.full, item.title)
+      );
+      galleryGrid.appendChild(btn);
     });
   }
 
-  function render(filterKey) {
-    const list = filterKey && filterKey !== "all"
-      ? rows.filter(r => r.key === filterKey)
-      : rows;
+  // =========================
+  // CAROUSEL ROWS
+  // =========================
+  if (rowsWrap) {
+    rowsWrap.innerHTML = "";
 
-    rowsEl.innerHTML = list.map(renderRow).join("");
+    const rows = {};
+    galleryItems.forEach(item => {
+      if (!rows[item.row]) rows[item.row] = [];
+      rows[item.row].push(item);
+    });
 
-    // tile click → lightbox
+    Object.keys(rows).forEach(rowName => {
+      const row = document.createElement("section");
+      row.className = "row";
+
+      row.innerHTML = `
+        <div class="rowhead">
+          <h3>${escapeHtml(rowName)}</h3>
+          <p class="hint">Swipe to explore</p>
+        </div>
+        <div class="stripWrap">
+          <div class="strip"></div>
+        </div>
+      `;
+
+      const strip = row.querySelector(".strip");
+
+      rows[rowName].forEach(item => {
+        const tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "tile";
+        tile.innerHTML = `
+          <img src="${item.thumb}" alt="${escapeHtml(item.title)}" loading="lazy" />
+          <div class="cap">${escapeHtml(item.title)}</div>
+        `;
+        tile.addEventListener("click", () =>
+          openLightbox(item.full, item.title)
+        );
+        strip.appendChild(tile);
+      });
+
+      rowsWrap.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+})();
