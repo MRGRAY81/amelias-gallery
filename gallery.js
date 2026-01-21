@@ -1,41 +1,80 @@
-// Amelia's Gallery — Endless carousel rows + lightbox
+// Amelia's Gallery — Endless carousel rows + lightbox (backend-aware)
 (function () {
   const rowsEl = document.getElementById("rows");
   const chipsEl = document.getElementById("chips");
 
-  // Lightbox IDs (must match your HTML)
   const lightbox = document.getElementById("lightbox");
   const lightboxImg = document.getElementById("lightboxImg");
   const lightboxCaption = document.getElementById("lightboxCaption");
   const lightboxClose = document.getElementById("lightboxClose");
 
-  // --- Data (placeholder): swap these later for Amelia's real art + categories
-  const CATEGORIES = [
-    { key: "all", label: "All" },
-    { key: "characters", label: "Characters" },
-    { key: "animals", label: "Animals" },
-    { key: "landscapes", label: "Landscapes" },
-    { key: "fantasy", label: "Fantasy" },
-    { key: "roblox", label: "Roblox Scenes" },
-  ];
+  // ✅ Set your Render backend here
+  // If you leave as "" it will try same-origin (only works if proxied).
+  const API_BASE = "https://amelias-gallery-backend.onrender.com";
 
-  // Each row is a "collection" (type order)
+  // Collections (rows). Categories should match backend "category" values.
   const COLLECTIONS = [
     { key: "characters", title: "Characters", hint: "Never-ending carousel" },
     { key: "animals", title: "Animals", hint: "Click any piece to enlarge" },
     { key: "landscapes", title: "Landscapes", hint: "Loops back around forever" },
     { key: "fantasy", title: "Fantasy Worlds", hint: "Soft gallery vibe" },
-    { key: "roblox", title: "Roblox Scenes", hint: "Great for commissions" },
+    { key: "roblox", title: "Roblox Scenes", hint: "Great for commissions" }
   ];
 
-  // Placeholder art items (Picsum). Replace with local images later.
-  // Use {thumb:"./images/xxx.jpg", full:"./images/xxx.jpg"} when ready.
-  function makeItemsFor(key, count = 10) {
+  // Fallback categories (chips). We will also auto-extend from backend categories.
+  let CATEGORIES = [
+    { key: "all", label: "All" },
+    { key: "characters", label: "Characters" },
+    { key: "animals", label: "Animals" },
+    { key: "landscapes", label: "Landscapes" },
+    { key: "fantasy", label: "Fantasy" },
+    { key: "roblox", label: "Roblox Scenes" }
+  ];
+
+  let activeFilter = "all";
+  let ALL_ITEMS = []; // populated from backend OR fallback
+
+  // --------------------
+  // Backend fetch
+  // --------------------
+  async function fetchBackendGallery() {
+    try {
+      const res = await fetch(`${API_BASE}/gallery`, { method: "GET" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const items = Array.isArray(data?.items) ? data.items : [];
+      // Normalize to our shape
+      const normalized = items.map((it) => {
+        const title = String(it.title || "Untitled");
+        const category = String(it.category || "other").toLowerCase();
+        const full = toAbsUrl(it.url);
+        const thumb = toAbsUrl(it.thumbUrl || it.url);
+        return { id: it.id || makeId(), title, category, thumb, full };
+      });
+      return normalized;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function toAbsUrl(p) {
+    const s = String(p || "");
+    if (!s) return "";
+    if (s.startsWith("http://") || s.startsWith("https://")) return s;
+    // backend serves /uploads/...
+    return `${API_BASE}${s.startsWith("/") ? "" : "/"}${s}`;
+  }
+
+  // --------------------
+  // Fallback placeholder data (picsum)
+  // --------------------
+  function makeItemsFor(key, count = 12) {
     return Array.from({ length: count }).map((_, i) => {
       const n = i + 1;
+      const label = (CATEGORIES.find(c => c.key === key)?.label) || "Artwork";
       return {
         id: `${key}-${n}`,
-        title: `${CATEGORIES.find(c => c.key === key)?.label || "Artwork"} #${n}`,
+        title: `${label} #${n}`,
         thumb: `https://picsum.photos/seed/amelia-${key}-${n}/700/500`,
         full: `https://picsum.photos/seed/amelia-${key}-${n}/1600/1100`,
         category: key
@@ -43,13 +82,19 @@
     });
   }
 
-  const ALL_ITEMS = COLLECTIONS.flatMap(c => makeItemsFor(c.key, 12));
+  function buildFallbackItems() {
+    const base = COLLECTIONS.flatMap(c => makeItemsFor(c.key, 12));
+    // add a few "other" so we never show empty if you pick it later
+    return base;
+  }
 
-  // --- Chips (filter)
-  let activeFilter = "all";
-
+  // --------------------
+  // Chips (filter)
+  // --------------------
   function renderChips() {
+    if (!chipsEl) return;
     chipsEl.innerHTML = "";
+
     CATEGORIES.forEach(c => {
       const b = document.createElement("button");
       b.type = "button";
@@ -64,8 +109,10 @@
     });
   }
 
-  // --- Endless strip engine
-  const strips = []; // keep refs for animation loop
+  // --------------------
+  // Endless strip engine
+  // --------------------
+  const strips = [];
 
   function createRow(collection) {
     const wrap = document.createElement("div");
@@ -85,19 +132,19 @@
 
     wrap.appendChild(stripWrap);
 
-    // choose items
+    // choose items for this row
     let items = ALL_ITEMS.filter(it => it.category === collection.key);
+
+    // global filter (chip)
     if (activeFilter !== "all") {
       items = items.filter(it => it.category === activeFilter);
     }
 
-    // If filter hides everything, show an empty friendly state
     if (items.length === 0) {
-      strip.innerHTML = `<div style="padding:18px;color:rgba(42,37,48,.62);font-weight:900;">No items in this category yet — coming soon ✨</div>`;
+      strip.innerHTML = `<div class="emptyRow">No items here yet — coming soon ✨</div>`;
       return wrap;
     }
 
-    // We duplicate items to simulate endless loop
     const loopItems = items.concat(items);
 
     loopItems.forEach((it) => {
@@ -112,19 +159,9 @@
       strip.appendChild(tile);
     });
 
-    // Animation state
-    const speed = 0.35 + Math.random() * 0.35; // slightly different per row
-    strips.push({
-      el: strip,
-      wrap: stripWrap,
-      x: 0,
-      speed,
-      paused: false,
-      // total width half (first set) - computed later
-      halfWidth: 0
-    });
+    const speed = 0.35 + Math.random() * 0.35;
+    strips.push({ el: strip, wrap: stripWrap, x: 0, speed, paused: false, halfWidth: 0 });
 
-    // Pause on hover / touch hold
     stripWrap.addEventListener("mouseenter", () => setPaused(strip, true));
     stripWrap.addEventListener("mouseleave", () => setPaused(strip, false));
     stripWrap.addEventListener("touchstart", () => setPaused(strip, true), { passive: true });
@@ -143,16 +180,13 @@
     rowsEl.innerHTML = "";
     COLLECTIONS.forEach(c => rowsEl.appendChild(createRow(c)));
 
-    // Compute half-widths after DOM paints
     requestAnimationFrame(() => {
       strips.forEach(s => {
-        // half width = width of first item set (since we duplicated)
         s.halfWidth = s.el.scrollWidth / 2;
       });
     });
   }
 
-  // Animation loop
   function tick() {
     strips.forEach(s => {
       if (!s.halfWidth) return;
@@ -160,7 +194,6 @@
 
       s.x -= s.speed;
 
-      // When moved past half, wrap around seamlessly
       if (Math.abs(s.x) >= s.halfWidth) {
         s.x = 0;
       }
@@ -170,7 +203,9 @@
     requestAnimationFrame(tick);
   }
 
-  // --- Lightbox
+  // --------------------
+  // Lightbox
+  // --------------------
   function openLightbox(it) {
     lightboxImg.src = it.full;
     lightboxCaption.textContent = it.title;
@@ -194,6 +229,9 @@
     if (e.key === "Escape") closeLightbox();
   });
 
+  // --------------------
+  // Utils
+  // --------------------
   function escapeHtml(s) {
     return String(s)
       .replaceAll("&", "&amp;")
@@ -203,8 +241,42 @@
       .replaceAll("'", "&#039;");
   }
 
+  function makeId() {
+    return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  }
+
+  function titleCase(s) {
+    return String(s || "").replace(/(^|\s)\S/g, (m) => m.toUpperCase());
+  }
+
+  // --------------------
   // Init
-  renderChips();
-  renderRows();
-  requestAnimationFrame(tick);
+  // --------------------
+  (async function init() {
+    const backendItems = await fetchBackendGallery();
+
+    if (backendItems && backendItems.length) {
+      ALL_ITEMS = backendItems;
+
+      // auto-build chips from backend categories
+      const set = new Set(backendItems.map(i => i.category).filter(Boolean));
+      const extra = Array.from(set)
+        .filter(k => k !== "all")
+        .map(k => ({ key: k, label: titleCase(k) }));
+
+      // keep "all" first, then your known ones, then extras not already listed
+      const known = new Set(CATEGORIES.map(c => c.key));
+      CATEGORIES = [
+        { key: "all", label: "All" },
+        ...CATEGORIES.filter(c => c.key !== "all"),
+        ...extra.filter(x => !known.has(x.key))
+      ];
+    } else {
+      ALL_ITEMS = buildFallbackItems();
+    }
+
+    renderChips();
+    renderRows();
+    requestAnimationFrame(tick);
+  })();
 })();
