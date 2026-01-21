@@ -388,3 +388,20 @@ body{
 .tile img{ width:100%; height:170px; object-fit:cover; display:block; }
 .tile .cap{ padding:10px 12px 12px; font-weight:900; color:rgba(42,37,48,.78); }
 .emptyRow{ padding:18px; color:rgba(42,37,48,.62); font-weight:900; }
+/* ===== FIX: stop hero/header from covering the whole page ===== */
+.hero,
+.hero-banner,
+.hero-banner.image-header{
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+}
+
+.hero-banner.image-header{
+  overflow:hidden !important;
+}
+
+.header-crop img{
+  max-height:320px;
+  object-fit:cover;
+}
