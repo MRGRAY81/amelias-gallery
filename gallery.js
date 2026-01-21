@@ -2,63 +2,87 @@
   const rowsEl = document.getElementById("rows");
   if (!rowsEl) return;
 
-  // TEMP demo data (replace later with real items / backend)
-  const demo = [
+  const chipBar = document.getElementById("chipBar");
+
+  // Lightbox elements (shared IDs)
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightboxImg");
+  const lightboxCaption = document.getElementById("lightboxCaption");
+  const lightboxClose = document.getElementById("lightboxClose");
+
+  function openLightbox(src, caption) {
+    lightboxImg.src = src;
+    lightboxCaption.textContent = caption || "";
+    lightbox.classList.add("show");
+    lightbox.setAttribute("aria-hidden", "false");
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove("show");
+    lightbox.setAttribute("aria-hidden", "true");
+    lightboxImg.src = "";
+    lightboxCaption.textContent = "";
+  }
+
+  lightboxClose?.addEventListener("click", closeLightbox);
+  lightbox?.addEventListener("click", (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeLightbox();
+  });
+
+  // TEMP demo rows (swap later to Amelia’s real sets or your backend)
+  const rows = [
     {
+      key: "all",
+      title: "All Artworks",
+      hint: "Swipe to browse",
+      items: seeds("all", 10)
+    },
+    {
+      key: "landscapes",
       title: "Landscapes",
       hint: "Swipe to browse",
-      items: [
-        { title: "Mountain", src: "https://picsum.photos/seed/a1/900/700" },
-        { title: "Sea", src: "https://picsum.photos/seed/a2/900/700" },
-        { title: "Forest", src: "https://picsum.photos/seed/a3/900/700" },
-        { title: "Sky", src: "https://picsum.photos/seed/a4/900/700" },
-      ],
+      items: seeds("land", 10)
     },
     {
-      title: "City & Places",
+      key: "animals",
+      title: "Animals",
       hint: "Swipe to browse",
-      items: [
-        { title: "Street", src: "https://picsum.photos/seed/b1/900/700" },
-        { title: "Buildings", src: "https://picsum.photos/seed/b2/900/700" },
-        { title: "Window", src: "https://picsum.photos/seed/b3/900/700" },
-        { title: "Cafe", src: "https://picsum.photos/seed/b4/900/700" },
-      ],
+      items: seeds("pets", 10)
     },
+    {
+      key: "characters",
+      title: "Characters",
+      hint: "Swipe to browse",
+      items: seeds("chars", 10)
+    }
   ];
 
-  rowsEl.innerHTML = demo.map(renderRow).join("");
+  // Chips filter
+  if (chipBar) {
+    chipBar.innerHTML = rows.map((r, i) => (
+      `<button class="chipbtn ${i === 0 ? "active" : ""}" type="button" data-key="${r.key}">${escapeHtml(r.title)}</button>`
+    )).join("");
 
-  function renderRow(row) {
-    const tiles = row.items
-      .map(
-        (it) => `
-        <button class="tile" type="button" data-src="${it.src}" data-title="${escapeHtml(it.title)}">
-          <img src="${it.src}" alt="${escapeHtml(it.title)}" loading="lazy"/>
-          <div class="cap">${escapeHtml(it.title)}</div>
-        </button>
-      `
-      )
-      .join("");
+    chipBar.addEventListener("click", (e) => {
+      const btn = e.target.closest(".chipbtn");
+      if (!btn) return;
+      const key = btn.getAttribute("data-key");
 
-    return `
-      <section class="row">
-        <div class="rowhead">
-          <h3>${escapeHtml(row.title)}</h3>
-          <p class="hint">${escapeHtml(row.hint || "")}</p>
-        </div>
-        <div class="stripWrap">
-          <div class="strip">${tiles}</div>
-        </div>
-      </section>
-    `;
+      chipBar.querySelectorAll(".chipbtn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      render(key);
+    });
   }
 
-  function escapeHtml(s) {
-    return String(s)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-})();
+  function render(filterKey) {
+    const list = filterKey && filterKey !== "all"
+      ? rows.filter(r => r.key === filterKey)
+      : rows;
+
+    rowsEl.innerHTML = list.map(renderRow).join("");
+
+    // tile click → lightbox
