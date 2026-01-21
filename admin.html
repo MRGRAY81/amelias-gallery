@@ -4,29 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login — Amelia’s Gallery</title>
-  <meta name="description" content="Admin login for Amelia’s Gallery (family managed)." />
+  <meta name="description" content="Family login (private)." />
   <link rel="stylesheet" href="./styles.css" />
-  <link rel="stylesheet" href="./admin.css" />
 </head>
 
 <body data-page="admin">
 
   <header class="topbar">
-    <nav class="nav nav-buttons">
-      <a class="btnlink" href="./index.html">Home</a>
-      <a class="btnlink" href="./gallery.html">Gallery</a>
-      <a class="btnlink" href="./commissions.html">Commissions</a>
-      <a class="btnlink" href="./about.html">About / Contact</a>
-      <a class="btnlink admin active" href="./admin.html">Login</a>
-    </nav>
+    <div class="topbar-inner">
+      <nav class="nav nav-buttons">
+        <a class="btnlink" href="./index.html">Home</a>
+        <a class="btnlink" href="./gallery.html">Gallery</a>
+        <a class="btnlink" href="./commissions.html">Commissions</a>
+        <a class="btnlink" href="./about.html">About / Contact</a>
+        <a class="btnlink admin active" href="./admin.html">Login</a>
+      </nav>
+    </div>
   </header>
 
   <main class="shell">
+
     <section class="hero">
       <div class="hero-banner image-header">
         <div class="header-crop">
-          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration"
-               onerror="this.onerror=null;this.src='./amelias-header.png';" />
+          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration" />
         </div>
       </div>
     </section>
@@ -37,16 +38,17 @@
         <p>For family use only.</p>
       </div>
 
-      <!-- Keep your existing admin login form structure if already present -->
-      <div class="about">
-        <h3>Login</h3>
-        <p>Your current admin.js can keep handling login as it already does.</p>
+      <div class="formcard">
+        <p style="margin:0; color:rgba(42,37,48,.72); font-weight:750;">
+          Your current <strong>admin.js</strong> can keep handling login as it already does.
+        </p>
       </div>
     </section>
 
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
     </footer>
+
   </main>
 
   <script src="./admin.js"></script>
