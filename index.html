@@ -11,15 +11,18 @@
 <body data-page="home">
 
   <header class="topbar">
-    <div class="topbar-inner">
-      <nav class="nav nav-buttons">
-        <a class="btnlink active" href="./index.html">Home</a>
-        <a class="btnlink" href="./gallery.html">Gallery</a>
-        <a class="btnlink" href="./commissions.html">Commissions</a>
-        <a class="btnlink" href="./about.html">About / Contact</a>
-        <a class="btnlink admin" href="./admin.html">Login</a>
-      </nav>
-    </div>
+    <a class="brand-left" href="./index.html" aria-label="Home">
+      <img class="amark-img" src="./a-mark.png" alt="Amelia’s Gallery mark" onerror="this.style.display='none'">
+      <span class="amark-fallback" aria-hidden="true">A</span>
+    </a>
+
+    <nav class="nav nav-buttons" aria-label="Primary">
+      <a class="btnlink active" href="./index.html">Home</a>
+      <a class="btnlink" href="./gallery.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin" href="./admin.html">Login</a>
+    </nav>
   </header>
 
   <main class="shell">
@@ -63,7 +66,6 @@
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
     </footer>
-
   </main>
 
   <div class="lightbox" id="lightbox" aria-hidden="true">
@@ -75,5 +77,6 @@
   </div>
 
   <script src="./script.js"></script>
+
 </body>
 </html>
