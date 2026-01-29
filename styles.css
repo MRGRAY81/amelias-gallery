@@ -658,3 +658,122 @@ body{
   .brand-left{ width:auto; }
   .nav{ width:auto; justify-content:flex-start; }
 }
+/* =========================
+   Admin (login) UI
+========================= */
+.admin-meta{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.admin-meta-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
+  opacity: .9;
+  word-break: break-all;
+}
+
+.small{ font-size: 13px; }
+
+.status{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.25);
+}
+
+.status.good{
+  box-shadow: 0 0 0 1px rgba(0,255,170,.18) inset;
+}
+
+.status.bad{
+  box-shadow: 0 0 0 1px rgba(255,80,80,.18) inset;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:12px;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.field span{
+  font-weight:600;
+  opacity:.9;
+}
+
+.field input{
+  width:100%;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.28);
+  color: inherit;
+  outline: none;
+}
+
+.field input:focus{
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.06);
+}
+
+.row-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top: 10px;
+}
+
+.btn{
+  cursor:pointer;
+  border-radius: 999px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: inherit;
+}
+
+.btn:hover{
+  background: rgba(255,255,255,.10);
+}
+
+.btn.primary{
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.12);
+}
+
+.btn.ghost{
+  background: transparent;
+}
+
+.codebox{
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.28);
+  overflow:auto;
+  max-height: 320px;
+  font-size: 13px;
+  line-height: 1.45;
+}
