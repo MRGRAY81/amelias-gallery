@@ -1,12 +1,11 @@
 // Amelia's Gallery — Admin wiring (Step 1)
 // - Checks backend health
 // - Logs in with email/password
-// - Stores JWT in localStorage
+// - Stores token in localStorage
 // - Provides helper for authenticated fetch
 
 (function () {
-  // ✅ SET THIS to your Render backend URL
-  // (your screenshot shows: https://amelias-gallery-backend.onrender.com)
+  // ✅ Your Render backend URL
   const API_BASE = "https://amelias-gallery-backend.onrender.com";
 
   const els = {
@@ -26,11 +25,13 @@
   const TOKEN_KEY = "amelias_admin_token";
 
   function setStatus(msg, ok = true) {
+    if (!els.status) return;
     els.status.textContent = msg;
     els.status.className = "status " + (ok ? "good" : "bad");
   }
 
   function setAdminOut(obj) {
+    if (!els.adminOutText) return;
     try {
       els.adminOutText.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
     } catch {
@@ -56,31 +57,38 @@
 
   async function apiFetch(path, opts = {}) {
     const url = API_BASE.replace(/\/$/, "") + path;
+
     const res = await fetch(url, {
       ...opts,
       headers: authedHeaders(opts.headers || {}),
     });
 
-    let data = null;
     const ct = res.headers.get("content-type") || "";
-    if (ct.includes("application/json")) data = await res.json();
-    else data = await res.text();
+    let data;
+    try {
+      data = ct.includes("application/json") ? await res.json() : await res.text();
+    } catch {
+      data = null;
+    }
 
     if (!res.ok) {
-      const msg = (data && data.error) ? data.error : `Request failed: ${res.status}`;
+      const msg =
+        (data && (data.message || data.error)) ||
+        `Request failed: ${res.status} ${res.statusText}`;
       throw new Error(msg);
     }
+
     return data;
   }
 
   function setLoggedInUI(isLoggedIn) {
-    els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
-    els.adminPanel.style.display = isLoggedIn ? "block" : "none";
+    if (els.logoutBtn) els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    if (els.adminPanel) els.adminPanel.style.display = isLoggedIn ? "block" : "none";
   }
 
   async function healthCheck() {
     try {
-      const data = await apiFetch("/", { method: "GET" });
+      const data = await apiFetch("/health", { method: "GET" });
       setStatus(`Backend OK ✅ (${API_BASE})`, true);
       return data;
     } catch (e) {
@@ -90,8 +98,8 @@
   }
 
   async function login() {
-    const email = (els.email.value || "").trim();
-    const password = els.password.value || "";
+    const email = (els.email?.value || "").trim();
+    const password = els.password?.value || "";
 
     if (!email || !password) {
       setStatus("Enter email + password.", false);
@@ -101,9 +109,8 @@
     setStatus("Logging in…", true);
 
     try {
-      // Expected backend route:
-      // POST /api/admin/login  { email, password } -> { token }
-      const data = await apiFetch("/api/admin/login", {
+      // ✅ BACKEND ROUTE (matches your backend code): POST /auth/login
+      const data = await apiFetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -120,6 +127,7 @@
       setToken("");
       setLoggedInUI(false);
       setStatus(`Login failed ❌ (${e.message})`, false);
+      setAdminOut({ ok: false, error: e.message });
     }
   }
 
@@ -132,12 +140,12 @@
 
   async function whoami() {
     try {
-      // Expected backend route:
-      // GET /api/admin/me -> { email, role }
-      const data = await apiFetch("/api/admin/me", { method: "GET" });
+      // Your backend doesn't have /admin/me yet, so let's verify by calling a protected endpoint:
+      // ✅ GET /admin/commissions (requires admin token)
+      const data = await apiFetch("/admin/commissions", { method: "GET" });
       setAdminOut(data);
     } catch (e) {
-      setAdminOut({ error: e.message });
+      setAdminOut({ ok: false, error: e.message });
     }
   }
 
@@ -147,22 +155,21 @@
   }
 
   // Init
-  els.backendUrl.textContent = API_BASE;
-  els.loginBtn.addEventListener("click", login);
-  els.logoutBtn.addEventListener("click", logout);
-  els.pingBtn.addEventListener("click", ping);
-  els.whoamiBtn.addEventListener("click", whoami);
+  if (els.backendUrl) els.backendUrl.textContent = API_BASE;
+  if (els.loginBtn) els.loginBtn.addEventListener("click", login);
+  if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
+  if (els.pingBtn) els.pingBtn.addEventListener("click", ping);
+  if (els.whoamiBtn) els.whoamiBtn.addEventListener("click", whoami);
 
-  // Enter key submits
-  [els.email, els.password].forEach((el) => {
+  // Enter submits
+  [els.email, els.password].filter(Boolean).forEach((el) => {
     el.addEventListener("keydown", (e) => {
       if (e.key === "Enter") login();
     });
   });
 
-  // If token exists, show admin panel and verify in background
-  const existingToken = getToken();
-  setLoggedInUI(!!existingToken);
+  // If token exists, show admin panel
+  setLoggedInUI(!!getToken());
 
   // Always do a health check on load
   healthCheck();
