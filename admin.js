@@ -139,14 +139,17 @@
   }
 
   async function whoami() {
-    try {
-      // Your backend doesn't have /admin/me yet, so let's verify by calling a protected endpoint:
-      // ✅ GET /admin/commissions (requires admin token)
-      const data = await apiFetch("/admin/commissions", { method: "GET" });
-      setAdminOut(data);
-    } catch (e) {
-      setAdminOut({ ok: false, error: e.message });
-    }
+  async function whoami() {
+  try {
+    const data = await apiFetch("/admin/commissions", { method: "GET" });
+    setAdminOut({
+      ok: true,
+      message: "Token valid ✅",
+      preview: data.items?.slice(0, 1) || []
+    });
+  } catch (e) {
+    setAdminOut({ ok: false, error: e.message });
+  }
   }
 
   async function ping() {
