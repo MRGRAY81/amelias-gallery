@@ -139,7 +139,6 @@
   }
 
   async function whoami() {
-  async function whoami() {
   try {
     const data = await apiFetch("/admin/commissions", { method: "GET" });
     setAdminOut({
