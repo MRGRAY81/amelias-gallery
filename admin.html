@@ -42,9 +42,51 @@
       </div>
 
       <div class="panel">
-        <h3>Login</h3>
-        <p>Your current admin JS can keep handling login as it already does.</p>
-        <!-- If you already have admin.js, keep it. -->
+        <div class="admin-meta">
+          <div class="admin-meta-row">
+            <div class="muted">Backend:</div>
+            <div class="mono" id="backendUrl">—</div>
+          </div>
+          <div class="status bad" id="status">Checking backend…</div>
+        </div>
+
+        <!-- LOGIN PANEL -->
+        <div id="loginPanel">
+          <h3>Login</h3>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>Email</span>
+              <input id="email" type="email" autocomplete="username" placeholder="you@example.com" />
+            </label>
+
+            <label class="field">
+              <span>Password</span>
+              <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </label>
+          </div>
+
+          <div class="row-actions">
+            <button class="btn primary" id="loginBtn" type="button">Login</button>
+            <button class="btn ghost" id="logoutBtn" type="button" style="display:none;">Logout</button>
+          </div>
+
+          <p class="muted small">
+            Tip: Press <b>Enter</b> to login.
+          </p>
+        </div>
+
+        <!-- ADMIN PANEL -->
+        <div id="adminPanel" style="display:none; margin-top:14px;">
+          <h3>Admin Tools</h3>
+
+          <div class="row-actions">
+            <button class="btn" id="pingBtn" type="button">Ping</button>
+            <button class="btn" id="whoamiBtn" type="button">Validate Token</button>
+          </div>
+
+          <pre class="codebox" id="adminOutText">{}</pre>
+        </div>
       </div>
     </section>
 
@@ -53,8 +95,7 @@
     </footer>
   </main>
 
-  <!-- If you have an admin script already, keep this line. -->
-  <!-- <script src="./admin.js"></script> -->
-
+  <!-- IMPORTANT: enable admin wiring -->
+  <script src="./admin.js"></script>
 </body>
 </html>
