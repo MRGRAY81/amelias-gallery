@@ -2,6 +2,7 @@
  * Amelia's Gallery Backend (Render / CommonJS)
  * --------------------------------------------
  * Public:
+ *  - GET  /
  *  - GET  /health
  *  - GET  /gallery
  *  - POST /commissions
@@ -9,6 +10,7 @@
  *
  * Admin:
  *  - POST /auth/login
+ *  - GET  /admin/me
  *  - GET  /admin/commissions
  *
  * Uploads:
@@ -41,7 +43,7 @@ const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB || "10");
 app.use(
   cors({
     origin: FRONTEND_ORIGIN === "*" ? true : FRONTEND_ORIGIN,
-    credentials: false
+    credentials: false,
   })
 );
 
@@ -56,7 +58,7 @@ const UPLOAD_DIR = path.join(__dirname, "uploads");
 const DB = {
   gallery: path.join(DATA_DIR, "gallery.json"),
   commissions: path.join(DATA_DIR, "commissions.json"),
-  enquiries: path.join(DATA_DIR, "enquiries.json")
+  enquiries: path.join(DATA_DIR, "enquiries.json"),
 };
 
 function ensureStorage() {
@@ -88,7 +90,7 @@ function makeToken(email) {
   const payload = {
     email,
     role: "admin",
-    iat: Date.now()
+    iat: Date.now(),
   };
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = crypto.createHmac("sha256", JWT_SECRET).update(body).digest("base64url");
@@ -98,18 +100,27 @@ function makeToken(email) {
 function verifyToken(token) {
   if (!token) return null;
   const [body, sig] = token.split(".");
+  if (!body || !sig) return null;
+
   const expected = crypto.createHmac("sha256", JWT_SECRET).update(body).digest("base64url");
   if (sig !== expected) return null;
-  return JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
+
+  try {
+    return JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
+  } catch {
+    return null;
+  }
 }
 
 function requireAdmin(req, res, next) {
   const auth = req.headers.authorization || "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
   const payload = verifyToken(token);
+
   if (!payload || payload.role !== "admin") {
     return res.status(401).json({ ok: false, message: "Unauthorized" });
   }
+
   req.admin = payload;
   next();
 }
@@ -124,9 +135,9 @@ const upload = multer({
       const ext = path.extname(file.originalname).toLowerCase() || ".png";
       const name = `img_${Date.now()}_${crypto.randomBytes(6).toString("hex")}${ext}`;
       cb(null, name);
-    }
+    },
   }),
-  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 }
+  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
 });
 
 app.use("/uploads", express.static(UPLOAD_DIR));
@@ -145,10 +156,16 @@ app.get("/health", (req, res) => {
 /* ---------- AUTH ---------- */
 app.post("/auth/login", (req, res) => {
   const { email, password } = req.body || {};
+
   if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
     return res.json({ ok: true, token: makeToken(email) });
   }
+
   res.status(401).json({ ok: false, message: "Invalid credentials" });
+});
+
+app.get("/admin/me", requireAdmin, (req, res) => {
+  res.json({ ok: true, email: req.admin.email, role: req.admin.role });
 });
 
 /* ---------- GALLERY ---------- */
@@ -158,14 +175,14 @@ app.get("/gallery", (req, res) => {
 });
 
 app.post("/upload", requireAdmin, upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ ok: false });
+  if (!req.file) return res.status(400).json({ ok: false, message: "No file" });
 
   const item = {
     id: `g_${Date.now()}`,
     title: String(req.body.title || "Untitled"),
     category: String(req.body.category || "other"),
     url: `/uploads/${req.file.filename}`,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 
   const items = readJson(DB.gallery);
@@ -187,8 +204,8 @@ app.post("/commissions", upload.array("refs", 3), (req, res) => {
     name,
     email,
     brief,
-    refs: (req.files || []).map(f => `/uploads/${f.filename}`),
-    createdAt: new Date().toISOString()
+    refs: (req.files || []).map((f) => `/uploads/${f.filename}`),
+    createdAt: new Date().toISOString(),
   };
 
   const items = readJson(DB.commissions);
@@ -206,7 +223,7 @@ app.get("/admin/commissions", requireAdmin, (req, res) => {
 app.post("/enquiries", (req, res) => {
   const { name, email, message } = req.body || {};
   if (!name || !email || !message) {
-    return res.status(400).json({ ok: false });
+    return res.status(400).json({ ok: false, message: "Missing fields" });
   }
 
   const items = readJson(DB.enquiries);
@@ -215,7 +232,7 @@ app.post("/enquiries", (req, res) => {
     name,
     email,
     message,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   });
   writeJson(DB.enquiries, items);
 
