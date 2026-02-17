@@ -1,12 +1,14 @@
-// Amelia's Gallery — Admin wiring (Step 1)
-// - Checks backend health
-// - Logs in with email/password
-// - Stores token in localStorage
-// - Provides helper for authenticated fetch
-
+/**
+ * Amelia's Gallery — Admin wiring
+ * - Checks backend health
+ * - Logs in with email/password
+ * - Stores token in localStorage
+ * - Provides helper for authenticated fetch
+ */
 (function () {
-  // ✅ Your Render backend URL
-  const API_BASE = "https://amelias-gallery-backend.onrender.com";
+  const API_BASE =
+    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) ||
+    "https://amelias-gallery-backend.onrender.com";
 
   const els = {
     backendUrl: document.getElementById("backendUrl"),
@@ -33,7 +35,8 @@
   function setAdminOut(obj) {
     if (!els.adminOutText) return;
     try {
-      els.adminOutText.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+      els.adminOutText.textContent =
+        typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
     } catch {
       els.adminOutText.textContent = String(obj);
     }
@@ -64,7 +67,7 @@
     });
 
     const ct = res.headers.get("content-type") || "";
-    let data;
+    let data = null;
     try {
       data = ct.includes("application/json") ? await res.json() : await res.text();
     } catch {
@@ -77,7 +80,6 @@
         `Request failed: ${res.status} ${res.statusText}`;
       throw new Error(msg);
     }
-
     return data;
   }
 
@@ -109,7 +111,6 @@
     setStatus("Logging in…", true);
 
     try {
-      // ✅ BACKEND ROUTE (matches your backend code): POST /auth/login
       const data = await apiFetch("/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -139,16 +140,17 @@
   }
 
   async function whoami() {
-  try {
-    const data = await apiFetch("/admin/commissions", { method: "GET" });
-    setAdminOut({
-      ok: true,
-      message: "Token valid ✅",
-      preview: data.items?.slice(0, 1) || []
-    });
-  } catch (e) {
-    setAdminOut({ ok: false, error: e.message });
-  }
+    try {
+      const data = await apiFetch("/admin/commissions", { method: "GET" });
+      setAdminOut({
+        ok: true,
+        message: "Token valid ✅",
+        preview: data.items?.slice(0, 1) || [],
+        count: Array.isArray(data.items) ? data.items.length : undefined,
+      });
+    } catch (e) {
+      setAdminOut({ ok: false, error: e.message });
+    }
   }
 
   async function ping() {
@@ -158,21 +160,18 @@
 
   // Init
   if (els.backendUrl) els.backendUrl.textContent = API_BASE;
+
   if (els.loginBtn) els.loginBtn.addEventListener("click", login);
   if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
   if (els.pingBtn) els.pingBtn.addEventListener("click", ping);
   if (els.whoamiBtn) els.whoamiBtn.addEventListener("click", whoami);
 
-  // Enter submits
   [els.email, els.password].filter(Boolean).forEach((el) => {
     el.addEventListener("keydown", (e) => {
       if (e.key === "Enter") login();
     });
   });
 
-  // If token exists, show admin panel
   setLoggedInUI(!!getToken());
-
-  // Always do a health check on load
   healthCheck();
 })();
