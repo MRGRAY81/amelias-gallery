@@ -6,6 +6,8 @@
   <title>Login — Amelia’s Gallery</title>
   <meta name="description" content="Admin login — family only." />
   <link rel="stylesheet" href="./styles.css" />
+  <!-- ✅ Optional (only if you have admin.css in the repo) -->
+  <link rel="stylesheet" href="./admin.css" />
 </head>
 
 <body data-page="admin">
@@ -57,12 +59,12 @@
           <div class="form-grid">
             <label class="field">
               <span>Email</span>
-              <input id="email" type="email" autocomplete="username" placeholder="you@example.com" />
+              <input id="email" type="email" autocomplete="username" placeholder="amelia@demo.com" />
             </label>
 
             <label class="field">
               <span>Password</span>
-              <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+              <input id="password" type="password" autocomplete="current-password" placeholder="Amelia1" />
             </label>
           </div>
 
@@ -95,7 +97,8 @@
     </footer>
   </main>
 
-  <!-- IMPORTANT: enable admin wiring -->
+  <!-- ✅ IMPORTANT: config FIRST, then admin wiring -->
+  <script src="./config.js"></script>
   <script src="./admin.js"></script>
 </body>
 </html>
