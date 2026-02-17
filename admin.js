@@ -1,14 +1,53 @@
 /**
  * Amelia's Gallery — Admin wiring
- * - Checks backend health
+ * - Auto-detects backend URL (health check)
  * - Logs in with email/password
  * - Stores token in localStorage
  * - Provides helper for authenticated fetch
  */
 (function () {
-  const API_BASE =
+  // 1) Prefer explicit config if provided (best for your own server later)
+  const CONFIG_BASE =
     (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) ||
-    "https://amelias-gallery-backend.onrender.com";
+    "";
+
+  // 2) Fallback guesses (Render names + derived from current host)
+  function buildCandidates() {
+    const candidates = [];
+
+    // Your previous default (keep as candidate)
+    candidates.push("https://amelias-gallery-backend.onrender.com");
+
+    // Common: backend service named "amelias-gallery"
+    candidates.push("https://amelias-gallery.onrender.com");
+
+    // If we're on a Render static site like: https://amelias-gallery-1.onrender.com
+    // then try removing "-1"
+    try {
+      const host = window.location.host; // e.g. amelias-gallery-1.onrender.com
+      const proto = window.location.protocol; // https:
+      if (host.endsWith(".onrender.com")) {
+        const base = `${proto}//${host}`;
+        candidates.push(base);
+
+        // remove "-1" / "-2" suffix patterns
+        const cleaned = host.replace(/-\d+\.onrender\.com$/, ".onrender.com");
+        candidates.push(`${proto}//${cleaned}`);
+
+        // sometimes people name backend "-backend"
+        const maybeBackend = cleaned.replace(".onrender.com", "-backend.onrender.com");
+        candidates.push(`${proto}//${maybeBackend}`);
+      }
+    } catch {}
+
+    // If you set CONFIG_BASE, make it the first candidate
+    if (CONFIG_BASE) candidates.unshift(CONFIG_BASE);
+
+    // de-dupe
+    return Array.from(new Set(candidates.map(c => c.replace(/\/$/, ""))));
+  }
+
+  let API_BASE = (CONFIG_BASE || "").replace(/\/$/, "");
 
   const els = {
     backendUrl: document.getElementById("backendUrl"),
@@ -58,13 +97,28 @@
     return headers;
   }
 
+  async function rawFetch(base, path, opts = {}) {
+    const url = base.replace(/\/$/, "") + path;
+    return fetch(url, opts);
+  }
+
   async function apiFetch(path, opts = {}) {
+    if (!API_BASE) throw new Error("Backend URL not set.");
+
     const url = API_BASE.replace(/\/$/, "") + path;
 
-    const res = await fetch(url, {
-      ...opts,
-      headers: authedHeaders(opts.headers || {}),
-    });
+    let res;
+    try {
+      res = await fetch(url, {
+        ...opts,
+        headers: authedHeaders(opts.headers || {}),
+      });
+    } catch (err) {
+      // This is the "Failed to fetch" bucket: bad URL, CORS, backend asleep, network
+      throw new Error(
+        "Failed to fetch (check backend URL, CORS FRONTEND_ORIGIN, or backend sleeping)."
+      );
+    }
 
     const ct = res.headers.get("content-type") || "";
     let data = null;
@@ -88,15 +142,40 @@
     if (els.adminPanel) els.adminPanel.style.display = isLoggedIn ? "block" : "none";
   }
 
-  async function healthCheck() {
+  async function healthCheckOne(base) {
     try {
-      const data = await apiFetch("/health", { method: "GET" });
-      setStatus(`Backend OK ✅ (${API_BASE})`, true);
-      return data;
-    } catch (e) {
-      setStatus(`Backend not reachable ❌ (${e.message})`, false);
+      const res = await rawFetch(base, "/health", { method: "GET" });
+      if (!res.ok) return null;
+      const ct = res.headers.get("content-type") || "";
+      const data = ct.includes("application/json") ? await res.json() : await res.text();
+      return { base, data };
+    } catch {
       return null;
     }
+  }
+
+  async function detectBackend() {
+    const candidates = buildCandidates();
+
+    // Show what we're trying (useful when debugging)
+    setStatus("Checking backend…", true);
+
+    for (const base of candidates) {
+      const hit = await healthCheckOne(base);
+      if (hit) {
+        API_BASE = hit.base;
+        if (els.backendUrl) els.backendUrl.textContent = API_BASE;
+        setStatus(`Backend OK ✅ (${API_BASE})`, true);
+        return hit.data;
+      }
+    }
+
+    if (els.backendUrl) els.backendUrl.textContent = CONFIG_BASE || "—";
+    setStatus(
+      "Backend not reachable ❌ (URL/CORS/sleeping). Check Render backend URL + FRONTEND_ORIGIN.",
+      false
+    );
+    return null;
   }
 
   async function login() {
@@ -128,7 +207,7 @@
       setToken("");
       setLoggedInUI(false);
       setStatus(`Login failed ❌ (${e.message})`, false);
-      setAdminOut({ ok: false, error: e.message });
+      setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
     }
   }
 
@@ -149,17 +228,17 @@
         count: Array.isArray(data.items) ? data.items.length : undefined,
       });
     } catch (e) {
-      setAdminOut({ ok: false, error: e.message });
+      setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
     }
   }
 
   async function ping() {
-    const data = await healthCheck();
+    const data = await detectBackend();
     if (data) setAdminOut(data);
   }
 
   // Init
-  if (els.backendUrl) els.backendUrl.textContent = API_BASE;
+  if (els.backendUrl) els.backendUrl.textContent = API_BASE || "—";
 
   if (els.loginBtn) els.loginBtn.addEventListener("click", login);
   if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
@@ -173,5 +252,5 @@
   });
 
   setLoggedInUI(!!getToken());
-  healthCheck();
+  detectBackend();
 })();
