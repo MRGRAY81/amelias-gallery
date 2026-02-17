@@ -1,23 +1,3 @@
-/**
- * Amelia's Gallery Backend (Render / CommonJS)
- * --------------------------------------------
- * Public:
- *  - GET  /
- *  - GET  /health
- *  - GET  /gallery
- *  - POST /commissions
- *  - POST /enquiries
- *
- * Admin:
- *  - POST /auth/login
- *  - GET  /admin/me
- *  - GET  /admin/commissions
- *
- * Uploads:
- *  - POST /upload   (admin only)
- *  - GET  /uploads/*
- */
-
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -38,12 +18,31 @@ const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
 const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB || "10");
 
 /* =========================
-   MIDDLEWARE
+   CORS (supports "*" OR allowlist)
 ========================= */
+function buildAllowedOrigins(value) {
+  if (!value || value === "*") return "*";
+  return value
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+const allowed = buildAllowedOrigins(FRONTEND_ORIGIN);
+
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN === "*" ? true : FRONTEND_ORIGIN,
-    credentials: false,
+    origin: (origin, cb) => {
+      // same-origin / server-to-server / curl
+      if (!origin) return cb(null, true);
+
+      if (allowed === "*") return cb(null, true);
+
+      if (Array.isArray(allowed) && allowed.includes(origin)) return cb(null, true);
+
+      return cb(new Error("Not allowed by CORS: " + origin), false);
+    },
+    credentials: false
   })
 );
 
@@ -58,7 +57,7 @@ const UPLOAD_DIR = path.join(__dirname, "uploads");
 const DB = {
   gallery: path.join(DATA_DIR, "gallery.json"),
   commissions: path.join(DATA_DIR, "commissions.json"),
-  enquiries: path.join(DATA_DIR, "enquiries.json"),
+  enquiries: path.join(DATA_DIR, "enquiries.json")
 };
 
 function ensureStorage() {
@@ -87,11 +86,7 @@ function writeJson(file, data) {
    AUTH (simple HMAC token)
 ========================= */
 function makeToken(email) {
-  const payload = {
-    email,
-    role: "admin",
-    iat: Date.now(),
-  };
+  const payload = { email, role: "admin", iat: Date.now() };
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = crypto.createHmac("sha256", JWT_SECRET).update(body).digest("base64url");
   return `${body}.${sig}`;
@@ -135,9 +130,9 @@ const upload = multer({
       const ext = path.extname(file.originalname).toLowerCase() || ".png";
       const name = `img_${Date.now()}_${crypto.randomBytes(6).toString("hex")}${ext}`;
       cb(null, name);
-    },
+    }
   }),
-  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 }
 });
 
 app.use("/uploads", express.static(UPLOAD_DIR));
@@ -164,10 +159,6 @@ app.post("/auth/login", (req, res) => {
   res.status(401).json({ ok: false, message: "Invalid credentials" });
 });
 
-app.get("/admin/me", requireAdmin, (req, res) => {
-  res.json({ ok: true, email: req.admin.email, role: req.admin.role });
-});
-
 /* ---------- GALLERY ---------- */
 app.get("/gallery", (req, res) => {
   const items = readJson(DB.gallery);
@@ -175,14 +166,14 @@ app.get("/gallery", (req, res) => {
 });
 
 app.post("/upload", requireAdmin, upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ ok: false, message: "No file" });
+  if (!req.file) return res.status(400).json({ ok: false, message: "No file uploaded" });
 
   const item = {
     id: `g_${Date.now()}`,
     title: String(req.body.title || "Untitled"),
     category: String(req.body.category || "other"),
     url: `/uploads/${req.file.filename}`,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   };
 
   const items = readJson(DB.gallery);
@@ -204,8 +195,8 @@ app.post("/commissions", upload.array("refs", 3), (req, res) => {
     name,
     email,
     brief,
-    refs: (req.files || []).map((f) => `/uploads/${f.filename}`),
-    createdAt: new Date().toISOString(),
+    refs: (req.files || []).map(f => `/uploads/${f.filename}`),
+    createdAt: new Date().toISOString()
   };
 
   const items = readJson(DB.commissions);
@@ -232,7 +223,7 @@ app.post("/enquiries", (req, res) => {
     name,
     email,
     message,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   });
   writeJson(DB.enquiries, items);
 
