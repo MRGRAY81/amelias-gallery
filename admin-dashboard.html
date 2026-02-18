@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Portal — Amelia’s Gallery</title>
+  <meta name="description" content="Family-only admin portal." />
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./admin-portal.css" />
+</head>
+
+<body data-page="admin-portal">
+
+  <header class="topbar">
+    <a class="brand-left" href="./index.html" aria-label="Home">
+      <img class="amark-img" src="./a-mark.png" alt="Amelia’s Gallery mark" onerror="this.style.display='none'">
+      <span class="amark-fallback" aria-hidden="true">A</span>
+    </a>
+
+    <nav class="nav nav-buttons" aria-label="Primary">
+      <a class="btnlink" href="./index.html">Home</a>
+      <a class="btnlink" href="./gallery.html">Gallery</a>
+      <a class="btnlink" href="./commissions.html">Commissions</a>
+      <a class="btnlink" href="./about.html">About / Contact</a>
+      <a class="btnlink admin active" href="./admin-dashboard.html">Admin Portal</a>
+    </nav>
+  </header>
+
+  <main class="portal-shell">
+    <aside class="portal-left">
+      <div class="card profile">
+        <div class="avatar">
+          <div class="avatar-circle">A</div>
+        </div>
+        <div class="profile-meta">
+          <div class="h">Welcome back, Amelia!</div>
+          <div class="muted small" id="backendTag">Backend: —</div>
+        </div>
+      </div>
+
+      <div class="card menu">
+        <button class="menu-item active" data-tab="orders">📬 Orders</button>
+        <button class="menu-item" data-tab="enquiries">💌 Enquiries</button>
+        <button class="menu-item" data-tab="gallery">🖼️ Gallery</button>
+        <button class="menu-item" data-tab="settings">⚙️ Settings</button>
+      </div>
+
+      <div class="card small">
+        <div class="row">
+          <button class="btn ghost" id="refreshBtn" type="button">Refresh</button>
+          <button class="btn danger" id="logoutBtn" type="button">Logout</button>
+        </div>
+        <div class="status good" id="status">Loading…</div>
+      </div>
+    </aside>
+
+    <section class="portal-main">
+      <div class="hero-banner">
+        <div class="hero-title">Welcome, Amelia!</div>
+        <div class="hero-sub" id="heroSub">Checking requests…</div>
+        <button class="btn primary" id="viewRequestsBtn" type="button">View Requests</button>
+      </div>
+
+      <!-- ORDERS -->
+      <section class="tabpanel" id="tab-orders">
+        <div class="panel-head">
+          <h2>Orders</h2>
+          <div class="filters">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="new">New</button>
+            <button class="chip" data-filter="in_progress">In Progress</button>
+            <button class="chip" data-filter="completed">Completed</button>
+          </div>
+          <div class="search">
+            <input id="orderSearch" placeholder="Search orders…" />
+          </div>
+        </div>
+
+        <div class="list" id="ordersList"></div>
+      </section>
+
+      <!-- ENQUIRIES -->
+      <section class="tabpanel" id="tab-enquiries" style="display:none;">
+        <div class="panel-head">
+          <h2>Enquiries</h2>
+          <div class="search">
+            <input id="enquirySearch" placeholder="Search enquiries…" />
+          </div>
+        </div>
+
+        <div class="list" id="enquiriesList"></div>
+      </section>
+
+      <!-- GALLERY -->
+      <section class="tabpanel" id="tab-gallery" style="display:none;">
+        <div class="panel-head">
+          <h2>Gallery</h2>
+          <p class="muted">Upload new artwork (admin only).</p>
+        </div>
+
+        <div class="card formcard">
+          <div class="grid2">
+            <label class="field">
+              <span>Title</span>
+              <input id="gTitle" placeholder="e.g., Magical Fox in Garden" />
+            </label>
+
+            <label class="field">
+              <span>Category</span>
+              <input id="gCategory" placeholder="e.g., animals, fantasy, roblox" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Image</span>
+            <input id="gFile" type="file" accept="image/*" />
+          </label>
+
+          <div class="row">
+            <button class="btn primary" id="uploadBtn" type="button">Upload</button>
+            <div class="muted small" id="uploadHint">Uploads are saved to backend /uploads.</div>
+          </div>
+        </div>
+
+        <div class="grid-gallery" id="galleryGrid"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="tabpanel" id="tab-settings" style="display:none;">
+        <div class="panel-head">
+          <h2>Settings</h2>
+          <p class="muted">Family-only controls (safe, simple).</p>
+        </div>
+
+        <div class="card formcard">
+          <label class="field">
+            <span>Backend API Base</span>
+            <input id="apiBase" />
+          </label>
+
+          <div class="row">
+            <button class="btn" id="saveApiBtn" type="button">Save</button>
+            <button class="btn ghost" id="resetApiBtn" type="button">Reset</button>
+          </div>
+
+          <p class="muted small">
+            This only changes your admin portal connection setting (stored in browser localStorage).
+          </p>
+        </div>
+      </section>
+
+      <footer class="footer footer-tight">
+        Site managed by family • Supported by Uncle G & Del 💛
+      </footer>
+    </section>
+  </main>
+
+  <script src="./config.js"></script>
+  <script src="./admin-portal.js"></script>
+</body>
+        </html>
