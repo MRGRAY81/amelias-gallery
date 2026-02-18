@@ -24,6 +24,8 @@
       <a class="btnlink" href="./commissions.html">Commissions</a>
       <a class="btnlink" href="./about.html">About / Contact</a>
       <a class="btnlink admin active" href="./admin.html">Login</a>
+      <!-- ✅ New: Admin Portal (works after login) -->
+      <a class="btnlink admin" href="./admin-portal.html">Admin Portal</a>
     </nav>
   </header>
 
@@ -49,7 +51,8 @@
             <div class="muted">Backend:</div>
             <div class="mono" id="backendUrl">—</div>
           </div>
-          <div class="status bad" id="status">Checking backend…</div>
+          <!-- ✅ Change: don’t force "bad" while checking -->
+          <div class="status" id="status">Checking backend…</div>
         </div>
 
         <!-- LOGIN PANEL -->
@@ -71,6 +74,8 @@
           <div class="row-actions">
             <button class="btn primary" id="loginBtn" type="button">Login</button>
             <button class="btn ghost" id="logoutBtn" type="button" style="display:none;">Logout</button>
+            <!-- ✅ New: quick button to portal (works after login) -->
+            <a class="btn" id="portalBtn" href="./admin-portal.html" style="display:none;">Open Admin Portal</a>
           </div>
 
           <p class="muted small">
@@ -85,6 +90,7 @@
           <div class="row-actions">
             <button class="btn" id="pingBtn" type="button">Ping</button>
             <button class="btn" id="whoamiBtn" type="button">Validate Token</button>
+            <a class="btn" href="./admin-portal.html">Open Admin Portal</a>
           </div>
 
           <pre class="codebox" id="adminOutText">{}</pre>
@@ -100,5 +106,14 @@
   <!-- ✅ IMPORTANT: config FIRST, then admin wiring -->
   <script src="./config.js"></script>
   <script src="./admin.js"></script>
+
+  <!-- ✅ Tiny helper: show portal button only when logged in -->
+  <script>
+    (function(){
+      const portalBtn = document.getElementById("portalBtn");
+      const token = localStorage.getItem("amelias_admin_token");
+      if (portalBtn && token) portalBtn.style.display = "inline-flex";
+    })();
+  </script>
 </body>
 </html>
