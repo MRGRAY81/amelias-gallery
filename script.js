@@ -7,6 +7,20 @@
   const lightboxCaption = document.getElementById("lightboxCaption");
   const lightboxClose = document.getElementById("lightboxClose");
 
+  if (!lightbox || !lightboxImg || !lightboxCaption || !lightboxClose) {
+    console.warn("Lightbox elements missing from page.");
+    return;
+  }
+
+  function escapeHtml(s) {
+    return String(s || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
   function openLightbox(src, caption) {
     lightboxImg.src = src;
     lightboxCaption.textContent = caption || "";
@@ -21,10 +35,12 @@
     lightboxCaption.textContent = "";
   }
 
-  lightboxClose?.addEventListener("click", closeLightbox);
-  lightbox?.addEventListener("click", (e) => {
+  lightboxClose.addEventListener("click", closeLightbox);
+
+  lightbox.addEventListener("click", (e) => {
     if (e.target === lightbox) closeLightbox();
   });
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeLightbox();
   });
@@ -39,21 +55,19 @@
   ];
 
   grid.innerHTML = "";
+
   featured.forEach((item) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "card";
+    btn.setAttribute("aria-label", `Open ${item.title}`);
     btn.innerHTML = `<img src="${item.thumb}" alt="${escapeHtml(item.title)}" loading="lazy" />`;
+
     btn.addEventListener("click", () => openLightbox(item.full, item.title));
+    btn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") openLightbox(item.full, item.title);
+    });
+
     grid.appendChild(btn);
   });
-
-  function escapeHtml(s) {
-    return String(s)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
 })();
