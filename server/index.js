@@ -1,18 +1,26 @@
 /**
- * Amelia's Gallery — Admin wiring (Login page)
- * - Detects backend URL (health check)
- * - Logs in with email/password
- * - Stores token in localStorage
+ * Amelia's Gallery — Admin wiring (Login page) — admin.js
+ * - Uses config.js if present (window.AMELIAS_CONFIG.API_BASE)
+ * - Detects backend via /health if config missing
+ * - Logs in with email/password -> stores token in localStorage
  * - Redirects to admin-portal.html on success
  */
 (function () {
+  const TOKEN_KEY = "amelias_admin_token";
+  const PORTAL_PAGE = "./admin-portal.html";
+
+  // Prefer config.js
   const CONFIG_BASE =
     (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
+
+  function normBase(b) {
+    return String(b || "").trim().replace(/\/$/, "");
+  }
 
   function buildCandidates() {
     const candidates = [];
 
-    // common defaults
+    // common defaults (keep as fallbacks)
     candidates.push("https://amelias-gallery-backend.onrender.com");
     candidates.push("https://amelias-gallery.onrender.com");
 
@@ -20,23 +28,32 @@
     try {
       const host = window.location.host;
       const proto = window.location.protocol;
-      if (host.endsWith(".onrender.com")) {
-        const base = `${proto}//${host}`;
-        candidates.push(base);
 
+      if (host.endsWith(".onrender.com")) {
+        // current host itself
+        candidates.push(`${proto}//${host}`);
+
+        // strip -1 / -2 etc
         const cleaned = host.replace(/-\d+\.onrender\.com$/, ".onrender.com");
         candidates.push(`${proto}//${cleaned}`);
 
-        const maybeBackend = cleaned.replace(".onrender.com", "-backend.onrender.com");
+        // try -backend naming
+        const maybeBackend = cleaned.replace(
+          ".onrender.com",
+          "-backend.onrender.com"
+        );
         candidates.push(`${proto}//${maybeBackend}`);
       }
     } catch {}
 
+    // if config.js set, try it first
     if (CONFIG_BASE) candidates.unshift(CONFIG_BASE);
-    return Array.from(new Set(candidates.map((c) => c.replace(/\/$/, ""))));
+
+    // de-dupe + normalize
+    return Array.from(new Set(candidates.map(normBase))).filter(Boolean);
   }
 
-  let API_BASE = (CONFIG_BASE || "").replace(/\/$/, "");
+  let API_BASE = normBase(CONFIG_BASE);
 
   const els = {
     backendUrl: document.getElementById("backendUrl"),
@@ -50,8 +67,6 @@
     whoamiBtn: document.getElementById("whoamiBtn"),
     adminOutText: document.getElementById("adminOutText"),
   };
-
-  const TOKEN_KEY = "amelias_admin_token";
 
   function setStatus(msg, ok = true) {
     if (!els.status) return;
@@ -78,6 +93,13 @@
     else localStorage.setItem(TOKEN_KEY, token);
   }
 
+  function setLoggedInUI(isLoggedIn) {
+    if (els.logoutBtn)
+      els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    if (els.adminPanel)
+      els.adminPanel.style.display = isLoggedIn ? "block" : "none";
+  }
+
   function authedHeaders(extra = {}) {
     const token = getToken();
     const headers = { ...extra };
@@ -86,13 +108,13 @@
   }
 
   async function rawFetch(base, path, opts = {}) {
-    const url = base.replace(/\/$/, "") + path;
+    const url = normBase(base) + path;
     return fetch(url, opts);
   }
 
   async function apiFetch(path, opts = {}) {
     if (!API_BASE) throw new Error("Backend URL not set.");
-    const url = API_BASE.replace(/\/$/, "") + path;
+    const url = normBase(API_BASE) + path;
 
     let res;
     try {
@@ -102,7 +124,7 @@
       });
     } catch {
       throw new Error(
-        "Failed to fetch (check backend URL, CORS FRONTEND_ORIGIN, or backend sleeping)."
+        "Failed to fetch (bad URL, CORS FRONTEND_ORIGIN, or backend sleeping)."
       );
     }
 
@@ -115,24 +137,24 @@
     }
 
     if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        // token/credentials issues
+        if (path !== "/auth/login") setToken("");
+      }
       const msg =
         (data && (data.message || data.error)) ||
         `Request failed: ${res.status} ${res.statusText}`;
       throw new Error(msg);
     }
-    return data;
-  }
 
-  function setLoggedInUI(isLoggedIn) {
-    if (els.logoutBtn) els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
-    if (els.adminPanel) els.adminPanel.style.display = isLoggedIn ? "block" : "none";
+    return data;
   }
 
   async function healthCheckOne(base) {
     try {
       const res = await rawFetch(base, "/health", { method: "GET" });
       if (!res.ok) return null;
-      return { base };
+      return { base: normBase(base) };
     } catch {
       return null;
     }
@@ -152,9 +174,9 @@
       }
     }
 
-    if (els.backendUrl) els.backendUrl.textContent = CONFIG_BASE || "—";
+    if (els.backendUrl) els.backendUrl.textContent = CONFIG_BASE ? normBase(CONFIG_BASE) : "—";
     setStatus(
-      "Backend not reachable ❌ (URL/CORS/sleeping). Check Render backend URL + FRONTEND_ORIGIN.",
+      "Backend not reachable ❌ (URL/CORS/sleeping). Check backend URL + FRONTEND_ORIGIN.",
       false
     );
     return false;
@@ -167,6 +189,12 @@
     if (!email || !password) {
       setStatus("Enter email + password.", false);
       return;
+    }
+
+    // ensure we have a working backend before trying login
+    if (!API_BASE) {
+      const ok = await detectBackend();
+      if (!ok) return;
     }
 
     setStatus("Logging in…", true);
@@ -183,11 +211,15 @@
 
       setToken(token);
       setLoggedInUI(true);
-      setStatus("Logged in ✅ Token saved.", true);
-      setAdminOut({ ok: true, message: "Logged in", tokenPreview: token.slice(0, 18) + "…" });
+      setStatus("Logged in ✅ Redirecting…", true);
+      setAdminOut({
+        ok: true,
+        message: "Logged in",
+        tokenPreview: token.slice(0, 18) + "…",
+        apiBase: API_BASE,
+      });
 
-      // ✅ go to portal
-      window.location.href = "./admin-portal.html";
+      window.location.href = PORTAL_PAGE;
     } catch (e) {
       setToken("");
       setLoggedInUI(false);
@@ -211,6 +243,7 @@
         message: "Token valid ✅",
         preview: data.items?.slice(0, 1) || [],
         count: Array.isArray(data.items) ? data.items.length : undefined,
+        apiBase: API_BASE || null,
       });
     } catch (e) {
       setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
@@ -237,5 +270,7 @@
   });
 
   setLoggedInUI(!!getToken());
+
+  // detect backend (but don't block page)
   detectBackend();
 })();
