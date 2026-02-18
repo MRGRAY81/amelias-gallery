@@ -10,7 +10,6 @@
 </head>
 
 <body data-page="admin-portal">
-
   <header class="topbar">
     <a class="brand-left" href="./index.html" aria-label="Home">
       <img class="amark-img" src="./a-mark.png" alt="Amelia’s Gallery mark" onerror="this.style.display='none'">
@@ -22,140 +21,112 @@
       <a class="btnlink" href="./gallery.html">Gallery</a>
       <a class="btnlink" href="./commissions.html">Commissions</a>
       <a class="btnlink" href="./about.html">About / Contact</a>
-      <a class="btnlink admin active" href="./admin-dashboard.html">Admin Portal</a>
+      <a class="btnlink admin active" href="./admin-portal.html">Admin Portal</a>
     </nav>
   </header>
 
   <main class="portal-shell">
-    <aside class="portal-left">
-      <div class="card profile">
-        <div class="avatar">
-          <div class="avatar-circle">A</div>
-        </div>
-        <div class="profile-meta">
-          <div class="h">Welcome back, Amelia!</div>
-          <div class="muted small" id="backendTag">Backend: —</div>
+    <section class="portal-top">
+      <div>
+        <h2 class="portal-title">Admin Portal</h2>
+        <div class="portal-sub">
+          Backend: <span class="mono" id="backendUrl">—</span>
+          <span class="dot" id="dot"></span>
+          <span id="statusText">Checking…</span>
         </div>
       </div>
 
-      <div class="card menu">
-        <button class="menu-item active" data-tab="orders">📬 Orders</button>
-        <button class="menu-item" data-tab="enquiries">💌 Enquiries</button>
-        <button class="menu-item" data-tab="gallery">🖼️ Gallery</button>
-        <button class="menu-item" data-tab="settings">⚙️ Settings</button>
+      <div class="portal-actions">
+        <button class="btn" id="refreshBtn" type="button">Refresh</button>
+        <button class="btn ghost" id="logoutBtn" type="button">Logout</button>
       </div>
-
-      <div class="card small">
-        <div class="row">
-          <button class="btn ghost" id="refreshBtn" type="button">Refresh</button>
-          <button class="btn danger" id="logoutBtn" type="button">Logout</button>
-        </div>
-        <div class="status good" id="status">Loading…</div>
-      </div>
-    </aside>
-
-    <section class="portal-main">
-      <div class="hero-banner">
-        <div class="hero-title">Welcome, Amelia!</div>
-        <div class="hero-sub" id="heroSub">Checking requests…</div>
-        <button class="btn primary" id="viewRequestsBtn" type="button">View Requests</button>
-      </div>
-
-      <!-- ORDERS -->
-      <section class="tabpanel" id="tab-orders">
-        <div class="panel-head">
-          <h2>Orders</h2>
-          <div class="filters">
-            <button class="chip active" data-filter="all">All</button>
-            <button class="chip" data-filter="new">New</button>
-            <button class="chip" data-filter="in_progress">In Progress</button>
-            <button class="chip" data-filter="completed">Completed</button>
-          </div>
-          <div class="search">
-            <input id="orderSearch" placeholder="Search orders…" />
-          </div>
-        </div>
-
-        <div class="list" id="ordersList"></div>
-      </section>
-
-      <!-- ENQUIRIES -->
-      <section class="tabpanel" id="tab-enquiries" style="display:none;">
-        <div class="panel-head">
-          <h2>Enquiries</h2>
-          <div class="search">
-            <input id="enquirySearch" placeholder="Search enquiries…" />
-          </div>
-        </div>
-
-        <div class="list" id="enquiriesList"></div>
-      </section>
-
-      <!-- GALLERY -->
-      <section class="tabpanel" id="tab-gallery" style="display:none;">
-        <div class="panel-head">
-          <h2>Gallery</h2>
-          <p class="muted">Upload new artwork (admin only).</p>
-        </div>
-
-        <div class="card formcard">
-          <div class="grid2">
-            <label class="field">
-              <span>Title</span>
-              <input id="gTitle" placeholder="e.g., Magical Fox in Garden" />
-            </label>
-
-            <label class="field">
-              <span>Category</span>
-              <input id="gCategory" placeholder="e.g., animals, fantasy, roblox" />
-            </label>
-          </div>
-
-          <label class="field">
-            <span>Image</span>
-            <input id="gFile" type="file" accept="image/*" />
-          </label>
-
-          <div class="row">
-            <button class="btn primary" id="uploadBtn" type="button">Upload</button>
-            <div class="muted small" id="uploadHint">Uploads are saved to backend /uploads.</div>
-          </div>
-        </div>
-
-        <div class="grid-gallery" id="galleryGrid"></div>
-      </section>
-
-      <!-- SETTINGS -->
-      <section class="tabpanel" id="tab-settings" style="display:none;">
-        <div class="panel-head">
-          <h2>Settings</h2>
-          <p class="muted">Family-only controls (safe, simple).</p>
-        </div>
-
-        <div class="card formcard">
-          <label class="field">
-            <span>Backend API Base</span>
-            <input id="apiBase" />
-          </label>
-
-          <div class="row">
-            <button class="btn" id="saveApiBtn" type="button">Save</button>
-            <button class="btn ghost" id="resetApiBtn" type="button">Reset</button>
-          </div>
-
-          <p class="muted small">
-            This only changes your admin portal connection setting (stored in browser localStorage).
-          </p>
-        </div>
-      </section>
-
-      <footer class="footer footer-tight">
-        Site managed by family • Supported by Uncle G & Del 💛
-      </footer>
     </section>
+
+    <section class="portal-controls">
+      <div class="tabs" role="tablist" aria-label="Status filter">
+        <button class="tab active" data-filter="all" type="button">All</button>
+        <button class="tab" data-filter="new" type="button">New</button>
+        <button class="tab" data-filter="in_progress" type="button">In Progress</button>
+        <button class="tab" data-filter="completed" type="button">Completed</button>
+        <button class="tab" data-filter="archived" type="button">Archived</button>
+      </div>
+
+      <div class="searchbox">
+        <input id="searchInput" type="search" placeholder="Search name / email / message…" />
+      </div>
+    </section>
+
+    <section class="portal-grid">
+      <aside class="panel list-panel">
+        <div class="panel-head">
+          <h3>Inbox</h3>
+          <div class="muted small" id="countText">0 items</div>
+        </div>
+        <div class="list" id="list"></div>
+      </aside>
+
+      <section class="panel detail-panel">
+        <div class="panel-head">
+          <h3>Details</h3>
+          <div class="muted small" id="detailHint">Select an item on the left.</div>
+        </div>
+
+        <div id="detail" class="detail" style="display:none;">
+          <div class="detail-row">
+            <div class="detail-meta">
+              <div class="tag" id="typeTag">TYPE</div>
+              <div class="muted small" id="createdAt">—</div>
+            </div>
+
+            <div class="detail-actions">
+              <label class="field inline">
+                <span>Status</span>
+                <select id="statusSelect">
+                  <option value="new">new</option>
+                  <option value="in_progress">in_progress</option>
+                  <option value="completed">completed</option>
+                  <option value="archived">archived</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="detail-block">
+            <div class="detail-name" id="nameText">—</div>
+            <div class="detail-email mono" id="emailText">—</div>
+          </div>
+
+          <div class="detail-block">
+            <div class="muted small">Message / Brief</div>
+            <div class="detail-message" id="messageText">—</div>
+          </div>
+
+          <div class="detail-block" id="refsBlock" style="display:none;">
+            <div class="muted small">Reference Images</div>
+            <div class="refs" id="refs"></div>
+          </div>
+
+          <div class="detail-block">
+            <div class="muted small">Notes (internal)</div>
+            <textarea id="notesInput" rows="4" placeholder="Add a note…"></textarea>
+          </div>
+
+          <div class="detail-save">
+            <button class="btn primary" id="saveBtn" type="button">Save</button>
+            <span class="muted small" id="saveStatus"></span>
+          </div>
+        </div>
+
+        <pre class="codebox" id="debugOut" style="display:none;"></pre>
+      </section>
+    </section>
+
+    <footer class="footer">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </footer>
   </main>
 
   <script src="./config.js"></script>
   <script src="./admin-portal.js"></script>
 </body>
-        </html>
+</html>
