@@ -24,7 +24,7 @@ function buildAllowedOrigins(value) {
   if (!value || value === "*") return "*";
   return value
     .split(",")
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .filter(Boolean);
 }
 
@@ -42,7 +42,7 @@ app.use(
 
       return cb(new Error("Not allowed by CORS: " + origin), false);
     },
-    credentials: false
+    credentials: false,
   })
 );
 
@@ -57,7 +57,7 @@ const UPLOAD_DIR = path.join(__dirname, "uploads");
 const DB = {
   gallery: path.join(DATA_DIR, "gallery.json"),
   commissions: path.join(DATA_DIR, "commissions.json"),
-  enquiries: path.join(DATA_DIR, "enquiries.json")
+  enquiries: path.join(DATA_DIR, "enquiries.json"),
 };
 
 function ensureStorage() {
@@ -130,9 +130,9 @@ const upload = multer({
       const ext = path.extname(file.originalname).toLowerCase() || ".png";
       const name = `img_${Date.now()}_${crypto.randomBytes(6).toString("hex")}${ext}`;
       cb(null, name);
-    }
+    },
   }),
-  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 }
+  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
 });
 
 app.use("/uploads", express.static(UPLOAD_DIR));
@@ -173,7 +173,7 @@ app.post("/upload", requireAdmin, upload.single("file"), (req, res) => {
     title: String(req.body.title || "Untitled"),
     category: String(req.body.category || "other"),
     url: `/uploads/${req.file.filename}`,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 
   const items = readJson(DB.gallery);
@@ -195,8 +195,10 @@ app.post("/commissions", upload.array("refs", 3), (req, res) => {
     name,
     email,
     brief,
-    refs: (req.files || []).map(f => `/uploads/${f.filename}`),
-    createdAt: new Date().toISOString()
+    refs: (req.files || []).map((f) => `/uploads/${f.filename}`),
+    status: "new",
+    notes: "",
+    createdAt: new Date().toISOString(),
   };
 
   const items = readJson(DB.commissions);
@@ -208,6 +210,26 @@ app.post("/commissions", upload.array("refs", 3), (req, res) => {
 
 app.get("/admin/commissions", requireAdmin, (req, res) => {
   res.json({ ok: true, items: readJson(DB.commissions) });
+});
+
+// ✅ NEW: update commission status / notes
+app.patch("/admin/commissions/:id", requireAdmin, (req, res) => {
+  const id = req.params.id;
+  const { status, notes } = req.body || {};
+
+  const items = readJson(DB.commissions);
+  const idx = items.findIndex((x) => x.id === id);
+  if (idx === -1) return res.status(404).json({ ok: false, message: "Not found" });
+
+  items[idx] = {
+    ...items[idx],
+    status: typeof status === "string" ? status : items[idx].status || "new",
+    notes: typeof notes === "string" ? notes : items[idx].notes || "",
+    updatedAt: new Date().toISOString(),
+  };
+
+  writeJson(DB.commissions, items);
+  res.json({ ok: true, item: items[idx] });
 });
 
 /* ---------- ENQUIRIES ---------- */
@@ -223,11 +245,38 @@ app.post("/enquiries", (req, res) => {
     name,
     email,
     message,
-    createdAt: new Date().toISOString()
+    status: "new",
+    notes: "",
+    createdAt: new Date().toISOString(),
   });
   writeJson(DB.enquiries, items);
 
   res.json({ ok: true });
+});
+
+// ✅ NEW: fetch enquiries in admin portal
+app.get("/admin/enquiries", requireAdmin, (req, res) => {
+  res.json({ ok: true, items: readJson(DB.enquiries) });
+});
+
+// ✅ NEW: update enquiry status / notes
+app.patch("/admin/enquiries/:id", requireAdmin, (req, res) => {
+  const id = req.params.id;
+  const { status, notes } = req.body || {};
+
+  const items = readJson(DB.enquiries);
+  const idx = items.findIndex((x) => x.id === id);
+  if (idx === -1) return res.status(404).json({ ok: false, message: "Not found" });
+
+  items[idx] = {
+    ...items[idx],
+    status: typeof status === "string" ? status : items[idx].status || "new",
+    notes: typeof notes === "string" ? notes : items[idx].notes || "",
+    updatedAt: new Date().toISOString(),
+  };
+
+  writeJson(DB.enquiries, items);
+  res.json({ ok: true, item: items[idx] });
 });
 
 /* =========================
