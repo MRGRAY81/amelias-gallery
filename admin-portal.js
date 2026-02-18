@@ -1,244 +1,156 @@
-/**
- * Amelia's Gallery — Admin Portal
- * Uses:
- *  - /auth/login (token stored by admin.js)
- *  - /admin/commissions
- *  - /admin/enquiries
- *  - /gallery
- *  - /upload (multipart)
- */
-
 (function () {
-  const DEFAULT_API =
-    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) ||
-    "https://amelias-gallery-backend.onrender.com";
+  const API_BASE =
+    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
 
   const TOKEN_KEY = "amelias_admin_token";
-  const API_KEY = "amelias_api_base_override";
+  const token = localStorage.getItem(TOKEN_KEY) || "";
 
   const els = {
-    backendTag: document.getElementById("backendTag"),
-    status: document.getElementById("status"),
+    backendUrl: document.getElementById("backendUrl"),
+    dot: document.getElementById("dot"),
+    statusText: document.getElementById("statusText"),
     refreshBtn: document.getElementById("refreshBtn"),
     logoutBtn: document.getElementById("logoutBtn"),
-    viewRequestsBtn: document.getElementById("viewRequestsBtn"),
-    heroSub: document.getElementById("heroSub"),
-
-    ordersList: document.getElementById("ordersList"),
-    enquiriesList: document.getElementById("enquiriesList"),
-    galleryGrid: document.getElementById("galleryGrid"),
-
-    orderSearch: document.getElementById("orderSearch"),
-    enquirySearch: document.getElementById("enquirySearch"),
-
-    gTitle: document.getElementById("gTitle"),
-    gCategory: document.getElementById("gCategory"),
-    gFile: document.getElementById("gFile"),
-    uploadBtn: document.getElementById("uploadBtn"),
-
-    apiBase: document.getElementById("apiBase"),
-    saveApiBtn: document.getElementById("saveApiBtn"),
-    resetApiBtn: document.getElementById("resetApiBtn"),
+    tabs: Array.from(document.querySelectorAll(".tab")),
+    searchInput: document.getElementById("searchInput"),
+    list: document.getElementById("list"),
+    countText: document.getElementById("countText"),
+    detail: document.getElementById("detail"),
+    detailHint: document.getElementById("detailHint"),
+    typeTag: document.getElementById("typeTag"),
+    createdAt: document.getElementById("createdAt"),
+    nameText: document.getElementById("nameText"),
+    emailText: document.getElementById("emailText"),
+    messageText: document.getElementById("messageText"),
+    refsBlock: document.getElementById("refsBlock"),
+    refs: document.getElementById("refs"),
+    statusSelect: document.getElementById("statusSelect"),
+    notesInput: document.getElementById("notesInput"),
+    saveBtn: document.getElementById("saveBtn"),
+    saveStatus: document.getElementById("saveStatus"),
   };
 
-  function getToken() {
-    return localStorage.getItem(TOKEN_KEY) || "";
+  if (!token) {
+    window.location.href = "./admin.html";
+    return;
   }
 
-  function setStatus(msg, ok = true) {
-    if (!els.status) return;
-    els.status.textContent = msg;
-    els.status.className = "status " + (ok ? "good" : "bad");
+  if (els.backendUrl) els.backendUrl.textContent = API_BASE || "—";
+
+  let filter = "all";
+  let search = "";
+  let items = [];
+  let activeId = null;
+
+  function setOnline(ok, msg) {
+    if (!els.dot || !els.statusText) return;
+    els.dot.className = "dot " + (ok ? "good" : "bad");
+    els.statusText.textContent = msg;
   }
 
-  function getApiBase() {
-    const override = localStorage.getItem(API_KEY);
-    return (override && override.trim()) ? override.trim() : DEFAULT_API;
-  }
-
-  function setApiBase(v) {
-    if (!v) localStorage.removeItem(API_KEY);
-    else localStorage.setItem(API_KEY, v);
+  function authHeaders(extra = {}) {
+    return {
+      ...extra,
+      Authorization: `Bearer ${token}`,
+    };
   }
 
   async function apiFetch(path, opts = {}) {
-    const API_BASE = getApiBase();
+    if (!API_BASE) throw new Error("Missing API_BASE in config.js");
     const url = API_BASE.replace(/\/$/, "") + path;
-
-    const headers = { ...(opts.headers || {}) };
-    const t = getToken();
-    if (t) headers["Authorization"] = `Bearer ${t}`;
-
-    const res = await fetch(url, { ...opts, headers });
+    const res = await fetch(url, {
+      ...opts,
+      headers: authHeaders(opts.headers || {}),
+    });
 
     const ct = res.headers.get("content-type") || "";
-    let data = null;
-    try {
-      data = ct.includes("application/json") ? await res.json() : await res.text();
-    } catch {
-      data = null;
-    }
+    const data = ct.includes("application/json") ? await res.json() : await res.text();
 
     if (!res.ok) {
-      const msg =
-        (data && (data.message || data.error)) ||
-        `Request failed: ${res.status} ${res.statusText}`;
+      const msg = (data && (data.message || data.error)) || `Request failed (${res.status})`;
       throw new Error(msg);
     }
     return data;
   }
 
-  function fmtDate(iso) {
-    if (!iso) return "";
-    try { return new Date(iso).toLocaleString(); } catch { return iso; }
+  function normalizeStatus(s) {
+    if (!s) return "new";
+    return String(s).toLowerCase();
   }
 
-  function normStatus(x) {
-    const s = String(x || "new").toLowerCase();
-    if (s === "inprogress") return "in_progress";
-    if (s === "in-progress") return "in_progress";
-    if (s === "done") return "completed";
-    return s;
+  // ✅ Map:
+  // - enquiries = Direct Sale (green)
+  // - commissions = Commission (purple)
+  function merge(commissions, enquiries) {
+    const a = (commissions || []).map((x) => ({
+      ...x,
+      _type: "commission",
+      _label: "COMMISSION",
+      _status: normalizeStatus(x.status),
+      _text: `${x.name || ""} ${x.email || ""} ${x.brief || ""}`.toLowerCase(),
+      _created: x.createdAt || "",
+    }));
+
+    const b = (enquiries || []).map((x) => ({
+      ...x,
+      _type: "sale",
+      _label: "DIRECT SALE",
+      _status: normalizeStatus(x.status),
+      _text: `${x.name || ""} ${x.email || ""} ${x.message || ""}`.toLowerCase(),
+      _created: x.createdAt || "",
+    }));
+
+    // newest first
+    return [...a, ...b].sort((p, q) => (q._created || "").localeCompare(p._created || ""));
   }
 
-  function orderCard(o) {
-    const status = normStatus(o.status || "new");
-    const badgeClass = status === "in_progress" ? "in_progress" : status;
+  function applyFilters(list) {
+    let out = list;
 
-    const safeBrief = (o.brief || "").slice(0, 140);
-    const refs = Array.isArray(o.refs) ? o.refs : [];
+    if (filter !== "all") out = out.filter((x) => x._status === filter);
 
-    const wrap = document.createElement("div");
-    wrap.className = "item";
+    if (search) {
+      const s = search.toLowerCase();
+      out = out.filter((x) => x._text.includes(s));
+    }
 
-    wrap.innerHTML = `
-      <div>
-        <h3>${escapeHtml(o.name || "Unknown")}</h3>
-        <div class="meta">
-          <b>Email:</b> ${escapeHtml(o.email || "")}
-          <span style="margin:0 8px;">•</span>
-          <b>Created:</b> ${escapeHtml(fmtDate(o.createdAt))}
-        </div>
-        <div style="margin-top:8px;">
-          ${escapeHtml(safeBrief)}${(o.brief || "").length > 140 ? "…" : ""}
-        </div>
+    return out;
+  }
 
-        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn" data-action="copy-email">Copy Email</button>
-          <button class="btn ghost" data-action="copy-brief">Copy Brief</button>
-          <button class="btn" data-action="set-new">New</button>
-          <button class="btn" data-action="set-progress">In Progress</button>
-          <button class="btn" data-action="set-completed">Completed</button>
-        </div>
+  function badgeHtml(x) {
+    const typeClass = x._type === "sale" ? "sale" : "commission";
+    const statusClass = `status-${x._status}`;
+    return `
+      <span class="badge ${typeClass}">${x._label}</span>
+      <span class="badge ${statusClass}">${x._status}</span>
+    `;
+  }
 
-        ${refs.length ? `
-          <div class="meta" style="margin-top:10px;"><b>Refs:</b></div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
-            ${refs.map(r => `<a class="btnlink" target="_blank" rel="noreferrer" href="${escapeAttr(fullUrl(r))}">Open ref</a>`).join("")}
+  function previewText(x) {
+    const t = x._type === "sale" ? (x.message || "") : (x.brief || "");
+    return String(t).slice(0, 120);
+  }
+
+  function renderList() {
+    const filtered = applyFilters(items);
+    if (els.countText) els.countText.textContent = `${filtered.length} item(s)`;
+
+    if (!els.list) return;
+    els.list.innerHTML = filtered
+      .map((x) => {
+        const active = x.id === activeId ? "active" : "";
+        return `
+          <div class="item ${active}" data-id="${x.id}">
+            <div class="item-top">
+              <div class="item-name">${escapeHtml(x.name || "Unknown")}</div>
+              <div class="item-meta">${badgeHtml(x)}</div>
+            </div>
+            <div class="item-preview">${escapeHtml(previewText(x))}</div>
+            <div class="muted small mono">${escapeHtml(x.email || "")}</div>
           </div>
-        ` : ""}
-      </div>
-
-      <div class="badge ${badgeClass}">${labelStatus(status)}</div>
-    `;
-
-    wrap.querySelectorAll("button[data-action]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const act = btn.getAttribute("data-action");
-
-        if (act === "copy-email") return copyText(o.email || "");
-        if (act === "copy-brief") return copyText(o.brief || "");
-
-        const next =
-          act === "set-new" ? "new" :
-          act === "set-progress" ? "in_progress" :
-          "completed";
-
-        try {
-          setStatus("Updating order…", true);
-          await apiFetch(`/admin/commissions/${encodeURIComponent(o.id)}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: next }),
-          });
-          await loadAll();
-          setStatus("Updated ✅", true);
-        } catch (e) {
-          setStatus(`Update failed ❌ (${e.message})`, false);
-        }
-      });
-    });
-
-    return wrap;
-  }
-
-  function enquiryCard(e) {
-    const status = normStatus(e.status || "new");
-    const badgeClass = status === "in_progress" ? "in_progress" : status;
-
-    const wrap = document.createElement("div");
-    wrap.className = "item";
-
-    const msg = (e.message || "").slice(0, 220);
-
-    wrap.innerHTML = `
-      <div>
-        <h3>${escapeHtml(e.name || "Unknown")}</h3>
-        <div class="meta">
-          <b>Email:</b> ${escapeHtml(e.email || "")}
-          <span style="margin:0 8px;">•</span>
-          <b>Created:</b> ${escapeHtml(fmtDate(e.createdAt))}
-        </div>
-        <div style="margin-top:8px;">
-          ${escapeHtml(msg)}${(e.message || "").length > 220 ? "…" : ""}
-        </div>
-
-        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn" data-action="copy-email">Copy Email</button>
-          <button class="btn ghost" data-action="copy-msg">Copy Message</button>
-          <button class="btn" data-action="set-new">New</button>
-          <button class="btn" data-action="set-completed">Replied</button>
-        </div>
-      </div>
-
-      <div class="badge ${badgeClass}">${labelEnquiry(status)}</div>
-    `;
-
-    wrap.querySelectorAll("button[data-action]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const act = btn.getAttribute("data-action");
-
-        if (act === "copy-email") return copyText(e.email || "");
-        if (act === "copy-msg") return copyText(e.message || "");
-
-        const next = act === "set-new" ? "new" : "completed";
-
-        try {
-          setStatus("Updating enquiry…", true);
-          await apiFetch(`/admin/enquiries/${encodeURIComponent(e.id)}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: next }),
-          });
-          await loadAll();
-          setStatus("Updated ✅", true);
-        } catch (err) {
-          setStatus(`Update failed ❌ (${err.message})`, false);
-        }
-      });
-    });
-
-    return wrap;
-  }
-
-  function labelStatus(s) {
-    if (s === "in_progress") return "In Progress";
-    if (s === "completed") return "Completed";
-    return "New Request";
-  }
-  function labelEnquiry(s) {
-    if (s === "completed") return "Replied";
-    return "New Enquiry";
+        `;
+      })
+      .join("");
   }
 
   function escapeHtml(str) {
@@ -250,215 +162,144 @@
       .replaceAll("'", "&#039;");
   }
 
-  function escapeAttr(str) {
-    return escapeHtml(str).replaceAll("`", "&#096;");
-  }
+  function showDetail(x) {
+    activeId = x.id;
+    renderList();
 
-  function fullUrl(p) {
-    // backend returns "/uploads/..."
-    const API_BASE = getApiBase().replace(/\/$/, "");
-    if (!p) return "";
-    if (String(p).startsWith("http")) return p;
-    return API_BASE + p;
-  }
+    if (!els.detail || !els.detailHint) return;
 
-  async function copyText(t) {
-    try {
-      await navigator.clipboard.writeText(String(t || ""));
-      setStatus("Copied ✅", true);
-    } catch {
-      setStatus("Copy failed ❌", false);
+    els.detailHint.style.display = "none";
+    els.detail.style.display = "block";
+
+    if (els.typeTag) {
+      els.typeTag.textContent = x._label;
+      els.typeTag.className = "tag " + (x._type === "sale" ? "sale" : "commission");
     }
-  }
 
-  function wireTabs() {
-    document.querySelectorAll(".menu-item").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
+    if (els.createdAt) els.createdAt.textContent = x.createdAt ? new Date(x.createdAt).toLocaleString() : "—";
+    if (els.nameText) els.nameText.textContent = x.name || "—";
+    if (els.emailText) els.emailText.textContent = x.email || "—";
 
-        const tab = btn.getAttribute("data-tab");
-        document.querySelectorAll(".tabpanel").forEach(p => p.style.display = "none");
-        const panel = document.getElementById(`tab-${tab}`);
-        if (panel) panel.style.display = "block";
-      });
-    });
+    const main = x._type === "sale" ? (x.message || "") : (x.brief || "");
+    if (els.messageText) els.messageText.textContent = main || "—";
 
-    document.querySelectorAll(".chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
-        chip.classList.add("active");
-        renderOrders();
-      });
-    });
-  }
+    if (els.statusSelect) els.statusSelect.value = x._status || "new";
+    if (els.notesInput) els.notesInput.value = x.notes || "";
 
-  let commissions = [];
-  let enquiries = [];
-  let gallery = [];
-
-  function renderOrders() {
-    const list = els.ordersList;
-    if (!list) return;
-    list.innerHTML = "";
-
-    const q = (els.orderSearch?.value || "").trim().toLowerCase();
-    const activeFilter = document.querySelector(".chip.active")?.getAttribute("data-filter") || "all";
-
-    const filtered = commissions
-      .filter(o => {
-        const hay = `${o.name||""} ${o.email||""} ${o.brief||""}`.toLowerCase();
-        if (q && !hay.includes(q)) return false;
-        const s = normStatus(o.status || "new");
-        if (activeFilter === "all") return true;
-        return s === activeFilter;
-      });
-
-    filtered.forEach(o => list.appendChild(orderCard(o)));
-
-    if (els.heroSub) {
-      const newCount = commissions.filter(o => normStatus(o.status) === "new").length;
-      els.heroSub.textContent = `You have ${newCount} new commission request${newCount === 1 ? "" : "s"}!`;
+    // refs (commissions only)
+    if (els.refsBlock && els.refs) {
+      const refs = Array.isArray(x.refs) ? x.refs : [];
+      if (x._type === "commission" && refs.length) {
+        els.refsBlock.style.display = "block";
+        els.refs.innerHTML = refs
+          .map((r, i) => `<a href="${r}" target="_blank" rel="noreferrer">Ref ${i + 1} ↗</a>`)
+          .join("");
+      } else {
+        els.refsBlock.style.display = "none";
+        els.refs.innerHTML = "";
+      }
     }
-  }
 
-  function renderEnquiries() {
-    const list = els.enquiriesList;
-    if (!list) return;
-    list.innerHTML = "";
-
-    const q = (els.enquirySearch?.value || "").trim().toLowerCase();
-
-    const filtered = enquiries.filter(e => {
-      const hay = `${e.name||""} ${e.email||""} ${e.message||""}`.toLowerCase();
-      if (q && !hay.includes(q)) return false;
-      return true;
-    });
-
-    filtered.forEach(e => list.appendChild(enquiryCard(e)));
-  }
-
-  function renderGallery() {
-    const grid = els.galleryGrid;
-    if (!grid) return;
-    grid.innerHTML = "";
-
-    (gallery || []).slice(0, 30).forEach((g) => {
-      const card = document.createElement("div");
-      card.className = "gimg";
-      card.innerHTML = `
-        <img src="${escapeAttr(fullUrl(g.url))}" alt="${escapeAttr(g.title || "Artwork")}" loading="lazy" />
-        <div class="cap">${escapeHtml(g.title || "Untitled")}</div>
-      `;
-      grid.appendChild(card);
-    });
+    if (els.saveStatus) els.saveStatus.textContent = "";
   }
 
   async function loadAll() {
-    const token = getToken();
-    if (!token) {
-      // no token -> send back to login
-      window.location.href = "./admin.html";
-      return;
-    }
-
-    const API_BASE = getApiBase();
-    if (els.backendTag) els.backendTag.textContent = `Backend: ${API_BASE}`;
-
     try {
-      setStatus("Loading admin data…", true);
+      setOnline(true, "Loading…");
+      const health = await fetch(API_BASE.replace(/\/$/, "") + "/health");
+      setOnline(health.ok, health.ok ? "Online" : "Online (but health not OK)");
 
-      // commissions
-      const c = await apiFetch("/admin/commissions");
-      commissions = Array.isArray(c.items) ? c.items : [];
+      const [c, e] = await Promise.all([
+        apiFetch("/admin/commissions", { method: "GET" }),
+        apiFetch("/admin/enquiries", { method: "GET" }),
+      ]);
 
-      // enquiries (may not exist until backend updated)
-      try {
-        const e = await apiFetch("/admin/enquiries");
-        enquiries = Array.isArray(e.items) ? e.items : [];
-      } catch {
-        enquiries = [];
+      items = merge(c.items || [], e.items || []);
+      renderList();
+
+      // keep selection if possible
+      if (activeId) {
+        const found = items.find((x) => x.id === activeId);
+        if (found) showDetail(found);
       }
-
-      // gallery
-      const g = await apiFetch("/gallery", { method: "GET" });
-      gallery = Array.isArray(g.items) ? g.items : [];
-
-      renderOrders();
-      renderEnquiries();
-      renderGallery();
-
-      setStatus("Ready ✅", true);
     } catch (err) {
-      setStatus(`Load failed ❌ (${err.message})`, false);
+      setOnline(false, err.message || "Offline");
+      if (els.list) els.list.innerHTML = `<div class="item"><b>Error:</b> ${escapeHtml(err.message)}</div>`;
     }
   }
 
-  async function uploadGallery() {
-    const title = (els.gTitle?.value || "").trim() || "Untitled";
-    const category = (els.gCategory?.value || "").trim() || "other";
-    const file = els.gFile?.files?.[0];
+  async function saveActive() {
+    if (!activeId) return;
+    const x = items.find((z) => z.id === activeId);
+    if (!x) return;
 
-    if (!file) return setStatus("Pick an image file first.", false);
+    const status = els.statusSelect ? els.statusSelect.value : "new";
+    const notes = els.notesInput ? els.notesInput.value : "";
+
+    const path =
+      x._type === "commission"
+        ? `/admin/commissions/${encodeURIComponent(x.id)}`
+        : `/admin/enquiries/${encodeURIComponent(x.id)}`;
 
     try {
-      setStatus("Uploading…", true);
-      const fd = new FormData();
-      fd.append("title", title);
-      fd.append("category", category);
-      fd.append("file", file);
+      if (els.saveStatus) els.saveStatus.textContent = "Saving…";
+      await apiFetch(path, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, notes }),
+      });
 
-      await apiFetch("/upload", { method: "POST", body: fd });
-      await loadAll();
-      setStatus("Uploaded ✅", true);
+      // update local copy
+      x.status = status;
+      x.notes = notes;
+      x._status = normalizeStatus(status);
 
-      if (els.gFile) els.gFile.value = "";
+      if (els.saveStatus) els.saveStatus.textContent = "Saved ✅";
+      renderList();
     } catch (err) {
-      setStatus(`Upload failed ❌ (${err.message})`, false);
+      if (els.saveStatus) els.saveStatus.textContent = `Save failed ❌ (${err.message})`;
     }
   }
 
-  function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    setStatus("Logged out.", true);
-    window.location.href = "./admin.html";
-  }
-
-  // Settings controls
-  function initSettingsUI() {
-    if (els.apiBase) els.apiBase.value = getApiBase();
-
-    els.saveApiBtn?.addEventListener("click", () => {
-      const v = (els.apiBase?.value || "").trim();
-      setApiBase(v);
-      setStatus("Saved ✅ Reloading…", true);
-      loadAll();
-    });
-
-    els.resetApiBtn?.addEventListener("click", () => {
-      localStorage.removeItem(API_KEY);
-      if (els.apiBase) els.apiBase.value = getApiBase();
-      setStatus("Reset ✅ Reloading…", true);
-      loadAll();
+  // Events
+  if (els.list) {
+    els.list.addEventListener("click", (e) => {
+      const itemEl = e.target.closest(".item");
+      if (!itemEl) return;
+      const id = itemEl.getAttribute("data-id");
+      const found = items.find((x) => x.id === id);
+      if (found) showDetail(found);
     });
   }
 
-  // Wire buttons
-  els.refreshBtn?.addEventListener("click", loadAll);
-  els.logoutBtn?.addEventListener("click", logout);
-  els.viewRequestsBtn?.addEventListener("click", () => {
-    // go to Orders tab
-    document.querySelector('[data-tab="orders"]')?.click();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  if (els.tabs) {
+    els.tabs.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        els.tabs.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        filter = btn.getAttribute("data-filter") || "all";
+        renderList();
+      });
+    });
+  }
 
-  els.orderSearch?.addEventListener("input", renderOrders);
-  els.enquirySearch?.addEventListener("input", renderEnquiries);
+  if (els.searchInput) {
+    els.searchInput.addEventListener("input", (e) => {
+      search = e.target.value || "";
+      renderList();
+    });
+  }
 
-  els.uploadBtn?.addEventListener("click", uploadGallery);
+  if (els.refreshBtn) els.refreshBtn.addEventListener("click", loadAll);
+  if (els.saveBtn) els.saveBtn.addEventListener("click", saveActive);
+
+  if (els.logoutBtn) {
+    els.logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem(TOKEN_KEY);
+      window.location.href = "./admin.html";
+    });
+  }
 
   // Init
-  wireTabs();
-  initSettingsUI();
   loadAll();
 })();
