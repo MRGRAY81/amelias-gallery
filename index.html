@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Amelia’s Gallery</title>
   <meta name="description" content="Amelia’s Gallery — artwork & commissions (family managed)." />
-  <link rel="stylesheet" href="./styles.css?v=3" />
+  <link rel="stylesheet" href="./styles.css?v=4" />
 </head>
 
 <body data-page="home" class="home-two-rows">
@@ -27,32 +27,35 @@
 
   <main class="shell">
 
-    <!-- ✅ NEW: Japanese frame hero -->
+    <!-- ✅ Japanese frame hero -->
     <section class="hero-frame">
-  <div class="frame-bg">
-    <div class="frame-inset">
+      <div class="frame-bg">
+        <div class="frame-inset">
 
-      <div class="hero-copy">
-        <h2 class="hero-title">Welcome to Amelia’s Gallery ✨</h2>
-        <p class="hero-sub">
-          Browse artwork, request commissions, and support a young artist (family managed).
-        </p>
+          <div class="hero-copy">
+            <h2 class="hero-title">Welcome to Amelia’s Gallery ✨</h2>
+            <p class="hero-sub">
+              Browse artwork, request commissions, and support a young artist (family managed).
+            </p>
+          </div>
+
+          <div class="home-actions">
+            <a class="btn" href="./gallery.html">Explore Gallery</a>
+            <a class="btn ghost" href="./commissions.html">Request a Commission</a>
+          </div>
+
+        </div>
       </div>
-
-      <div class="home-actions">
-        <a class="btn" href="./gallery.html">Explore Gallery</a>
-        <a class="btn ghost" href="./commissions.html">Request a Commission</a>
-      </div>
-
-    </div>
-  </div>
     </section>
 
+    <!-- ✅ Featured grid (2 rows) -->
     <section class="section">
       <div class="section-head">
-        <h2>Welcome to Amelia’s Gallery ✨</h2>
-        <p>Browse artwork, request commissions, and support a young artist (family managed).</p>
+        <h2>Featured</h2>
+        <p>Click to view bigger ✨</p>
       </div>
+
+      <div class="grid" id="homeGrid"></div>
     </section>
 
     <section class="cta">
@@ -66,6 +69,7 @@
     <footer class="footer">
       Site managed by family • Supported by Uncle G & Del 💛
     </footer>
+
   </main>
 
   <div class="lightbox" id="lightbox" aria-hidden="true">
@@ -76,6 +80,6 @@
     </div>
   </div>
 
-  <script src="./script.js?v=3"></script>
+  <script src="./script.js?v=4"></script>
 </body>
 </html>
