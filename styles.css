@@ -425,3 +425,14 @@ body{
   .grid{ grid-template-columns:repeat(2, 1fr); }
   .cta{ flex-direction:column; align-items:flex-start; }
 }
+/* Force Featured section to stay as 2 rows on desktop */
+.home-two-rows .grid{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* On mobile keep 2 columns */
+@media (max-width: 720px){
+  .home-two-rows .grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
