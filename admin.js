@@ -4,21 +4,22 @@
  * - Logs in with email/password
  * - Stores token in localStorage
  * - Provides helper for authenticated fetch
+ * - Redirects to admin portal page after login
  */
 (function () {
+  // ✅ Change this if you name your dashboard differently
+  const PORTAL_PAGE = "./admin-portal.html";
+
   // 1) Prefer explicit config if provided (best for your own server later)
   const CONFIG_BASE =
-    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) ||
-    "";
+    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
 
   // 2) Fallback guesses (Render names + derived from current host)
   function buildCandidates() {
     const candidates = [];
 
-    // Your previous default (keep as candidate)
+    // Previous defaults (keep as candidates)
     candidates.push("https://amelias-gallery-backend.onrender.com");
-
-    // Common: backend service named "amelias-gallery"
     candidates.push("https://amelias-gallery.onrender.com");
 
     // If we're on a Render static site like: https://amelias-gallery-1.onrender.com
@@ -35,16 +36,19 @@
         candidates.push(`${proto}//${cleaned}`);
 
         // sometimes people name backend "-backend"
-        const maybeBackend = cleaned.replace(".onrender.com", "-backend.onrender.com");
+        const maybeBackend = cleaned.replace(
+          ".onrender.com",
+          "-backend.onrender.com"
+        );
         candidates.push(`${proto}//${maybeBackend}`);
       }
     } catch {}
 
-    // If you set CONFIG_BASE, make it the first candidate
+    // If CONFIG_BASE is set, prefer it first
     if (CONFIG_BASE) candidates.unshift(CONFIG_BASE);
 
-    // de-dupe
-    return Array.from(new Set(candidates.map(c => c.replace(/\/$/, ""))));
+    // de-dupe + trim trailing slash
+    return Array.from(new Set(candidates.map((c) => c.replace(/\/$/, ""))));
   }
 
   let API_BASE = (CONFIG_BASE || "").replace(/\/$/, "");
@@ -90,6 +94,12 @@
     else localStorage.setItem(TOKEN_KEY, token);
   }
 
+  function clearTokenAndUI(message) {
+    setToken("");
+    setLoggedInUI(false);
+    if (message) setStatus(message, false);
+  }
+
   function authedHeaders(extra = {}) {
     const token = getToken();
     const headers = { ...extra };
@@ -114,7 +124,6 @@
         headers: authedHeaders(opts.headers || {}),
       });
     } catch (err) {
-      // This is the "Failed to fetch" bucket: bad URL, CORS, backend asleep, network
       throw new Error(
         "Failed to fetch (check backend URL, CORS FRONTEND_ORIGIN, or backend sleeping)."
       );
@@ -129,6 +138,11 @@
     }
 
     if (!res.ok) {
+      // If token is wrong/expired, clean up
+      if (res.status === 401 || res.status === 403) {
+        clearTokenAndUI("Session expired / invalid token. Please login again.");
+      }
+
       const msg =
         (data && (data.message || data.error)) ||
         `Request failed: ${res.status} ${res.statusText}`;
@@ -138,8 +152,60 @@
   }
 
   function setLoggedInUI(isLoggedIn) {
-    if (els.logoutBtn) els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
-    if (els.adminPanel) els.adminPanel.style.display = isLoggedIn ? "block" : "none";
+    if (els.logoutBtn)
+      els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    if (els.adminPanel)
+      els.adminPanel.style.display = isLoggedIn ? "block" : "none";
+
+    // Add portal + clear token buttons once (inside adminPanel)
+    ensureExtraButtons(isLoggedIn);
+  }
+
+  function ensureExtraButtons(isLoggedIn) {
+    if (!els.adminPanel) return;
+
+    // create container once
+    let row = document.getElementById("portalRow");
+    if (!row) {
+      row = document.createElement("div");
+      row.id = "portalRow";
+      row.className = "row-actions";
+      row.style.marginTop = "10px";
+      els.adminPanel.prepend(row);
+    }
+
+    // Portal button
+    let portalBtn = document.getElementById("goPortalBtn");
+    if (!portalBtn) {
+      portalBtn = document.createElement("button");
+      portalBtn.id = "goPortalBtn";
+      portalBtn.type = "button";
+      portalBtn.className = "btn primary";
+      portalBtn.textContent = "Go to Admin Portal";
+      portalBtn.addEventListener("click", () => {
+        window.location.href = PORTAL_PAGE;
+      });
+      row.appendChild(portalBtn);
+    }
+
+    // Clear token button
+    let clearBtn = document.getElementById("clearTokenBtn");
+    if (!clearBtn) {
+      clearBtn = document.createElement("button");
+      clearBtn.id = "clearTokenBtn";
+      clearBtn.type = "button";
+      clearBtn.className = "btn ghost";
+      clearBtn.textContent = "Clear Token";
+      clearBtn.style.marginLeft = "8px";
+      clearBtn.addEventListener("click", () => {
+        clearTokenAndUI("Token cleared. Please login again.");
+        setAdminOut("Token cleared.");
+      });
+      row.appendChild(clearBtn);
+    }
+
+    portalBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    clearBtn.style.display = isLoggedIn ? "inline-flex" : "none";
   }
 
   async function healthCheckOne(base) {
@@ -157,7 +223,6 @@
   async function detectBackend() {
     const candidates = buildCandidates();
 
-    // Show what we're trying (useful when debugging)
     setStatus("Checking backend…", true);
 
     for (const base of candidates) {
@@ -176,6 +241,19 @@
       false
     );
     return null;
+  }
+
+  async function validateTokenSilently() {
+    const token = getToken();
+    if (!token) return false;
+
+    try {
+      // any protected endpoint works
+      await apiFetch("/admin/commissions", { method: "GET" });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async function login() {
@@ -201,8 +279,15 @@
 
       setToken(token);
       setLoggedInUI(true);
-      setStatus("Logged in ✅ Token saved.", true);
-      setAdminOut({ ok: true, message: "Logged in", tokenPreview: token.slice(0, 18) + "…" });
+      setStatus("Logged in ✅ Token saved. Redirecting…", true);
+      setAdminOut({
+        ok: true,
+        message: "Logged in",
+        tokenPreview: token.slice(0, 18) + "…",
+      });
+
+      // ✅ Go to dashboard/portal
+      window.location.href = PORTAL_PAGE;
     } catch (e) {
       setToken("");
       setLoggedInUI(false);
@@ -226,6 +311,7 @@
         message: "Token valid ✅",
         preview: data.items?.slice(0, 1) || [],
         count: Array.isArray(data.items) ? data.items.length : undefined,
+        apiBase: API_BASE || null,
       });
     } catch (e) {
       setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
@@ -251,6 +337,19 @@
     });
   });
 
-  setLoggedInUI(!!getToken());
-  detectBackend();
+  (async function boot() {
+    setLoggedInUI(!!getToken());
+    await detectBackend();
+
+    // If already logged in, verify token and show portal button
+    if (getToken()) {
+      const ok = await validateTokenSilently();
+      if (ok) {
+        setStatus("Session active ✅ (token valid)", true);
+        setLoggedInUI(true);
+      } else {
+        clearTokenAndUI("Session invalid. Please login again.");
+      }
+    }
+  })();
 })();
