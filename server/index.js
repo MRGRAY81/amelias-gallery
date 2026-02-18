@@ -1,276 +1,221 @@
-/**
- * Amelia's Gallery — Admin wiring (Login page) — admin.js
- * - Uses config.js if present (window.AMELIAS_CONFIG.API_BASE)
- * - Detects backend via /health if config missing
- * - Logs in with email/password -> stores token in localStorage
- * - Redirects to admin-portal.html on success
- */
-(function () {
-  const TOKEN_KEY = "amelias_admin_token";
-  const PORTAL_PAGE = "./admin-portal.html";
+const express = require("express");
+const cors = require("cors");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const crypto = require("crypto");
 
-  // Prefer config.js
-  const CONFIG_BASE =
-    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
+const app = express();
+const PORT = process.env.PORT || 10000;
 
-  function normBase(b) {
-    return String(b || "").trim().replace(/\/$/, "");
+/* =========================
+   ENV
+========================= */
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "change-me";
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
+const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB || "10");
+
+/* =========================
+   CORS
+========================= */
+function buildAllowedOrigins(value) {
+  if (!value || value === "*") return "*";
+  return value.split(",").map(s => s.trim()).filter(Boolean);
+}
+
+const allowed = buildAllowedOrigins(FRONTEND_ORIGIN);
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (allowed === "*") return cb(null, true);
+    if (Array.isArray(allowed) && allowed.includes(origin)) return cb(null, true);
+    return cb(new Error("Not allowed by CORS: " + origin), false);
+  }
+}));
+
+app.use(express.json({ limit: "2mb" }));
+
+/* =========================
+   STORAGE
+========================= */
+const DATA_DIR = path.join(__dirname, "data");
+const UPLOAD_DIR = path.join(__dirname, "uploads");
+
+const DB = {
+  gallery: path.join(DATA_DIR, "gallery.json"),
+  commissions: path.join(DATA_DIR, "commissions.json"),
+  enquiries: path.join(DATA_DIR, "enquiries.json"),
+};
+
+function ensureStorage() {
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  Object.values(DB).forEach(file => {
+    if (!fs.existsSync(file)) fs.writeFileSync(file, "[]");
+  });
+}
+ensureStorage();
+
+function readJson(file) {
+  try { return JSON.parse(fs.readFileSync(file, "utf8")); }
+  catch { return []; }
+}
+
+function writeJson(file, data) {
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+/* =========================
+   AUTH
+========================= */
+function makeToken(email) {
+  const payload = { email, role: "admin", iat: Date.now() };
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const sig = crypto.createHmac("sha256", JWT_SECRET).update(body).digest("base64url");
+  return `${body}.${sig}`;
+}
+
+function verifyToken(token) {
+  if (!token) return null;
+  const [body, sig] = token.split(".");
+  if (!body || !sig) return null;
+  const expected = crypto.createHmac("sha256", JWT_SECRET).update(body).digest("base64url");
+  if (sig !== expected) return null;
+  try { return JSON.parse(Buffer.from(body, "base64url").toString("utf8")); }
+  catch { return null; }
+}
+
+function requireAdmin(req, res, next) {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  const payload = verifyToken(token);
+  if (!payload || payload.role !== "admin") {
+    return res.status(401).json({ ok: false, message: "Unauthorized" });
+  }
+  req.admin = payload;
+  next();
+}
+
+/* =========================
+   UPLOADS
+========================= */
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: UPLOAD_DIR,
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || ".png";
+      const name = `img_${Date.now()}_${crypto.randomBytes(6).toString("hex")}${ext}`;
+      cb(null, name);
+    },
+  }),
+  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
+});
+
+app.use("/uploads", express.static(UPLOAD_DIR));
+
+/* =========================
+   ROUTES
+========================= */
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "amelias-gallery-backend" });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
+/* AUTH */
+app.post("/auth/login", (req, res) => {
+  const { email, password } = req.body || {};
+  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    return res.json({ ok: true, token: makeToken(email) });
+  }
+  res.status(401).json({ ok: false, message: "Invalid credentials" });
+});
+
+/* COMMISSIONS */
+app.post("/commissions", upload.array("refs", 3), (req, res) => {
+  const { name, email, brief } = req.body || {};
+  if (!name || !email || !brief) {
+    return res.status(400).json({ ok: false, message: "Missing fields" });
   }
 
-  function buildCandidates() {
-    const candidates = [];
-
-    // common defaults (keep as fallbacks)
-    candidates.push("https://amelias-gallery-backend.onrender.com");
-    candidates.push("https://amelias-gallery.onrender.com");
-
-    // derive from current Render host
-    try {
-      const host = window.location.host;
-      const proto = window.location.protocol;
-
-      if (host.endsWith(".onrender.com")) {
-        // current host itself
-        candidates.push(`${proto}//${host}`);
-
-        // strip -1 / -2 etc
-        const cleaned = host.replace(/-\d+\.onrender\.com$/, ".onrender.com");
-        candidates.push(`${proto}//${cleaned}`);
-
-        // try -backend naming
-        const maybeBackend = cleaned.replace(
-          ".onrender.com",
-          "-backend.onrender.com"
-        );
-        candidates.push(`${proto}//${maybeBackend}`);
-      }
-    } catch {}
-
-    // if config.js set, try it first
-    if (CONFIG_BASE) candidates.unshift(CONFIG_BASE);
-
-    // de-dupe + normalize
-    return Array.from(new Set(candidates.map(normBase))).filter(Boolean);
-  }
-
-  let API_BASE = normBase(CONFIG_BASE);
-
-  const els = {
-    backendUrl: document.getElementById("backendUrl"),
-    status: document.getElementById("status"),
-    email: document.getElementById("email"),
-    password: document.getElementById("password"),
-    loginBtn: document.getElementById("loginBtn"),
-    logoutBtn: document.getElementById("logoutBtn"),
-    adminPanel: document.getElementById("adminPanel"),
-    pingBtn: document.getElementById("pingBtn"),
-    whoamiBtn: document.getElementById("whoamiBtn"),
-    adminOutText: document.getElementById("adminOutText"),
+  const record = {
+    id: `c_${Date.now()}`,
+    name, email, brief,
+    refs: (req.files || []).map(f => `/uploads/${f.filename}`),
+    status: "new",
+    notes: "",
+    createdAt: new Date().toISOString(),
   };
 
-  function setStatus(msg, ok = true) {
-    if (!els.status) return;
-    els.status.textContent = msg;
-    els.status.className = "status " + (ok ? "good" : "bad");
+  const items = readJson(DB.commissions);
+  items.unshift(record);
+  writeJson(DB.commissions, items);
+
+  res.json({ ok: true });
+});
+
+app.get("/admin/commissions", requireAdmin, (req, res) => {
+  res.json({ ok: true, items: readJson(DB.commissions) });
+});
+
+app.patch("/admin/commissions/:id", requireAdmin, (req, res) => {
+  const id = req.params.id;
+  const { status, notes } = req.body || {};
+
+  const items = readJson(DB.commissions);
+  const idx = items.findIndex(x => x.id === id);
+  if (idx === -1) return res.status(404).json({ ok: false });
+
+  items[idx] = { ...items[idx], status, notes, updatedAt: new Date().toISOString() };
+  writeJson(DB.commissions, items);
+
+  res.json({ ok: true, item: items[idx] });
+});
+
+/* ENQUIRIES */
+app.post("/enquiries", (req, res) => {
+  const { name, email, message } = req.body || {};
+  if (!name || !email || !message) {
+    return res.status(400).json({ ok: false });
   }
 
-  function setAdminOut(obj) {
-    if (!els.adminOutText) return;
-    try {
-      els.adminOutText.textContent =
-        typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
-    } catch {
-      els.adminOutText.textContent = String(obj);
-    }
-  }
-
-  function getToken() {
-    return localStorage.getItem(TOKEN_KEY) || "";
-  }
-
-  function setToken(token) {
-    if (!token) localStorage.removeItem(TOKEN_KEY);
-    else localStorage.setItem(TOKEN_KEY, token);
-  }
-
-  function setLoggedInUI(isLoggedIn) {
-    if (els.logoutBtn)
-      els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
-    if (els.adminPanel)
-      els.adminPanel.style.display = isLoggedIn ? "block" : "none";
-  }
-
-  function authedHeaders(extra = {}) {
-    const token = getToken();
-    const headers = { ...extra };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-    return headers;
-  }
-
-  async function rawFetch(base, path, opts = {}) {
-    const url = normBase(base) + path;
-    return fetch(url, opts);
-  }
-
-  async function apiFetch(path, opts = {}) {
-    if (!API_BASE) throw new Error("Backend URL not set.");
-    const url = normBase(API_BASE) + path;
-
-    let res;
-    try {
-      res = await fetch(url, {
-        ...opts,
-        headers: authedHeaders(opts.headers || {}),
-      });
-    } catch {
-      throw new Error(
-        "Failed to fetch (bad URL, CORS FRONTEND_ORIGIN, or backend sleeping)."
-      );
-    }
-
-    const ct = res.headers.get("content-type") || "";
-    let data = null;
-    try {
-      data = ct.includes("application/json") ? await res.json() : await res.text();
-    } catch {
-      data = null;
-    }
-
-    if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
-        // token/credentials issues
-        if (path !== "/auth/login") setToken("");
-      }
-      const msg =
-        (data && (data.message || data.error)) ||
-        `Request failed: ${res.status} ${res.statusText}`;
-      throw new Error(msg);
-    }
-
-    return data;
-  }
-
-  async function healthCheckOne(base) {
-    try {
-      const res = await rawFetch(base, "/health", { method: "GET" });
-      if (!res.ok) return null;
-      return { base: normBase(base) };
-    } catch {
-      return null;
-    }
-  }
-
-  async function detectBackend() {
-    const candidates = buildCandidates();
-    setStatus("Checking backend…", true);
-
-    for (const base of candidates) {
-      const hit = await healthCheckOne(base);
-      if (hit) {
-        API_BASE = hit.base;
-        if (els.backendUrl) els.backendUrl.textContent = API_BASE;
-        setStatus(`Backend OK ✅ (${API_BASE})`, true);
-        return true;
-      }
-    }
-
-    if (els.backendUrl) els.backendUrl.textContent = CONFIG_BASE ? normBase(CONFIG_BASE) : "—";
-    setStatus(
-      "Backend not reachable ❌ (URL/CORS/sleeping). Check backend URL + FRONTEND_ORIGIN.",
-      false
-    );
-    return false;
-  }
-
-  async function login() {
-    const email = (els.email?.value || "").trim();
-    const password = els.password?.value || "";
-
-    if (!email || !password) {
-      setStatus("Enter email + password.", false);
-      return;
-    }
-
-    // ensure we have a working backend before trying login
-    if (!API_BASE) {
-      const ok = await detectBackend();
-      if (!ok) return;
-    }
-
-    setStatus("Logging in…", true);
-
-    try {
-      const data = await apiFetch("/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const token = data && (data.token || data.jwt || data.accessToken);
-      if (!token) throw new Error("No token returned from backend.");
-
-      setToken(token);
-      setLoggedInUI(true);
-      setStatus("Logged in ✅ Redirecting…", true);
-      setAdminOut({
-        ok: true,
-        message: "Logged in",
-        tokenPreview: token.slice(0, 18) + "…",
-        apiBase: API_BASE,
-      });
-
-      window.location.href = PORTAL_PAGE;
-    } catch (e) {
-      setToken("");
-      setLoggedInUI(false);
-      setStatus(`Login failed ❌ (${e.message})`, false);
-      setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
-    }
-  }
-
-  function logout() {
-    setToken("");
-    setLoggedInUI(false);
-    setStatus("Logged out.", true);
-    setAdminOut("Logged out.");
-  }
-
-  async function whoami() {
-    try {
-      const data = await apiFetch("/admin/commissions", { method: "GET" });
-      setAdminOut({
-        ok: true,
-        message: "Token valid ✅",
-        preview: data.items?.slice(0, 1) || [],
-        count: Array.isArray(data.items) ? data.items.length : undefined,
-        apiBase: API_BASE || null,
-      });
-    } catch (e) {
-      setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
-    }
-  }
-
-  async function ping() {
-    const ok = await detectBackend();
-    if (ok) setAdminOut({ ok: true, apiBase: API_BASE });
-  }
-
-  // Init
-  if (els.backendUrl) els.backendUrl.textContent = API_BASE || "—";
-
-  if (els.loginBtn) els.loginBtn.addEventListener("click", login);
-  if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
-  if (els.pingBtn) els.pingBtn.addEventListener("click", ping);
-  if (els.whoamiBtn) els.whoamiBtn.addEventListener("click", whoami);
-
-  [els.email, els.password].filter(Boolean).forEach((el) => {
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") login();
-    });
+  const items = readJson(DB.enquiries);
+  items.unshift({
+    id: `e_${Date.now()}`,
+    name, email, message,
+    status: "new",
+    notes: "",
+    createdAt: new Date().toISOString(),
   });
 
-  setLoggedInUI(!!getToken());
+  writeJson(DB.enquiries, items);
+  res.json({ ok: true });
+});
 
-  // detect backend (but don't block page)
-  detectBackend();
-})();
+app.get("/admin/enquiries", requireAdmin, (req, res) => {
+  res.json({ ok: true, items: readJson(DB.enquiries) });
+});
+
+app.patch("/admin/enquiries/:id", requireAdmin, (req, res) => {
+  const id = req.params.id;
+  const { status, notes } = req.body || {};
+
+  const items = readJson(DB.enquiries);
+  const idx = items.findIndex(x => x.id === id);
+  if (idx === -1) return res.status(404).json({ ok: false });
+
+  items[idx] = { ...items[idx], status, notes, updatedAt: new Date().toISOString() };
+  writeJson(DB.enquiries, items);
+
+  res.json({ ok: true, item: items[idx] });
+});
+
+/* START */
+app.listen(PORT, () => {
+  console.log(`Backend running on ${PORT}`);
+});
