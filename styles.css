@@ -140,7 +140,7 @@ body{
   overflow:hidden;
   min-height: 520px;
   background:
-    url("./sakura-frame.jpg") center/cover no-repeat;
+    url("./sakura-frame.png") center/cover no-repeat;
   position:relative;
 }
 
