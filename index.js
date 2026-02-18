@@ -1,325 +1,276 @@
-const express = require("express");
-const cors = require("cors");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-const crypto = require("crypto");
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
 /**
- * =========================
- * ENV
- * =========================
- * Required (Render):
- * - ADMIN_EMAIL
- * - ADMIN_PASSWORD
- * - JWT_SECRET (any long string)
- *
- * Optional:
- * - FRONTEND_ORIGIN (use * for now)
- * - MAX_UPLOAD_MB (default 10)
+ * Amelia's Gallery — Admin wiring (Login page) — admin.js
+ * - Uses config.js if present (window.AMELIAS_CONFIG.API_BASE)
+ * - Detects backend via /health if config missing
+ * - Logs in with email/password -> stores token in localStorage
+ * - Redirects to admin-portal.html on success
  */
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "change-me";
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
-const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB || "10");
+(function () {
+  const TOKEN_KEY = "amelias_admin_token";
+  const PORTAL_PAGE = "./admin-portal.html";
 
-/**
- * =========================
- * CORS + JSON
- * =========================
- */
-app.use(
-  cors({
-    origin: FRONTEND_ORIGIN === "*" ? true : FRONTEND_ORIGIN,
-    credentials: false
-  })
-);
+  // Prefer config.js
+  const CONFIG_BASE =
+    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
 
-app.use(express.json({ limit: "2mb" }));
-
-/**
- * =========================
- * Storage paths
- * =========================
- */
-const DATA_DIR = path.join(__dirname, "data");
-const UPLOAD_DIR = path.join(__dirname, "uploads");
-
-const DB_FILES = {
-  gallery: path.join(DATA_DIR, "gallery.json"),
-  commissions: path.join(DATA_DIR, "commissions.json"),
-  enquiries: path.join(DATA_DIR, "enquiries.json")
-};
-
-function ensureStore() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
-  for (const key of Object.keys(DB_FILES)) {
-    const file = DB_FILES[key];
-    if (!fs.existsSync(file)) fs.writeFileSync(file, "[]");
+  function normBase(b) {
+    return String(b || "").trim().replace(/\/$/, "");
   }
-}
-ensureStore();
 
-function readJson(file) {
-  try {
-    const raw = fs.readFileSync(file, "utf8");
-    return JSON.parse(raw || "[]");
-  } catch {
-    return [];
+  function buildCandidates() {
+    const candidates = [];
+
+    // common defaults (keep as fallbacks)
+    candidates.push("https://amelias-gallery-backend.onrender.com");
+    candidates.push("https://amelias-gallery.onrender.com");
+
+    // derive from current Render host
+    try {
+      const host = window.location.host;
+      const proto = window.location.protocol;
+
+      if (host.endsWith(".onrender.com")) {
+        // current host itself
+        candidates.push(`${proto}//${host}`);
+
+        // strip -1 / -2 etc
+        const cleaned = host.replace(/-\d+\.onrender\.com$/, ".onrender.com");
+        candidates.push(`${proto}//${cleaned}`);
+
+        // try -backend naming
+        const maybeBackend = cleaned.replace(
+          ".onrender.com",
+          "-backend.onrender.com"
+        );
+        candidates.push(`${proto}//${maybeBackend}`);
+      }
+    } catch {}
+
+    // if config.js set, try it first
+    if (CONFIG_BASE) candidates.unshift(CONFIG_BASE);
+
+    // de-dupe + normalize
+    return Array.from(new Set(candidates.map(normBase))).filter(Boolean);
   }
-}
 
-function writeJson(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
-}
+  let API_BASE = normBase(CONFIG_BASE);
 
-/**
- * =========================
- * Token helpers (simple signed token)
- * =========================
- * Not full JWT, but secure enough for MVP:
- * token = base64(payload).base64(hmac)
- */
-function makeToken(email) {
-  const payload = {
-    email,
-    role: "admin",
-    iat: Date.now()
+  const els = {
+    backendUrl: document.getElementById("backendUrl"),
+    status: document.getElementById("status"),
+    email: document.getElementById("email"),
+    password: document.getElementById("password"),
+    loginBtn: document.getElementById("loginBtn"),
+    logoutBtn: document.getElementById("logoutBtn"),
+    adminPanel: document.getElementById("adminPanel"),
+    pingBtn: document.getElementById("pingBtn"),
+    whoamiBtn: document.getElementById("whoamiBtn"),
+    adminOutText: document.getElementById("adminOutText"),
   };
-  const json = JSON.stringify(payload);
-  const b64 = Buffer.from(json).toString("base64url");
-  const sig = crypto.createHmac("sha256", JWT_SECRET).update(b64).digest("base64url");
-  return `${b64}.${sig}`;
-}
 
-function verifyToken(token) {
-  if (!token || typeof token !== "string") return null;
-  const parts = token.split(".");
-  if (parts.length !== 2) return null;
-  const [b64, sig] = parts;
-
-  const expected = crypto.createHmac("sha256", JWT_SECRET).update(b64).digest("base64url");
-  if (sig !== expected) return null;
-
-  try {
-    const payload = JSON.parse(Buffer.from(b64, "base64url").toString("utf8"));
-    return payload;
-  } catch {
-    return null;
+  function setStatus(msg, ok = true) {
+    if (!els.status) return;
+    els.status.textContent = msg;
+    els.status.className = "status " + (ok ? "good" : "bad");
   }
-}
 
-function requireAdmin(req, res, next) {
-  const header = req.headers.authorization || "";
-  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-  const payload = verifyToken(token);
-  if (!payload || payload.role !== "admin") {
-    return res.status(401).json({ ok: false, message: "Unauthorized" });
+  function setAdminOut(obj) {
+    if (!els.adminOutText) return;
+    try {
+      els.adminOutText.textContent =
+        typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+    } catch {
+      els.adminOutText.textContent = String(obj);
+    }
   }
-  req.admin = payload;
-  next();
-}
 
-/**
- * =========================
- * Upload config (MVP safe-ish)
- * =========================
- * - allowlist types
- * - size limit
- */
-const allowedMime = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp"
-]);
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => {
-    const ext = (path.extname(file.originalname) || "").toLowerCase();
-    const safeExt = [".jpg", ".jpeg", ".png", ".webp"].includes(ext) ? ext : ".png";
-    const name = `img_${Date.now()}_${crypto.randomBytes(6).toString("hex")}${safeExt}`;
-    cb(null, name);
+  function getToken() {
+    return localStorage.getItem(TOKEN_KEY) || "";
   }
-});
 
-const upload = multer({
-  storage,
-  limits: { fileSize: MAX_UPLOAD_MB * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (!allowedMime.has(file.mimetype)) return cb(new Error("Only PNG/JPG/WEBP allowed"));
-    cb(null, true);
+  function setToken(token) {
+    if (!token) localStorage.removeItem(TOKEN_KEY);
+    else localStorage.setItem(TOKEN_KEY, token);
   }
-});
 
-app.use("/uploads", express.static(UPLOAD_DIR));
+  function setLoggedInUI(isLoggedIn) {
+    if (els.logoutBtn)
+      els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    if (els.adminPanel)
+      els.adminPanel.style.display = isLoggedIn ? "block" : "none";
+  }
 
-/**
- * =========================
- * Routes
- * =========================
- */
-app.get("/", (req, res) => {
-  res.json({ ok: true, service: "amelias-gallery-backend" });
-});
+  function authedHeaders(extra = {}) {
+    const token = getToken();
+    const headers = { ...extra };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    return headers;
+  }
 
-app.get("/health", (req, res) => {
-  res.json({
-    ok: true,
-    service: "amelias-gallery-backend",
-    version: "0.2.0",
-    time: new Date().toISOString()
+  async function rawFetch(base, path, opts = {}) {
+    const url = normBase(base) + path;
+    return fetch(url, opts);
+  }
+
+  async function apiFetch(path, opts = {}) {
+    if (!API_BASE) throw new Error("Backend URL not set.");
+    const url = normBase(API_BASE) + path;
+
+    let res;
+    try {
+      res = await fetch(url, {
+        ...opts,
+        headers: authedHeaders(opts.headers || {}),
+      });
+    } catch {
+      throw new Error(
+        "Failed to fetch (bad URL, CORS FRONTEND_ORIGIN, or backend sleeping)."
+      );
+    }
+
+    const ct = res.headers.get("content-type") || "";
+    let data = null;
+    try {
+      data = ct.includes("application/json") ? await res.json() : await res.text();
+    } catch {
+      data = null;
+    }
+
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        // token/credentials issues
+        if (path !== "/auth/login") setToken("");
+      }
+      const msg =
+        (data && (data.message || data.error)) ||
+        `Request failed: ${res.status} ${res.statusText}`;
+      throw new Error(msg);
+    }
+
+    return data;
+  }
+
+  async function healthCheckOne(base) {
+    try {
+      const res = await rawFetch(base, "/health", { method: "GET" });
+      if (!res.ok) return null;
+      return { base: normBase(base) };
+    } catch {
+      return null;
+    }
+  }
+
+  async function detectBackend() {
+    const candidates = buildCandidates();
+    setStatus("Checking backend…", true);
+
+    for (const base of candidates) {
+      const hit = await healthCheckOne(base);
+      if (hit) {
+        API_BASE = hit.base;
+        if (els.backendUrl) els.backendUrl.textContent = API_BASE;
+        setStatus(`Backend OK ✅ (${API_BASE})`, true);
+        return true;
+      }
+    }
+
+    if (els.backendUrl) els.backendUrl.textContent = CONFIG_BASE ? normBase(CONFIG_BASE) : "—";
+    setStatus(
+      "Backend not reachable ❌ (URL/CORS/sleeping). Check backend URL + FRONTEND_ORIGIN.",
+      false
+    );
+    return false;
+  }
+
+  async function login() {
+    const email = (els.email?.value || "").trim();
+    const password = els.password?.value || "";
+
+    if (!email || !password) {
+      setStatus("Enter email + password.", false);
+      return;
+    }
+
+    // ensure we have a working backend before trying login
+    if (!API_BASE) {
+      const ok = await detectBackend();
+      if (!ok) return;
+    }
+
+    setStatus("Logging in…", true);
+
+    try {
+      const data = await apiFetch("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const token = data && (data.token || data.jwt || data.accessToken);
+      if (!token) throw new Error("No token returned from backend.");
+
+      setToken(token);
+      setLoggedInUI(true);
+      setStatus("Logged in ✅ Redirecting…", true);
+      setAdminOut({
+        ok: true,
+        message: "Logged in",
+        tokenPreview: token.slice(0, 18) + "…",
+        apiBase: API_BASE,
+      });
+
+      window.location.href = PORTAL_PAGE;
+    } catch (e) {
+      setToken("");
+      setLoggedInUI(false);
+      setStatus(`Login failed ❌ (${e.message})`, false);
+      setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
+    }
+  }
+
+  function logout() {
+    setToken("");
+    setLoggedInUI(false);
+    setStatus("Logged out.", true);
+    setAdminOut("Logged out.");
+  }
+
+  async function whoami() {
+    try {
+      const data = await apiFetch("/admin/commissions", { method: "GET" });
+      setAdminOut({
+        ok: true,
+        message: "Token valid ✅",
+        preview: data.items?.slice(0, 1) || [],
+        count: Array.isArray(data.items) ? data.items.length : undefined,
+        apiBase: API_BASE || null,
+      });
+    } catch (e) {
+      setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
+    }
+  }
+
+  async function ping() {
+    const ok = await detectBackend();
+    if (ok) setAdminOut({ ok: true, apiBase: API_BASE });
+  }
+
+  // Init
+  if (els.backendUrl) els.backendUrl.textContent = API_BASE || "—";
+
+  if (els.loginBtn) els.loginBtn.addEventListener("click", login);
+  if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
+  if (els.pingBtn) els.pingBtn.addEventListener("click", ping);
+  if (els.whoamiBtn) els.whoamiBtn.addEventListener("click", whoami);
+
+  [els.email, els.password].filter(Boolean).forEach((el) => {
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
   });
-});
 
-/**
- * Auth
- */
-app.post("/auth/login", (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ ok: false, message: "Missing fields" });
+  setLoggedInUI(!!getToken());
 
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-    const token = makeToken(email);
-    return res.json({ ok: true, token, email });
-  }
-  return res.status(401).json({ ok: false, message: "Invalid login" });
-});
-
-app.get("/me", requireAdmin, (req, res) => {
-  res.json({ ok: true, email: req.admin.email, role: req.admin.role });
-});
-
-/**
- * Gallery
- * Public list
- */
-app.get("/gallery", (req, res) => {
-  const items = readJson(DB_FILES.gallery);
-  res.json({ ok: true, items });
-});
-
-/**
- * Upload (admin only)
- * Accepts: file + title + category
- * Adds to gallery.json and returns the new item
- */
-app.post("/upload", requireAdmin, upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ ok: false, message: "No file uploaded" });
-
-  const title = String(req.body.title || "").trim() || "Untitled";
-  const category = String(req.body.category || "other").trim() || "other";
-
-  const url = `/uploads/${req.file.filename}`;
-  const item = {
-    id: `g_${Date.now()}`,
-    title,
-    category,
-    url: `${url}`,
-    thumbUrl: `${url}`,
-    createdAt: new Date().toISOString()
-  };
-
-  const items = readJson(DB_FILES.gallery);
-  items.unshift(item);
-  writeJson(DB_FILES.gallery, items);
-
-  res.json({ ok: true, item });
-});
-
-/**
- * Commissions (public submit)
- * Supports multipart: refs (up to 3 images), plus fields.
- */
-const refsUpload = upload.fields([{ name: "refs", maxCount: 3 }]);
-
-app.post("/commissions", refsUpload, (req, res) => {
-  const name = String(req.body.name || "").trim();
-  const email = String(req.body.email || "").trim();
-  const type = String(req.body.type || "").trim();
-  const size = String(req.body.size || "").trim();
-  const brief = String(req.body.brief || "").trim();
-
-  if (!name || !email || !brief) {
-    return res.status(400).json({ ok: false, message: "name, email, brief required" });
-  }
-
-  const files = (req.files && req.files.refs) ? req.files.refs : [];
-  const refs = files.map(f => ({
-    url: `/uploads/${f.filename}`,
-    filename: f.filename,
-    mime: f.mimetype,
-    size: f.size
-  }));
-
-  const record = {
-    id: `c_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    status: "new",
-    name,
-    email,
-    type: type || "custom",
-    size: size || "digital",
-    brief,
-    refs
-  };
-
-  const items = readJson(DB_FILES.commissions);
-  items.unshift(record);
-  writeJson(DB_FILES.commissions, items);
-
-  res.json({ ok: true, commission: record });
-});
-
-/**
- * Admin commissions list
- */
-app.get("/admin/commissions", requireAdmin, (req, res) => {
-  const items = readJson(DB_FILES.commissions);
-  res.json({ ok: true, items });
-});
-
-/**
- * Enquiries (about/contact)
- * JSON body: { name, email, message }
- */
-app.post("/enquiries", (req, res) => {
-  const name = String(req.body.cname || req.body.name || "").trim();
-  const email = String(req.body.cemail || req.body.email || "").trim();
-  const message = String(req.body.cmsg || req.body.message || "").trim();
-
-  if (!name || !email || !message) {
-    return res.status(400).json({ ok: false, message: "name, email, message required" });
-  }
-
-  const record = {
-    id: `e_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    name,
-    email,
-    message
-  };
-
-  const items = readJson(DB_FILES.enquiries);
-  items.unshift(record);
-  writeJson(DB_FILES.enquiries, items);
-
-  res.json({ ok: true });
-});
-
-/**
- * Error handler
- */
-app.use((err, req, res, next) => {
-  res.status(400).json({ ok: false, message: err?.message || "Error" });
-});
-
-app.listen(PORT, () => {
-  console.log(`Amelia backend running on port ${PORT}`);
-});
+  // detect backend (but don't block page)
+  detectBackend();
+})();
