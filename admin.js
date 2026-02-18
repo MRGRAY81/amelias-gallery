@@ -3,39 +3,36 @@
  * - Auto-detects backend URL (health check)
  * - Logs in with email/password
  * - Stores token in localStorage
- * - Provides helper for authenticated fetch
- * - Redirects to admin portal page after login
+ * - Authenticated fetch helper
+ * - Redirects to admin portal after login
  */
 (function () {
-  // ✅ Change this if you name your dashboard differently
   const PORTAL_PAGE = "./admin-portal.html";
+  const TOKEN_KEY = "amelias_admin_token";
 
-  // 1) Prefer explicit config if provided (best for your own server later)
+  // Prefer explicit config if provided
   const CONFIG_BASE =
     (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
 
-  // 2) Fallback guesses (Render names + derived from current host)
   function buildCandidates() {
     const candidates = [];
 
-    // Previous defaults (keep as candidates)
+    // Known services (keep as candidates)
     candidates.push("https://amelias-gallery-backend.onrender.com");
     candidates.push("https://amelias-gallery.onrender.com");
 
-    // If we're on a Render static site like: https://amelias-gallery-1.onrender.com
-    // then try removing "-1"
+    // Derive from current render host
     try {
       const host = window.location.host; // e.g. amelias-gallery-1.onrender.com
       const proto = window.location.protocol; // https:
       if (host.endsWith(".onrender.com")) {
-        const base = `${proto}//${host}`;
-        candidates.push(base);
+        candidates.push(`${proto}//${host}`);
 
-        // remove "-1" / "-2" suffix patterns
+        // remove "-1" / "-2"
         const cleaned = host.replace(/-\d+\.onrender\.com$/, ".onrender.com");
         candidates.push(`${proto}//${cleaned}`);
 
-        // sometimes people name backend "-backend"
+        // try "-backend"
         const maybeBackend = cleaned.replace(
           ".onrender.com",
           "-backend.onrender.com"
@@ -44,14 +41,13 @@
       }
     } catch {}
 
-    // If CONFIG_BASE is set, prefer it first
     if (CONFIG_BASE) candidates.unshift(CONFIG_BASE);
 
     // de-dupe + trim trailing slash
-    return Array.from(new Set(candidates.map((c) => c.replace(/\/$/, ""))));
+    return Array.from(new Set(candidates.map((c) => String(c).replace(/\/$/, ""))));
   }
 
-  let API_BASE = (CONFIG_BASE || "").replace(/\/$/, "");
+  let API_BASE = String(CONFIG_BASE || "").replace(/\/$/, "");
 
   const els = {
     backendUrl: document.getElementById("backendUrl"),
@@ -60,14 +56,11 @@
     password: document.getElementById("password"),
     loginBtn: document.getElementById("loginBtn"),
     logoutBtn: document.getElementById("logoutBtn"),
-    loginPanel: document.getElementById("loginPanel"),
     adminPanel: document.getElementById("adminPanel"),
     pingBtn: document.getElementById("pingBtn"),
     whoamiBtn: document.getElementById("whoamiBtn"),
     adminOutText: document.getElementById("adminOutText"),
   };
-
-  const TOKEN_KEY = "amelias_admin_token";
 
   function setStatus(msg, ok = true) {
     if (!els.status) return;
@@ -94,10 +87,9 @@
     else localStorage.setItem(TOKEN_KEY, token);
   }
 
-  function clearTokenAndUI(message) {
-    setToken("");
-    setLoggedInUI(false);
-    if (message) setStatus(message, false);
+  function setLoggedInUI(isLoggedIn) {
+    if (els.logoutBtn) els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    if (els.adminPanel) els.adminPanel.style.display = isLoggedIn ? "block" : "none";
   }
 
   function authedHeaders(extra = {}) {
@@ -108,7 +100,7 @@
   }
 
   async function rawFetch(base, path, opts = {}) {
-    const url = base.replace(/\/$/, "") + path;
+    const url = String(base).replace(/\/$/, "") + path;
     return fetch(url, opts);
   }
 
@@ -123,10 +115,8 @@
         ...opts,
         headers: authedHeaders(opts.headers || {}),
       });
-    } catch (err) {
-      throw new Error(
-        "Failed to fetch (check backend URL, CORS FRONTEND_ORIGIN, or backend sleeping)."
-      );
+    } catch {
+      throw new Error("Failed to fetch (backend URL/CORS/backend sleeping).");
     }
 
     const ct = res.headers.get("content-type") || "";
@@ -138,80 +128,25 @@
     }
 
     if (!res.ok) {
-      // If token is wrong/expired, clean up
+      // Token invalid → clear session
       if (res.status === 401 || res.status === 403) {
-        clearTokenAndUI("Session expired / invalid token. Please login again.");
+        setToken("");
+        setLoggedInUI(false);
       }
-
       const msg =
         (data && (data.message || data.error)) ||
         `Request failed: ${res.status} ${res.statusText}`;
       throw new Error(msg);
     }
+
     return data;
-  }
-
-  function setLoggedInUI(isLoggedIn) {
-    if (els.logoutBtn)
-      els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
-    if (els.adminPanel)
-      els.adminPanel.style.display = isLoggedIn ? "block" : "none";
-
-    // Add portal + clear token buttons once (inside adminPanel)
-    ensureExtraButtons(isLoggedIn);
-  }
-
-  function ensureExtraButtons(isLoggedIn) {
-    if (!els.adminPanel) return;
-
-    // create container once
-    let row = document.getElementById("portalRow");
-    if (!row) {
-      row = document.createElement("div");
-      row.id = "portalRow";
-      row.className = "row-actions";
-      row.style.marginTop = "10px";
-      els.adminPanel.prepend(row);
-    }
-
-    // Portal button
-    let portalBtn = document.getElementById("goPortalBtn");
-    if (!portalBtn) {
-      portalBtn = document.createElement("button");
-      portalBtn.id = "goPortalBtn";
-      portalBtn.type = "button";
-      portalBtn.className = "btn primary";
-      portalBtn.textContent = "Go to Admin Portal";
-      portalBtn.addEventListener("click", () => {
-        window.location.href = PORTAL_PAGE;
-      });
-      row.appendChild(portalBtn);
-    }
-
-    // Clear token button
-    let clearBtn = document.getElementById("clearTokenBtn");
-    if (!clearBtn) {
-      clearBtn = document.createElement("button");
-      clearBtn.id = "clearTokenBtn";
-      clearBtn.type = "button";
-      clearBtn.className = "btn ghost";
-      clearBtn.textContent = "Clear Token";
-      clearBtn.style.marginLeft = "8px";
-      clearBtn.addEventListener("click", () => {
-        clearTokenAndUI("Token cleared. Please login again.");
-        setAdminOut("Token cleared.");
-      });
-      row.appendChild(clearBtn);
-    }
-
-    portalBtn.style.display = isLoggedIn ? "inline-flex" : "none";
-    clearBtn.style.display = isLoggedIn ? "inline-flex" : "none";
   }
 
   async function healthCheckOne(base) {
     try {
       const res = await rawFetch(base, "/health", { method: "GET" });
       if (!res.ok) return null;
+
       const ct = res.headers.get("content-type") || "";
       const data = ct.includes("application/json") ? await res.json() : await res.text();
       return { base, data };
@@ -222,16 +157,15 @@
 
   async function detectBackend() {
     const candidates = buildCandidates();
-
     setStatus("Checking backend…", true);
 
     for (const base of candidates) {
       const hit = await healthCheckOne(base);
       if (hit) {
-        API_BASE = hit.base;
+        API_BASE = String(hit.base).replace(/\/$/, "");
         if (els.backendUrl) els.backendUrl.textContent = API_BASE;
         setStatus(`Backend OK ✅ (${API_BASE})`, true);
-        return hit.data;
+        return true;
       }
     }
 
@@ -240,15 +174,13 @@
       "Backend not reachable ❌ (URL/CORS/sleeping). Check Render backend URL + FRONTEND_ORIGIN.",
       false
     );
-    return null;
+    return false;
   }
 
   async function validateTokenSilently() {
     const token = getToken();
     if (!token) return false;
-
     try {
-      // any protected endpoint works
       await apiFetch("/admin/commissions", { method: "GET" });
       return true;
     } catch {
@@ -265,6 +197,12 @@
       return;
     }
 
+    // ✅ Ensure we have a working backend URL before trying login
+    if (!API_BASE) {
+      const ok = await detectBackend();
+      if (!ok) return;
+    }
+
     setStatus("Logging in…", true);
 
     try {
@@ -279,14 +217,14 @@
 
       setToken(token);
       setLoggedInUI(true);
-      setStatus("Logged in ✅ Token saved. Redirecting…", true);
+      setStatus("Logged in ✅ Redirecting…", true);
       setAdminOut({
         ok: true,
         message: "Logged in",
+        apiBase: API_BASE,
         tokenPreview: token.slice(0, 18) + "…",
       });
 
-      // ✅ Go to dashboard/portal
       window.location.href = PORTAL_PAGE;
     } catch (e) {
       setToken("");
@@ -309,9 +247,9 @@
       setAdminOut({
         ok: true,
         message: "Token valid ✅",
-        preview: data.items?.slice(0, 1) || [],
+        apiBase: API_BASE,
         count: Array.isArray(data.items) ? data.items.length : undefined,
-        apiBase: API_BASE || null,
+        preview: data.items?.slice(0, 1) || [],
       });
     } catch (e) {
       setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
@@ -319,13 +257,18 @@
   }
 
   async function ping() {
-    const data = await detectBackend();
-    if (data) setAdminOut(data);
+    const ok = await detectBackend();
+    if (ok) {
+      try {
+        const data = await apiFetch("/health", { method: "GET" });
+        setAdminOut({ ok: true, apiBase: API_BASE, health: data });
+      } catch (e) {
+        setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
+      }
+    }
   }
 
-  // Init
-  if (els.backendUrl) els.backendUrl.textContent = API_BASE || "—";
-
+  // Init bindings
   if (els.loginBtn) els.loginBtn.addEventListener("click", login);
   if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
   if (els.pingBtn) els.pingBtn.addEventListener("click", ping);
@@ -337,18 +280,24 @@
     });
   });
 
+  // Boot
   (async function boot() {
+    if (els.backendUrl) els.backendUrl.textContent = API_BASE || "—";
     setLoggedInUI(!!getToken());
+
+    // detect backend first
     await detectBackend();
 
-    // If already logged in, verify token and show portal button
+    // if token exists, validate it
     if (getToken()) {
       const ok = await validateTokenSilently();
       if (ok) {
-        setStatus("Session active ✅ (token valid)", true);
         setLoggedInUI(true);
+        setStatus("Session active ✅ (token valid)", true);
       } else {
-        clearTokenAndUI("Session invalid. Please login again.");
+        setToken("");
+        setLoggedInUI(false);
+        setStatus("Session invalid. Please login again.", false);
       }
     }
   })();
