@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Amelia’s Gallery</title>
   <meta name="description" content="Amelia’s Gallery — artwork & commissions (family managed)." />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=3" />
 </head>
 
-<body data-page="home">
+<body data-page="home" class="home-two-rows">
 
   <header class="topbar">
     <a class="brand-left" href="./index.html" aria-label="Home">
@@ -27,10 +27,24 @@
 
   <main class="shell">
 
-    <section class="hero">
-      <div class="hero-banner image-header">
-        <div class="header-crop">
-          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration" />
+    <!-- ✅ NEW: Japanese frame hero -->
+    <section class="hero hero-frame">
+      <div class="frame-bg" role="img" aria-label="Amelia’s Gallery cherry blossom frame">
+        <div class="frame-inset">
+          <div class="frame-title">
+            <h1 class="script-title">Amelia’s Gallery</h1>
+            <p class="frame-sub">Original artwork • Commissions • Family managed</p>
+          </div>
+
+          <!-- 2-row preview inside the frame -->
+          <div class="frame-gallery">
+            <div class="grid frame-grid" id="homeGrid"></div>
+          </div>
+
+          <div class="frame-actions">
+            <a class="btn" href="./gallery.html">Explore Gallery</a>
+            <a class="btn ghost" href="./commissions.html">Request a Commission</a>
+          </div>
         </div>
       </div>
     </section>
@@ -40,19 +54,6 @@
         <h2>Welcome to Amelia’s Gallery ✨</h2>
         <p>Browse artwork, request commissions, and support a young artist (family managed).</p>
       </div>
-
-      <div class="home-actions">
-        <a class="btn" href="./gallery.html">Explore Gallery</a>
-        <a class="btn ghost" href="./commissions.html">Request a Commission</a>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <h2>Featured</h2>
-        <p>Click to view bigger ✨</p>
-      </div>
-      <div class="grid" id="homeGrid"></div>
     </section>
 
     <section class="cta">
@@ -76,7 +77,6 @@
     </div>
   </div>
 
-  <script src="./script.js"></script>
-
+  <script src="./script.js?v=3"></script>
 </body>
 </html>
