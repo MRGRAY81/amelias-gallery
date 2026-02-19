@@ -55,7 +55,37 @@ body{
   z-index:1;
   pointer-events:none;
 }
+/* =========================
+   Visible Login Button
+========================= */
+.login-btn{
+  position:absolute;
+  right: 28px;
+  top: 22px;
 
+  padding:6px 12px;
+  border-radius:999px;
+  text-decoration:none;
+
+  font-size:12px;
+  font-weight:900;
+
+  background:rgba(255,255,255,.75);
+  border:1px solid var(--stroke);
+  color:rgba(42,37,48,.78);
+
+  box-shadow:0 6px 18px rgba(20,12,5,.08);
+  backdrop-filter: blur(6px);
+
+  z-index:25;
+  transition: all .15s ease;
+}
+
+.login-btn:hover{
+  background:rgba(255,255,255,.92);
+  color:rgba(42,37,48,.95);
+  transform: translateY(-1px);
+}
 /* =========================
    Header Nav Hotspots (INVISIBLE)
 ========================= */
