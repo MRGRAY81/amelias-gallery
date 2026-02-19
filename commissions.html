@@ -4,23 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact — Amelia’s Gallery</title>
-  <meta name="description" content="Contact Amelia’s Gallery (family managed)." />
+  <meta name="description" content="Contact — Amelia’s Gallery (family managed)." />
   <link rel="stylesheet" href="./styles.css?v=12" />
 </head>
 
 <body data-page="contact">
-  <header class="image-header">
-    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager" />
 
-    <!-- Invisible nav hotspots -->
-    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
-    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
-    <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
-    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
-
-    <!-- Tower hotspot -->
-    <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
-  </header>
+  <!-- Shared Header -->
+  <div id="site-header"></div>
 
   <main class="shell">
     <section class="section">
@@ -31,11 +22,11 @@
 
       <div class="panel">
         <p>
-          If you’d like to ask about a drawing, commission artwork, or purchase a piece,
-          please send a message below.
+          If you’d like to ask about a drawing, commission artwork,
+          or purchase a piece, please send a message below ✨
         </p>
 
-        <form class="contact-form">
+        <form class="form">
           <label>
             Name
             <input type="text" placeholder="Your name" required />
@@ -57,11 +48,28 @@
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="image-footer">
     <img src="./amelias-gallery-footer.png" alt="Footer" />
-    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
+    <div class="footer-note">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </div>
   </footer>
 
+  <!-- Scripts -->
+  <script src="./config.js"></script>
+
+  <!-- Header Loader -->
+  <script>
+    fetch("./header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("site-header").innerHTML = html;
+        if (window.AMELIAS_SITEAUTH_REFRESH) window.AMELIAS_SITEAUTH_REFRESH();
+      });
+  </script>
+
   <script src="./site-auth.js?v=1"></script>
+
 </body>
 </html>
