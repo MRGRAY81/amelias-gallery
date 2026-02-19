@@ -4,40 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About — Amelia’s Gallery</title>
-  <meta name="description" content="About & contact — Amelia’s Gallery." />
-  <link rel="stylesheet" href="./styles.css" />
+  <meta name="description" content="About — Amelia’s Gallery (family managed)." />
+  <link rel="stylesheet" href="./styles.css?v=4" />
 </head>
 
 <body data-page="about">
 
-  <header class="topbar">
-    <a class="brand-left" href="./index.html" aria-label="Home">
-      <img class="amark-img" src="./a-mark.png" alt="Amelia’s Gallery mark" onerror="this.style.display='none'">
-      <span class="amark-fallback" aria-hidden="true">A</span>
-    </a>
+  <!-- 🌸 Header Image + Clickable Word Links -->
+  <header class="image-header">
+    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" />
 
-    <nav class="nav nav-buttons" aria-label="Primary">
-      <a class="btnlink" href="./index.html">Home</a>
-      <a class="btnlink" href="./gallery.html">Gallery</a>
-      <a class="btnlink" href="./commissions.html">Commissions</a>
-      <a class="btnlink active" href="./about.html">About / Contact</a>
-      <a class="btnlink admin" href="./admin.html">Login</a>
-    </nav>
+    <!-- 🎯 Word hotspots (Home | Gallery | Contact | About) -->
+    <a class="nav-hotspot nav-home" href="./index.html" aria-label="Home"></a>
+    <a class="nav-hotspot nav-gallery" href="./gallery.html" aria-label="Gallery"></a>
+    <a class="nav-hotspot nav-contact" href="./contact.html" aria-label="Contact"></a>
+    <a class="nav-hotspot nav-about" href="./about.html" aria-label="About"></a>
+
+    <!-- 🗼 Hidden admin login hotspot (tower) -->
+    <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
 
   <main class="shell">
 
-    <section class="hero">
-      <div class="hero-banner image-header">
-        <div class="header-crop">
-          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration" />
-        </div>
-      </div>
-    </section>
-
     <section class="section">
       <div class="section-head">
-        <h2>About / Contact</h2>
+        <h2>About</h2>
         <p>Family managed — we’ll reply as soon as we can.</p>
       </div>
 
@@ -45,15 +36,17 @@
         <h3>About Amelia</h3>
         <p>Amelia loves creating drawings and illustrations. This site is managed by family.</p>
 
-        <h3 style="margin-top:14px;">Contact</h3>
-        <p>If you already have a contact form embed, we can place it here — otherwise we can wire this to your backend next.</p>
+        <h3 style="margin-top:14px;">A quick note</h3>
+        <p>If you’re looking to request artwork, head to the Contact page — we’ll get back to you as soon as possible.</p>
       </div>
     </section>
 
-    <footer class="footer">
-      Site managed by family • Supported by Uncle G & Del 💛
-    </footer>
   </main>
+
+  <!-- 🌸 Footer Image -->
+  <footer class="image-footer">
+    <img src="./amelias-gallery-footer.png" alt="Amelia’s Gallery footer" />
+  </footer>
 
 </body>
 </html>
