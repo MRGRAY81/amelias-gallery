@@ -5,26 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact — Amelia’s Gallery</title>
   <meta name="description" content="Contact & commission requests — Amelia’s Gallery (family managed)." />
-  <link rel="stylesheet" href="./styles.css?v=5" />
+  <link rel="stylesheet" href="./styles.css?v=7" />
 </head>
 
 <body data-page="contact">
 
-  <!-- 🌸 Japanese Header -->
+  <!-- 🌸 Header Image (with clickable word hotspots) -->
   <header class="image-header">
     <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery">
 
-    <!-- 🎯 Hidden tower login -->
+    <!-- ✅ Clickable words on the header image -->
+    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
+    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
+    <a href="./contact.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
+    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
+
+    <!-- 🗼 Hidden admin login hotspot (tower) -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
-
-  <!-- 🌸 Navigation -->
-  <nav class="nav nav-buttons" aria-label="Primary">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink" href="./gallery.html">Gallery</a>
-    <a class="btnlink active" href="./commissions.html">Contact</a>
-    <a class="btnlink" href="./about.html">About</a>
-  </nav>
 
   <main class="shell">
 
@@ -75,15 +73,13 @@
 
   </main>
 
-  <!-- 🌸 Japanese Footer -->
+  <!-- 🌸 Footer Image -->
   <footer class="image-footer">
     <img src="./amelias-gallery-footer.png" alt="Footer">
-    <div class="footer-note">
-      Site managed by family • Supported by Uncle G & Del 💛
-    </div>
+    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <!-- ✅ Wire to backend if config.js exists, else show friendly message -->
+  <!-- ✅ Wire to backend if config.js exists -->
   <script src="./config.js"></script>
   <script>
     (function () {
@@ -120,7 +116,6 @@
         setStatus("Sending…");
 
         try {
-          // If it's a commission, send to /commissions using 'brief'
           if (type === "commission") {
             const res = await fetch(base + "/commissions", {
               method: "POST",
@@ -129,7 +124,6 @@
             });
             if (!res.ok) throw new Error("Send failed");
           } else {
-            // Otherwise send to /enquiries
             const res = await fetch(base + "/enquiries", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
