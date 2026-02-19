@@ -5,23 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Portal — Amelia’s Gallery</title>
   <meta name="description" content="Family-only admin portal." />
-  <link rel="stylesheet" href="./styles.css?v=10" />
+  <link rel="stylesheet" href="./styles.css?v=12" />
   <link rel="stylesheet" href="./admin-portal.css?v=10" />
 </head>
 
 <body data-page="admin-portal">
+  <!-- Shared Header -->
+  <div id="site-header"></div>
 
-  <header class="image-header">
-    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" loading="eager" />
-    <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
-  </header>
-
-  <nav class="nav nav-buttons" aria-label="Primary">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink" href="./gallery.html">Gallery</a>
-    <a class="btnlink" href="./commissions.html">Contact</a>
-    <a class="btnlink" href="./about.html">About</a>
-  </nav>
+  <!-- REMOVE old nav pills (hotspots + visible login are in header.html now) -->
 
   <main class="shell portal-shell">
     <!-- your portal markup stays the same inside here -->
@@ -33,8 +25,13 @@
     <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <script src="./site-auth.js?v=1"></script>
+  <!-- Scripts (order matters) -->
   <script src="./config.js"></script>
+  <script src="./site-auth.js?v=1"></script>
+  <script src="./admin-portal.js?v=10"></script>
+  <script src="./header-loader.js?v=1"></script>
+</body>
+</html>  <script src="./config.js"></script>
   <script src="./admin-portal.js?v=10"></script>
 </body>
 </html>
