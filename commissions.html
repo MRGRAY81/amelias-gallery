@@ -3,73 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commissions — Amelia’s Gallery</title>
-  <meta name="description" content="Commission requests — Amelia’s Gallery." />
-  <link rel="stylesheet" href="./styles.css" />
+  <title>Contact — Amelia’s Gallery</title>
+  <meta name="description" content="Contact & commission requests — Amelia’s Gallery (family managed)." />
+  <link rel="stylesheet" href="./styles.css?v=5" />
 </head>
 
-<body data-page="commissions">
+<body data-page="contact">
 
-  <header class="topbar">
-    <a class="brand-left" href="./index.html" aria-label="Home">
-      <img class="amark-img" src="./a-mark.png" alt="Amelia’s Gallery mark" onerror="this.style.display='none'">
-      <span class="amark-fallback" aria-hidden="true">A</span>
-    </a>
+  <!-- 🌸 Japanese Header -->
+  <header class="image-header">
+    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery">
 
-    <nav class="nav nav-buttons" aria-label="Primary">
-      <a class="btnlink" href="./index.html">Home</a>
-      <a class="btnlink" href="./gallery.html">Gallery</a>
-      <a class="btnlink active" href="./commissions.html">Commissions</a>
-      <a class="btnlink" href="./about.html">About / Contact</a>
-      <a class="btnlink admin" href="./admin.html">Login</a>
-    </nav>
+    <!-- 🎯 Hidden tower login -->
+    <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
+
+  <!-- 🌸 Navigation -->
+  <nav class="nav nav-buttons" aria-label="Primary">
+    <a class="btnlink" href="./index.html">Home</a>
+    <a class="btnlink" href="./gallery.html">Gallery</a>
+    <a class="btnlink active" href="./commissions.html">Contact</a>
+    <a class="btnlink" href="./about.html">About</a>
+  </nav>
 
   <main class="shell">
 
-    <section class="hero">
-      <div class="hero-banner image-header">
-        <div class="header-crop">
-          <img src="./amelias-header.jpg" alt="Amelia’s Gallery header illustration" />
-        </div>
-      </div>
-    </section>
-
     <section class="section">
       <div class="section-head">
-        <h2>Request a Commission ✨</h2>
-        <p>Tell us what you’d like — a grown-up will reply.</p>
+        <h2>Contact ✨</h2>
+        <p>For commission requests or enquiries — a grown-up will reply.</p>
       </div>
 
       <div class="panel">
-        <h3>Commission Form</h3>
-        <p>If you already have a form embed (Google Form / MailerLite / etc), paste it here.</p>
+        <h3>Message Amelia’s Gallery</h3>
+        <p class="muted">
+          Choose what you need below. If it’s a commission, tell us the idea and any details that help.
+        </p>
 
-        <!-- Optional quick form (works without backend) -->
-        <form class="form" action="mailto:your-email@example.com" method="post" enctype="text/plain">
+        <!-- ✅ CONTACT / COMMISSION FORM -->
+        <form class="form" id="contactForm">
           <label>
             Your name
             <input name="name" required />
           </label>
+
           <label>
             Your email
             <input name="email" type="email" required />
           </label>
-          <label>
-            What would you like Amelia to create?
-            <textarea name="request" rows="5" required></textarea>
-          </label>
-          <button class="btn" type="submit">Send Request</button>
-        </form>
 
-        <p class="fineprint">We can swap this to a proper form endpoint next.</p>
+          <label>
+            What is this about?
+            <select name="type" required>
+              <option value="commission" selected>Commission request</option>
+              <option value="sales">Sales / buying artwork</option>
+              <option value="general">General enquiry</option>
+            </select>
+          </label>
+
+          <label>
+            Your message
+            <textarea name="message" rows="5" required placeholder="Tell us what you’d like…"></textarea>
+          </label>
+
+          <button class="btn" type="submit">Send</button>
+
+          <div class="fineprint" id="formStatus" aria-live="polite"></div>
+        </form>
       </div>
     </section>
 
-    <footer class="footer">
-      Site managed by family • Supported by Uncle G & Del 💛
-    </footer>
   </main>
 
+  <!-- 🌸 Japanese Footer -->
+  <footer class="image-footer">
+    <img src="./amelias-gallery-footer.png" alt="Footer">
+    <div class="footer-note">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </div>
+  </footer>
+
+  <!-- ✅ Wire to backend if config.js exists, else show friendly message -->
+  <script src="./config.js"></script>
+  <script>
+    (function () {
+      const form = document.getElementById("contactForm");
+      const statusEl = document.getElementById("formStatus");
+      if (!form) return;
+
+      function setStatus(msg) {
+        if (statusEl) statusEl.textContent = msg || "";
+      }
+
+      const API_BASE = (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
+      const base = String(API_BASE).replace(/\/$/, "");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const fd = new FormData(form);
+        const name = String(fd.get("name") || "").trim();
+        const email = String(fd.get("email") || "").trim();
+        const type = String(fd.get("type") || "commission");
+        const message = String(fd.get("message") || "").trim();
+
+        if (!name || !email || !message) {
+          setStatus("Please fill in all fields.");
+          return;
+        }
+
+        if (!base) {
+          setStatus("Backend not set yet. Add API_BASE in config.js to enable sending.");
+          return;
+        }
+
+        setStatus("Sending…");
+
+        try {
+          // If it's a commission, send to /commissions using 'brief'
+          if (type === "commission") {
+            const res = await fetch(base + "/commissions", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, email, brief: message }),
+            });
+            if (!res.ok) throw new Error("Send failed");
+          } else {
+            // Otherwise send to /enquiries
+            const res = await fetch(base + "/enquiries", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, email, message }),
+            });
+            if (!res.ok) throw new Error("Send failed");
+          }
+
+          form.reset();
+          setStatus("Sent ✅ Thank you! We’ll reply soon.");
+        } catch (err) {
+          setStatus("Couldn’t send right now ❌ Please try again in a moment.");
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
