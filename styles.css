@@ -23,7 +23,7 @@ body{
 }
 
 /* =========================
-   Japanese Header + Hotspots
+   Header / Footer Images
 ========================= */
 
 .image-header{
@@ -42,60 +42,54 @@ body{
   box-shadow:var(--shadow);
 }
 
-/* Clickable "word" hotspots over the header image
-   NOTE: These are percentage-based so they scale on mobile.
-   If alignment is slightly off, just tweak left/top/width/height a tiny bit.
-*/
-.nav-hotspot{
-  position:absolute;
-  display:block;
-  border-radius:12px;
-  /* debug: uncomment next line to see hotspots */
-  /* background: rgba(255,0,0,.15); */
-}
-
-/* These positions assume the words are along the top-ish area.
-   If your header text sits elsewhere, tweak these 4 blocks.
-*/
-.nav-home{
-  left: 38%;
-  top: 14%;
-  width: 8%;
-  height: 10%;
-}
-
-.nav-gallery{
-  left: 47%;
-  top: 14%;
-  width: 9%;
-  height: 10%;
-}
-
-.nav-contact{
-  left: 57%;
-  top: 14%;
-  width: 10%;
-  height: 10%;
-}
-
-.nav-about{
-  left: 68%;
-  top: 14%;
-  width: 8%;
-  height: 10%;
-}
-
 /* Hidden tower login hotspot */
 .tower-login{
   position:absolute;
   display:block;
-  /* debug: uncomment to see hotspot */
-  /* background: rgba(0,255,255,.18); */
   left: 86%;
   top: 18%;
   width: 10%;
   height: 55%;
   border-radius:18px;
+  /* debug: uncomment to see hotspot */
+  /* background: rgba(0,255,255,.18); */
+}
+
+/* =========================
+   Shadow Nav Buttons
+========================= */
+
+.nav{
+  max-width:1200px;
+  margin:12px auto 0;
+  padding:0 16px;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.btnlink{
+  text-decoration:none;
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.70);
+  border:1px solid var(--stroke);
+  color:rgba(42,37,48,.80);
+  font-weight:950;
+  transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+
+.btnlink:hover{
+  background:rgba(255,255,255,.86);
+  box-shadow:0 12px 28px rgba(20,12,5,.10);
+  transform: translateY(-1px);
+  color:rgba(42,37,48,.92);
+}
+
+.btnlink.active{
+  background:rgba(255,255,255,.92);
+  box-shadow:0 14px 32px rgba(20,12,5,.12);
 }
 
 /* =========================
@@ -449,9 +443,4 @@ body{
   .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   .cta{ flex-direction:column; align-items:flex-start; }
   .card img{ height:140px; }
-
-  /* Make hotspots a bit taller on small screens */
-  .nav-home,.nav-gallery,.nav-contact,.nav-about{
-    height: 12%;
-  }
 }
