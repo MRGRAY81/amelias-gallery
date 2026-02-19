@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact — Amelia’s Gallery</title>
   <meta name="description" content="Contact & commission requests — Amelia’s Gallery (family managed)." />
-  <link rel="stylesheet" href="./styles.css?v=10" />
+  <link rel="stylesheet" href="./styles.css?v=11" />
 </head>
 
 <body data-page="contact">
@@ -28,37 +28,30 @@
       </div>
 
       <div class="panel">
-        <h3>Message Amelia’s Gallery</h3>
-        <p class="muted">Choose what you need below. If it’s a commission, tell us the idea and any details that help.</p>
+        <h3>Send a message</h3>
+        <p>Please be kind and include what you’d like (size, style, colours, deadline).</p>
 
-        <form class="form" id="contactForm">
+        <form class="form" id="commissionForm">
           <label>
             Your name
             <input name="name" required />
           </label>
 
           <label>
-            Your email
+            Email
             <input name="email" type="email" required />
           </label>
 
           <label>
-            What is this about?
-            <select name="type" required>
-              <option value="commission" selected>Commission request</option>
-              <option value="sales">Sales / buying artwork</option>
-              <option value="general">General enquiry</option>
-            </select>
-          </label>
-
-          <label>
-            Your message
-            <textarea name="message" rows="5" required placeholder="Tell us what you’d like…"></textarea>
+            What would you like?
+            <textarea name="message" rows="5" required></textarea>
           </label>
 
           <button class="btn" type="submit">Send</button>
-          <div class="fineprint" id="formStatus" aria-live="polite"></div>
+          <div class="fineprint">Family-managed • We reply as soon as possible 💛</div>
         </form>
+
+        <div class="status" id="statusBox" style="display:none;"></div>
       </div>
     </section>
   </main>
@@ -68,66 +61,8 @@
     <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <script src="./config.js"></script>
+  <script src="./config.js?v=1"></script>
   <script src="./site-auth.js?v=1"></script>
-  <script>
-    (function () {
-      const form = document.getElementById("contactForm");
-      const statusEl = document.getElementById("formStatus");
-      if (!form) return;
-
-      function setStatus(msg) {
-        if (statusEl) statusEl.textContent = msg || "";
-      }
-
-      const API_BASE = (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
-      const base = String(API_BASE).replace(/\/$/, "");
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const fd = new FormData(form);
-        const name = String(fd.get("name") || "").trim();
-        const email = String(fd.get("email") || "").trim();
-        const type = String(fd.get("type") || "commission");
-        const message = String(fd.get("message") || "").trim();
-
-        if (!name || !email || !message) {
-          setStatus("Please fill in all fields.");
-          return;
-        }
-
-        if (!base) {
-          setStatus("Backend not set yet. Add API_BASE in config.js to enable sending.");
-          return;
-        }
-
-        setStatus("Sending…");
-
-        try {
-          if (type === "commission") {
-            const res = await fetch(base + "/commissions", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, email, brief: message }),
-            });
-            if (!res.ok) throw new Error("Send failed");
-          } else {
-            const res = await fetch(base + "/enquiries", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, email, message }),
-            });
-            if (!res.ok) throw new Error("Send failed");
-          }
-
-          form.reset();
-          setStatus("Sent ✅ Thank you! We’ll reply soon.");
-        } catch (err) {
-          setStatus("Couldn’t send right now ❌ Please try again in a moment.");
-        }
-      });
-    })();
-  </script>
+  <script src="./commissions.js?v=1"></script>
 </body>
 </html>
