@@ -71,30 +71,31 @@ body{
 
 /* Re-aligned to sit over:
    Home | Gallery | Contact | About */
+
 .nav-home{
-  left: 32%;
-  top: 30%;
+  left: 28%;
+  top: 40%;
   width: 11%;
   height: 14%;
 }
 
 .nav-gallery{
-  left: 44%;
-  top: 30%;
+  left: 40%;
+  top: 40%;
   width: 13%;
   height: 14%;
 }
 
 .nav-contact{
-  left: 59%;
-  top: 30%;
+  left: 55%;
+  top: 40%;
   width: 13%;
   height: 14%;
 }
 
 .nav-about{
-  left: 74%;
-  top: 30%;
+  left: 70%;
+  top: 40%;
   width: 11%;
   height: 14%;
 }
