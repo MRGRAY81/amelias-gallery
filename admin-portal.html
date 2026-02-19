@@ -6,6 +6,7 @@
   <title>Admin Portal — Amelia’s Gallery</title>
   <meta name="description" content="Family-only admin portal." />
   <link rel="stylesheet" href="./styles.css?v=7" />
+  <link rel="stylesheet" href="./admin-portal.css?v=7" />
 </head>
 
 <body data-page="admin-portal">
@@ -20,11 +21,11 @@
     <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
     <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
 
-    <!-- 🗼 Hidden admin login hotspot (optional; harmless) -->
+    <!-- 🗼 Hidden admin login hotspot (tower) -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
 
-  <main class="shell portal-shell">
+  <main class="portal-shell">
 
     <section class="portal-top">
       <div>
@@ -94,43 +95,3 @@
 
           <div class="detail-block">
             <div class="detail-name" id="nameText">—</div>
-            <div class="detail-email mono" id="emailText">—</div>
-          </div>
-
-          <div class="detail-block">
-            <div class="muted small">Message / Brief</div>
-            <div class="detail-message" id="messageText">—</div>
-          </div>
-
-          <div class="detail-block" id="refsBlock" style="display:none;">
-            <div class="muted small">Reference Images</div>
-            <div class="refs" id="refs"></div>
-          </div>
-
-          <div class="detail-block">
-            <div class="muted small">Notes (internal)</div>
-            <textarea id="notesInput" rows="4" placeholder="Add a note…"></textarea>
-          </div>
-
-          <div class="detail-save">
-            <button class="btn primary" id="saveBtn" type="button">Save</button>
-            <span class="muted small" id="saveStatus"></span>
-          </div>
-        </div>
-
-        <pre class="codebox" id="debugOut" style="display:none;"></pre>
-      </section>
-    </section>
-
-  </main>
-
-  <!-- 🌸 Japanese Footer -->
-  <footer class="image-footer">
-    <img src="./amelias-gallery-footer.png" alt="Amelia’s Gallery footer" />
-    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
-  </footer>
-
-  <script src="./config.js"></script>
-  <script src="./admin-portal.js?v=7"></script>
-</body>
-</html>
