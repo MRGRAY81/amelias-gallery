@@ -5,27 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Portal — Amelia’s Gallery</title>
   <meta name="description" content="Family-only admin portal." />
-  <link rel="stylesheet" href="./styles.css?v=6" />
+  <link rel="stylesheet" href="./styles.css?v=7" />
 </head>
 
 <body data-page="admin-portal">
 
-  <!-- 🌸 Japanese Header -->
+  <!-- 🌸 Header Image (with clickable word hotspots) -->
   <header class="image-header">
-    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" />
+    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" loading="eager" />
+
+    <!-- ✅ Clickable words on the header image -->
+    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
+    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
+    <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
+    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
 
     <!-- 🗼 Hidden admin login hotspot (optional; harmless) -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
-
-  <!-- 🌸 Public Nav (matches site) -->
-  <nav class="nav nav-buttons" aria-label="Primary">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink" href="./gallery.html">Gallery</a>
-    <!-- Contact is commissions.html in your build -->
-    <a class="btnlink" href="./commissions.html">Contact</a>
-    <a class="btnlink" href="./about.html">About</a>
-  </nav>
 
   <main class="shell portal-shell">
 
@@ -134,6 +131,6 @@
   </footer>
 
   <script src="./config.js"></script>
-  <script src="./admin-portal.js?v=6"></script>
+  <script src="./admin-portal.js?v=7"></script>
 </body>
 </html>
