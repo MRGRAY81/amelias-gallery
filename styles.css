@@ -22,98 +22,96 @@ body{
     linear-gradient(var(--bg), var(--bg2));
 }
 
-a{ color:inherit; }
-.muted{ color:var(--muted); }
+/* =========================
+   Japanese Header + Hotspots
+========================= */
 
-/* ===== Header / Footer Images ===== */
-.image-header,
-.image-footer{
-  width:100%;
-  display:block;
+.image-header{
   position:relative;
-  overflow:hidden;
+  max-width:1200px;
+  margin:18px auto 0;
+  padding:0 16px;
 }
 
-.image-header img,
-.image-footer img{
+.image-header img{
   width:100%;
   height:auto;
   display:block;
+  border-radius:var(--r);
+  border:1px solid var(--stroke);
+  box-shadow:var(--shadow);
 }
 
-/* Keep content nicely boxed under the header image */
+/* Clickable "word" hotspots over the header image
+   NOTE: These are percentage-based so they scale on mobile.
+   If alignment is slightly off, just tweak left/top/width/height a tiny bit.
+*/
+.nav-hotspot{
+  position:absolute;
+  display:block;
+  border-radius:12px;
+  /* debug: uncomment next line to see hotspots */
+  /* background: rgba(255,0,0,.15); */
+}
+
+/* These positions assume the words are along the top-ish area.
+   If your header text sits elsewhere, tweak these 4 blocks.
+*/
+.nav-home{
+  left: 38%;
+  top: 14%;
+  width: 8%;
+  height: 10%;
+}
+
+.nav-gallery{
+  left: 47%;
+  top: 14%;
+  width: 9%;
+  height: 10%;
+}
+
+.nav-contact{
+  left: 57%;
+  top: 14%;
+  width: 10%;
+  height: 10%;
+}
+
+.nav-about{
+  left: 68%;
+  top: 14%;
+  width: 8%;
+  height: 10%;
+}
+
+/* Hidden tower login hotspot */
+.tower-login{
+  position:absolute;
+  display:block;
+  /* debug: uncomment to see hotspot */
+  /* background: rgba(0,255,255,.18); */
+  left: 86%;
+  top: 18%;
+  width: 10%;
+  height: 55%;
+  border-radius:18px;
+}
+
+/* =========================
+   Layout Shell
+========================= */
+
 .shell{
   max-width:1200px;
   margin:10px auto 26px;
   padding:0 16px 20px;
 }
 
-/* Footer note overlay (optional but nice) */
-.footer-note{
-  max-width:1200px;
-  margin:0 auto;
-  padding:10px 16px 14px;
-  text-align:center;
-  color:var(--muted);
-  font-weight:800;
-}
+/* =========================
+   Sections / Headings
+========================= */
 
-/* ===== Clickable header word hotspots =====
-   These are invisible links positioned over the words:
-   Home | Gallery | Contact | About
-*/
-.nav-hotspot{
-  position:absolute;
-  top:61%;
-  height:11%;
-  /* debug if needed:
-  outline:2px solid rgba(255,0,0,.35);
-  background:rgba(255,0,0,.08);
-  */
-}
-
-/* Adjust these values if needed based on your exact header image */
-.nav-home{    left:40.5%; width:8.5%; }
-.nav-gallery{ left:50.0%; width:10.5%; }
-.nav-contact{ left:61.5%; width:10.5%; }
-.nav-about{   left:73.0%; width:9.0%; }
-
-/* Hidden admin hotspot on tower */
-.tower-login{
-  position:absolute;
-  left:10.5%;
-  top:52%;
-  width:12%;
-  height:30%;
-  /* debug if needed:
-  outline:2px solid rgba(0,0,255,.35);
-  background:rgba(0,0,255,.06);
-  */
-}
-
-/* ===== Buttons ===== */
-.btn{
-  border:1px solid var(--stroke);
-  background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
-  color:#fff;
-  padding:12px 16px;
-  border-radius:999px;
-  font-weight:950;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-}
-.btn:hover{ filter:brightness(.98); }
-
-.btn.ghost{
-  background:rgba(255,255,255,.70);
-  color:rgba(42,37,48,.80);
-}
-
-/* ===== Sections ===== */
 .section{ margin-top:18px; }
 
 .section-head{
@@ -136,57 +134,40 @@ a{ color:inherit; }
   font-weight:750;
 }
 
-/* ===== Panels & Forms ===== */
-.panel{
-  margin-top:12px;
-  padding:16px;
-  border-radius:var(--r);
+/* =========================
+   Buttons
+========================= */
+
+.btn{
   border:1px solid var(--stroke);
-  background:rgba(255,255,255,.62);
-  box-shadow:0 14px 30px rgba(20,12,5,.06);
+  background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
+  color:#fff;
+  padding:12px 16px;
+  border-radius:999px;
+  font-weight:950;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.btn:hover{ filter:brightness(.98); }
+
+.btn.ghost{
+  background:rgba(255,255,255,.70);
+  color:rgba(42,37,48,.80);
 }
 
-.panel h3{ margin:0 0 10px; font-weight:950; }
+/* =========================
+   Home Featured Grid
+========================= */
 
-.form{
-  display:grid;
-  gap:12px;
-  margin-top:10px;
-}
-
-.form label{
-  display:grid;
-  gap:6px;
-  font-weight:850;
-}
-
-.form input,
-.form textarea,
-.form select{
-  width:100%;
-  padding:12px 12px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.78);
-  color:var(--ink);
-  outline:none;
-  font-weight:700;
-}
-
-.form textarea{ resize:vertical; }
-
-.fineprint{
-  color:var(--muted);
-  font-weight:800;
-  padding-top:4px;
-}
-
-/* ===== Grid / Cards (homepage) ===== */
 .grid{
+  margin-top:14px;
   display:grid;
   grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:12px;
-  margin-top:12px;
 }
 
 .card{
@@ -206,7 +187,10 @@ a{ color:inherit; }
   display:block;
 }
 
-/* ===== CTA ===== */
+/* =========================
+   CTA
+========================= */
+
 .cta{
   margin-top:16px;
   padding:16px;
@@ -231,77 +215,185 @@ a{ color:inherit; }
   font-weight:750;
 }
 
-/* ===== Gallery: chips + carousel rows (keeps your moving rows happy) ===== */
-.chips{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  padding:12px 14px 0;
+/* =========================
+   Panels / Forms
+========================= */
+
+.panel{
+  margin-top:14px;
+  padding:16px;
+  border-radius:var(--r);
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.62);
+  box-shadow:var(--shadow);
 }
 
-.chip{
-  padding:10px 14px;
-  border-radius:999px;
+.panel h3{ margin:0 0 8px; font-weight:950; }
+.panel p{ margin:0 0 10px; color:var(--muted); font-weight:750; }
+
+.form{
+  display:grid;
+  gap:10px;
+  margin-top:10px;
+}
+.form label{
+  display:grid;
+  gap:6px;
+  font-weight:850;
+  color:rgba(42,37,48,.78);
+}
+.form input, .form textarea, .form select{
+  padding:10px 12px;
+  border-radius:14px;
   border:1px solid var(--stroke);
-  background:rgba(255,255,255,.70);
+  background:rgba(255,255,255,.80);
+  font:inherit;
+}
+
+.fineprint{
+  margin-top:10px;
+  font-size:13px;
+  color:rgba(42,37,48,.55);
+  font-weight:800;
+}
+
+/* =========================
+   Gallery Chips + Rows (Carousel)
+========================= */
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:10px 14px 0;
+}
+
+.chipbtn{
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.75);
   color:rgba(42,37,48,.80);
   font-weight:900;
+  padding:10px 14px;
+  border-radius:999px;
   cursor:pointer;
-  user-select:none;
 }
-.chip:hover{ background:rgba(255,255,255,.82); }
-.chip.active{
-  background:rgba(255,255,255,.92);
-  box-shadow:0 12px 28px rgba(20,12,5,.08);
+
+.chipbtn.active{
+  background:var(--peach);
+  color:white;
+  border-color:rgba(0,0,0,.06);
 }
 
 .rows{
-  display:grid;
-  gap:14px;
-  margin-top:12px;
-  padding:0 14px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  padding:14px 0 18px;
 }
 
 .row{
+  background:rgba(255,255,255,.62);
+  border:1px solid var(--stroke);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.rowhead{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 16px 10px;
+}
+
+.rowhead h3{
+  margin:0;
+  font-size:18px;
+}
+
+.rowhead .hint{
+  margin:0;
+  color:rgba(42,37,48,.60);
+  font-weight:800;
+  font-size:13px;
+}
+
+.stripWrap{
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:12px 12px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.strip{
   display:flex;
   gap:12px;
-  overflow:auto;
-  padding:10px;
-  border-radius:18px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.52);
-  scroll-snap-type:x mandatory;
-}
-.row::-webkit-scrollbar{ height:10px; }
-.row::-webkit-scrollbar-thumb{
-  background:rgba(42,37,48,.18);
-  border-radius:999px;
 }
 
 .tile{
-  min-width:220px;
-  max-width:220px;
+  min-width:260px;
+  max-width:260px;
+  border:0;
+  background:rgba(255,255,255,.70);
   border-radius:18px;
   overflow:hidden;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.70);
-  box-shadow:0 14px 30px rgba(20,12,5,.06);
   cursor:pointer;
-  scroll-snap-align:start;
+  box-shadow:0 18px 40px rgba(0,0,0,.12);
+  text-align:left;
+  padding:0;
 }
+
 .tile img{
   width:100%;
-  height:150px;
+  height:170px;
   object-fit:cover;
   display:block;
 }
+
 .tile .cap{
-  padding:10px 10px 12px;
+  padding:10px 12px 12px;
   font-weight:900;
-  color:rgba(42,37,48,.86);
+  color:rgba(42,37,48,.78);
 }
 
-/* ===== Lightbox ===== */
+.emptyRow{
+  padding:18px;
+  color:rgba(42,37,48,.62);
+  font-weight:900;
+}
+
+/* =========================
+   Footer Image
+========================= */
+
+.image-footer{
+  max-width:1200px;
+  margin:0 auto 26px;
+  padding:0 16px;
+  text-align:center;
+}
+
+.image-footer img{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:var(--r);
+  border:1px solid var(--stroke);
+  box-shadow:var(--shadow);
+}
+
+.footer-note{
+  margin-top:10px;
+  color:var(--muted);
+  font-weight:800;
+  padding-bottom:8px;
+}
+
+/* =========================
+   Lightbox
+========================= */
+
 .lightbox{
   position:fixed;
   inset:0;
@@ -349,19 +441,17 @@ a{ color:inherit; }
   font-weight:800;
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 980px){
-  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .card img{ height:140px; }
-
-  /* Make hotspots still usable on smaller screens */
-  .nav-hotspot{ top:60%; height:12%; }
-}
+/* =========================
+   Responsive
+========================= */
 
 @media (max-width: 720px){
+  .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   .cta{ flex-direction:column; align-items:flex-start; }
+  .card img{ height:140px; }
 
-  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-
-  .tile{ min-width:200px; max-width:200px; }
+  /* Make hotspots a bit taller on small screens */
+  .nav-home,.nav-gallery,.nav-contact,.nav-about{
+    height: 12%;
+  }
 }
