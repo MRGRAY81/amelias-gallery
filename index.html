@@ -4,46 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Amelia’s Gallery</title>
-  <meta name="description" content="Amelia’s Gallery — artwork & commissions (family managed)." />
+  <meta name="description" content="Amelia’s Gallery — Artwork & illustrations." />
   <link rel="stylesheet" href="./styles.css?v=12" />
 </head>
 
 <body data-page="home">
-  <header class="image-header">
-    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager" />
 
-    <!-- Invisible nav hotspots -->
-    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
-    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
-    <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
-    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
-
-    <!-- Tower hotspot -->
-    <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
-  </header>
+  <!-- Shared Header -->
+  <div id="site-header"></div>
 
   <main class="shell">
     <section class="section">
       <div class="section-head">
-        <h2>Featured</h2>
-        <p>Click to view bigger ✨</p>
+        <h2>Featured ✨</h2>
+        <p>Tap to view bigger</p>
       </div>
 
-      <div class="grid" id="homeGrid"></div>
+      <div class="grid">
+        <button class="card">
+          <img src="https://picsum.photos/id/1018/600/400" />
+        </button>
+        <button class="card">
+          <img src="https://picsum.photos/id/1025/600/400" />
+        </button>
+        <button class="card">
+          <img src="https://picsum.photos/id/1039/600/400" />
+        </button>
+      </div>
     </section>
 
     <section class="cta">
       <div>
-        <h3>Got an idea for a drawing?</h3>
-        <p>Send a request — a grown-up will reply 💛</p>
+        <h3>Commissions ✨</h3>
+        <p class="muted">Request custom artwork</p>
       </div>
-      <a class="btn" href="./commissions.html">Contact</a>
+      <a href="./commissions.html" class="btn">Contact</a>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="image-footer">
     <img src="./amelias-gallery-footer.png" alt="Footer" />
-    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
+    <div class="footer-note">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </div>
   </footer>
 
   <!-- Lightbox -->
@@ -55,7 +59,5 @@
     </div>
   </div>
 
-  <script src="./site-auth.js?v=1"></script>
-  <script src="./script.js?v=12"></script>
-</body>
-</html>
+  <!-- Scripts -->
+  <script src="./config.js
