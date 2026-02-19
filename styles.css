@@ -41,31 +41,36 @@ body{
   padding:0 16px;
 }
 
-.image-header img{
+/* IMPORTANT: image should NOT block clicks on hotspots */
+.image-header img,
+.image-header .header-img{
   width:100%;
   height:auto;
   display:block;
   border-radius:var(--r);
   border:1px solid var(--stroke);
   box-shadow:var(--shadow);
+
+  position:relative;
+  z-index:1;
+  pointer-events:none; /* <-- this is the key */
 }
 
 /* =========================
    Header Nav Hotspots (INVISIBLE)
 ========================= */
-
 .nav-hotspot{
   position:absolute;
   display:block;
   border-radius:12px;
-  z-index:3;
+  z-index:10;
+  pointer-events:auto;
   /* DEBUG (optional) */
   /* background: rgba(255,0,0,.18); */
 }
 
 /* Re-aligned to sit over:
    Home | Gallery | Contact | About */
-
 .nav-home{
   left: 32%;
   top: 30%;
@@ -95,7 +100,6 @@ body{
 }
 
 /* Hidden tower login hotspot */
-
 .tower-login{
   position:absolute;
   display:block;
@@ -104,7 +108,8 @@ body{
   width: 10%;
   height: 55%;
   border-radius:18px;
-  z-index:4;
+  z-index:11;
+  pointer-events:auto;
   /* DEBUG */
   /* background: rgba(0,255,255,.18); */
 }
