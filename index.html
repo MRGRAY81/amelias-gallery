@@ -41,13 +41,20 @@
     <div class="lightbox-inner" role="dialog" aria-modal="true">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
       <img id="lightboxImg" alt="Artwork enlarged" />
-      <div class="lightbox-caption" id="lightboxCap"></div>
+      <div class="lightbox-caption" id="lightboxCaption"></div>
     </div>
   </div>
 
+  <!-- Scripts -->
   <script src="./config.js"></script>
-  <script src="./site-auth.js?v=1"></script>
-  <script src="./script.js?v=12"></script>
+
+  <!-- Load header first so tower exists -->
   <script src="./header-loader.js?v=1"></script>
+
+  <!-- Then wire login/logout on tower -->
+  <script src="./site-auth.js?v=1"></script>
+
+  <!-- Home grid + lightbox logic -->
+  <script src="./script.js?v=12"></script>
 </body>
 </html>
