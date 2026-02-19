@@ -1,71 +1,55 @@
-/* site-auth.js
-   Amelia’s Gallery — lightweight auth helper (frontend)
-   - Uses localStorage token set by admin.js (amelias_admin_token)
-   - Turns hidden tower login into Logout when signed in
-   - Optionally hides admin-only links when logged out
-*/
-
+/**
+ * Amelia's Gallery — Site Auth Helper
+ * - Makes the hidden tower hotspot act as:
+ *   - Login (when logged out) -> goes to /admin.html
+ *   - Logout (when logged in) -> clears token + returns to home
+ *
+ * Place this file in the project ROOT (same folder as index.html).
+ */
 (function () {
   const TOKEN_KEY = "amelias_admin_token";
 
-  function getToken() {
-    return localStorage.getItem(TOKEN_KEY);
+  function isLoggedIn() {
+    return !!localStorage.getItem(TOKEN_KEY);
   }
 
-  function isAuthed() {
-    const t = getToken();
-    return !!(t && String(t).trim().length > 10);
+  function logout() {
+    localStorage.removeItem(TOKEN_KEY);
+
+    // Optional: also clear any other legacy keys if you ever used them
+    // localStorage.removeItem("token");
+    // localStorage.removeItem("admin_token");
+
+    // Hard redirect so state is definitely refreshed
+    window.location.href = "./index.html";
   }
 
-  function setTowerToLogout(towerLink) {
-    // Convert the hidden tower hotspot into a logout click target
-    towerLink.setAttribute("href", "#logout");
-    towerLink.setAttribute("aria-label", "Logout");
+  function wireTower() {
+    const tower = document.querySelector(".tower-login");
+    if (!tower) return;
 
-    towerLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem(TOKEN_KEY);
+    if (isLoggedIn()) {
+      // Convert hotspot into "Logout"
+      tower.setAttribute("aria-label", "Logout");
+      tower.setAttribute("title", "Logout");
 
-      // Friendly: bounce to home after logout
-      window.location.href = "./index.html";
-    });
-  }
-
-  function setTowerToLogin(towerLink) {
-    towerLink.setAttribute("href", "./admin.html");
-    towerLink.setAttribute("aria-label", "Admin Login");
-  }
-
-  function applyTowerToggle() {
-    const towerLink = document.querySelector(".tower-login");
-    if (!towerLink) return;
-
-    if (isAuthed()) setTowerToLogout(towerLink);
-    else setTowerToLogin(towerLink);
-  }
-
-  function protectAdminPages() {
-    const page = document.body?.dataset?.page || "";
-
-    // If user tries to access admin portal while logged out, bounce to admin login
-    if ((page === "admin-portal" || page === "admin") && !isAuthed()) {
-      // Allow admin.html itself (login page) even when logged out
-      if (page === "admin-portal") {
-        window.location.replace("./admin.html");
-      }
+      // Prevent going to admin.html and instead log out
+      tower.addEventListener("click", (e) => {
+        e.preventDefault();
+        logout();
+      });
+    } else {
+      // Normal login behaviour
+      tower.setAttribute("aria-label", "Admin Login");
+      tower.setAttribute("title", "Admin Login");
+      tower.setAttribute("href", "./admin.html");
     }
   }
 
-  function hideAdminOnlyLinks() {
-    // Optional: if you ever add visible admin links, hide them unless authed
-    const authed = isAuthed();
-    document.querySelectorAll("[data-admin-only]").forEach((el) => {
-      el.style.display = authed ? "" : "none";
-    });
+  // Run after DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wireTower);
+  } else {
+    wireTower();
   }
-
-  // Run
-  protectAdminPages();
-  applyTowerToggle();
-  hideAdminOnlyLinks();
 })();
