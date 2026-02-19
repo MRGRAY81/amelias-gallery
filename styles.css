@@ -56,11 +56,6 @@ body{
   pointer-events:none;
 }
 
-  position:relative;
-  z-index:1;
-  pointer-events:none; /* <-- this is the key */
-}
-
 /* =========================
    Header Nav Hotspots (INVISIBLE)
 ========================= */
