@@ -9,20 +9,18 @@
 </head>
 
 <body data-page="home">
-
   <header class="image-header">
-  <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager" />
+    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager" />
 
-  <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
-  <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
-  <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
-  <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
+    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
+    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
+    <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
+    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
 
-  <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
-</header>
+    <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
+  </header>
 
   <main class="shell">
-
     <section class="section">
       <div class="section-head">
         <h2>Featured</h2>
@@ -39,7 +37,6 @@
       </div>
       <a class="btn" href="./commissions.html">Contact</a>
     </section>
-
   </main>
 
   <footer class="image-footer">
@@ -48,14 +45,15 @@
   </footer>
 
   <div class="lightbox" id="lightbox" aria-hidden="true">
-    <div class="lightbox-inner" role="dialog" aria-modal="true">
+    <div class="lightbox-inner">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
-      <img id="lightboxImg" alt="Artwork enlarged" />
-      <div class="lightbox-caption" id="lightboxCaption"></div>
+      <img id="lightboxImg" alt="">
+      <div class="lightbox-caption" id="lightboxCap"></div>
     </div>
   </div>
 
+  <script src="./config.js"></script>
   <script src="./site-auth.js?v=1"></script>
-  <script src="./script.js?v=10"></script>
+  <script src="./script.js"></script>
 </body>
 </html>
