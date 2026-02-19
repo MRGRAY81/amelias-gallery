@@ -52,43 +52,50 @@ body{
 
 /* =========================
    Header Nav Hotspots (INVISIBLE)
-   Put <a class="nav-hotspot nav-home"> etc inside .image-header
 ========================= */
+
 .nav-hotspot{
   position:absolute;
   display:block;
   border-radius:12px;
-  /* Debug (optional): turn on to SEE hotspots */
+  z-index:3;
+  /* DEBUG (optional) */
   /* background: rgba(255,0,0,.18); */
 }
 
-/* These are tuned for your header image (words under "Amelia’s Gallery") */
+/* Re-aligned to sit over:
+   Home | Gallery | Contact | About */
+
 .nav-home{
-  left: 36%;
-  top: 32%;
-  width: 8%;
-  height: 12%;
+  left: 32%;
+  top: 30%;
+  width: 11%;
+  height: 14%;
 }
+
 .nav-gallery{
-  left: 46%;
-  top: 32%;
-  width: 10%;
-  height: 12%;
+  left: 44%;
+  top: 30%;
+  width: 13%;
+  height: 14%;
 }
+
 .nav-contact{
-  left: 58%;
-  top: 32%;
-  width: 10%;
-  height: 12%;
+  left: 59%;
+  top: 30%;
+  width: 13%;
+  height: 14%;
 }
+
 .nav-about{
-  left: 70%;
-  top: 32%;
-  width: 8%;
-  height: 12%;
+  left: 74%;
+  top: 30%;
+  width: 11%;
+  height: 14%;
 }
 
 /* Hidden tower login hotspot */
+
 .tower-login{
   position:absolute;
   display:block;
@@ -97,7 +104,8 @@ body{
   width: 10%;
   height: 55%;
   border-radius:18px;
-  /* debug: uncomment to see hotspot */
+  z-index:4;
+  /* DEBUG */
   /* background: rgba(0,255,255,.18); */
 }
 
