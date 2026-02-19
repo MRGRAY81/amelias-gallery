@@ -4,54 +4,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact — Amelia’s Gallery</title>
-  <meta name="description" content="Contact & commission requests — Amelia’s Gallery (family managed)." />
-  <link rel="stylesheet" href="./styles.css?v=11" />
+  <meta name="description" content="Contact Amelia’s Gallery (family managed)." />
+  <link rel="stylesheet" href="./styles.css?v=12" />
 </head>
 
 <body data-page="contact">
   <header class="image-header">
     <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager" />
 
+    <!-- Invisible nav hotspots -->
     <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
     <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
     <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
     <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
 
+    <!-- Tower hotspot -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
 
   <main class="shell">
     <section class="section">
       <div class="section-head">
-        <h2>Contact ✨</h2>
-        <p>For commission requests or enquiries — a grown-up will reply.</p>
+        <h2>Contact 💛</h2>
+        <p>Artwork requests & enquiries</p>
       </div>
 
       <div class="panel">
-        <h3>Send a message</h3>
-        <p>Please be kind and include what you’d like (size, style, colours, deadline).</p>
+        <p>
+          If you’d like to ask about a drawing, commission artwork, or purchase a piece,
+          please send a message below.
+        </p>
 
-        <form class="form" id="commissionForm">
+        <form class="contact-form">
           <label>
-            Your name
-            <input name="name" required />
+            Name
+            <input type="text" placeholder="Your name" required />
           </label>
 
           <label>
             Email
-            <input name="email" type="email" required />
+            <input type="email" placeholder="Your email" required />
           </label>
 
           <label>
-            What would you like?
-            <textarea name="message" rows="5" required></textarea>
+            Message
+            <textarea rows="4" placeholder="Tell us about your idea ✨" required></textarea>
           </label>
 
-          <button class="btn" type="submit">Send</button>
-          <div class="fineprint">Family-managed • We reply as soon as possible 💛</div>
+          <button type="submit" class="btn">Send Message ✨</button>
         </form>
-
-        <div class="status" id="statusBox" style="display:none;"></div>
       </div>
     </section>
   </main>
@@ -61,8 +62,6 @@
     <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <script src="./config.js?v=1"></script>
   <script src="./site-auth.js?v=1"></script>
-  <script src="./commissions.js?v=1"></script>
 </body>
 </html>
