@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gallery — Amelia’s Gallery</title>
   <meta name="description" content="Artwork gallery by Amelia — family managed." />
-  <link rel="stylesheet" href="./styles.css?v=5" />
+  <link rel="stylesheet" href="./styles.css?v=6" />
 </head>
 
 <body data-page="gallery">
@@ -14,17 +14,15 @@
   <header class="image-header">
     <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery">
 
+    <!-- ✅ Nav word hotspots (clickable text on the header image) -->
+    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
+    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
+    <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
+    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
+
     <!-- 🎯 Hidden tower login -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
-
-  <!-- 🌸 Navigation -->
-  <nav class="nav nav-buttons" aria-label="Primary">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink active" href="./gallery.html">Gallery</a>
-    <a class="btnlink" href="./commissions.html">Contact</a>
-    <a class="btnlink" href="./about.html">About</a>
-  </nav>
 
   <main class="shell">
 
@@ -61,7 +59,7 @@
     </div>
   </div>
 
-  <script src="./gallery.js?v=5"></script>
+  <script src="./gallery.js?v=6"></script>
 
 </body>
 </html>
