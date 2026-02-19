@@ -102,6 +102,7 @@ body{
 /* Re-aligned to sit over:
    Home | Gallery | Contact | About */
 
+/* Your current HOME + GALLERY are good (keep same) */
 .nav-home{
   left: 28%;
   top: 40%;
@@ -116,15 +117,17 @@ body{
   height: 14%;
 }
 
+/* FIX: move Contact slightly left (about ~2 letters) */
 .nav-contact{
-  left: 52%;
+  left: 50.5%;
   top: 40%;
   width: 13%;
   height: 14%;
 }
 
+/* FIX: move About left by ~a button width */
 .nav-about{
-  left: 66%;
+  left: 61.5%;
   top: 40%;
   width: 11%;
   height: 14%;
