@@ -4,12 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Amelia’s Gallery</title>
-  <meta name="description" content="Amelia’s Gallery — Artwork & illustrations." />
+  <meta name="description" content="Amelia’s Gallery — artwork & commissions (family managed)." />
   <link rel="stylesheet" href="./styles.css?v=12" />
 </head>
 
 <body data-page="home">
-
   <!-- Shared Header -->
   <div id="site-header"></div>
 
@@ -20,34 +19,21 @@
         <p>Tap to view bigger</p>
       </div>
 
-      <div class="grid">
-        <button class="card">
-          <img src="https://picsum.photos/id/1018/600/400" />
-        </button>
-        <button class="card">
-          <img src="https://picsum.photos/id/1025/600/400" />
-        </button>
-        <button class="card">
-          <img src="https://picsum.photos/id/1039/600/400" />
-        </button>
-      </div>
+      <div class="grid" id="homeGrid"></div>
     </section>
 
     <section class="cta">
       <div>
         <h3>Commissions ✨</h3>
-        <p class="muted">Request custom artwork</p>
+        <p>Request custom artwork</p>
       </div>
-      <a href="./commissions.html" class="btn">Contact</a>
+      <a class="btn" href="./commissions.html">Contact</a>
     </section>
   </main>
 
-  <!-- Footer -->
   <footer class="image-footer">
     <img src="./amelias-gallery-footer.png" alt="Footer" />
-    <div class="footer-note">
-      Site managed by family • Supported by Uncle G & Del 💛
-    </div>
+    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
   <!-- Lightbox -->
@@ -55,9 +41,13 @@
     <div class="lightbox-inner" role="dialog" aria-modal="true">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
       <img id="lightboxImg" alt="Artwork enlarged" />
-      <div class="lightbox-caption" id="lightboxCaption"></div>
+      <div class="lightbox-caption" id="lightboxCap"></div>
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="./config.js
+  <script src="./config.js"></script>
+  <script src="./site-auth.js?v=1"></script>
+  <script src="./script.js?v=12"></script>
+  <script src="./header-loader.js?v=1"></script>
+</body>
+</html>
