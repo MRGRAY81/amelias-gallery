@@ -5,18 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gallery — Amelia’s Gallery</title>
   <meta name="description" content="Gallery — Amelia’s Gallery (family managed)." />
-  <link rel="stylesheet" href="./styles.css?v=11" />
+  <link rel="stylesheet" href="./styles.css?v=12" />
 </head>
 
 <body data-page="gallery">
   <header class="image-header">
     <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager" />
 
+    <!-- Invisible nav hotspots -->
     <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
     <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
     <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
     <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
 
+    <!-- Tower hotspot -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
 
@@ -27,7 +29,10 @@
         <p>Tap to view bigger</p>
       </div>
 
+      <!-- Category chips -->
       <div class="chips" id="chipBar"></div>
+
+      <!-- Carousel rows -->
       <div class="rows" id="galleryRows"></div>
     </section>
   </main>
@@ -37,16 +42,19 @@
     <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
+  <!-- Lightbox (IDs MUST match JS) -->
   <div class="lightbox" id="lightbox" aria-hidden="true">
-    <div class="lightbox-inner">
+    <div class="lightbox-inner" role="dialog" aria-modal="true">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
-      <img id="lightboxImg" alt="">
+      <img id="lightboxImg" alt="Artwork enlarged" />
       <div class="lightbox-caption" id="lightboxCaption"></div>
     </div>
   </div>
 
-  <script src="./config.js?v=1"></script>
+  <script src="./config.js"></script>
   <script src="./site-auth.js?v=1"></script>
-  <script src="./script.js?v=1"></script>
+
+  <!-- Use ONE gallery script only -->
+  <script src="./gallery.js?v=12"></script>
 </body>
 </html>
