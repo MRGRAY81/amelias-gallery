@@ -9,7 +9,6 @@
 </head>
 
 <body data-page="contact">
-
   <!-- Shared Header -->
   <div id="site-header"></div>
 
@@ -22,54 +21,43 @@
 
       <div class="panel">
         <p>
-          If you’d like to ask about a drawing, commission artwork,
-          or purchase a piece, please send a message below ✨
+          If you’d like to ask about a drawing, commission artwork, or purchase a piece,
+          please send a message below.
         </p>
 
-        <form class="form">
+        <form class="form" action="#" method="post">
           <label>
             Name
-            <input type="text" placeholder="Your name" required />
+            <input type="text" name="name" placeholder="Your name" required />
           </label>
 
           <label>
             Email
-            <input type="email" placeholder="Your email" required />
+            <input type="email" name="email" placeholder="Your email" required />
           </label>
 
           <label>
             Message
-            <textarea rows="4" placeholder="Tell us about your idea ✨" required></textarea>
+            <textarea name="message" rows="4" placeholder="Tell us about your idea ✨" required></textarea>
           </label>
 
           <button type="submit" class="btn">Send Message ✨</button>
+
+          <div class="fineprint">
+            This form is a placeholder for now. Next step: connect it to email (Formspree/Netlify Forms/etc).
+          </div>
         </form>
       </div>
     </section>
   </main>
 
-  <!-- Footer -->
   <footer class="image-footer">
     <img src="./amelias-gallery-footer.png" alt="Footer" />
-    <div class="footer-note">
-      Site managed by family • Supported by Uncle G & Del 💛
-    </div>
+    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <!-- Scripts -->
   <script src="./config.js"></script>
-
-  <!-- Header Loader -->
-  <script>
-    fetch("./header.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("site-header").innerHTML = html;
-        if (window.AMELIAS_SITEAUTH_REFRESH) window.AMELIAS_SITEAUTH_REFRESH();
-      });
-  </script>
-
   <script src="./site-auth.js?v=1"></script>
-
+  <script src="./header-loader.js?v=1"></script>
 </body>
 </html>
