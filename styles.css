@@ -23,9 +23,17 @@ body{
 }
 
 /* =========================
+   Utilities
+========================= */
+.muted{ color:var(--muted); }
+.small{ font-size:12px; }
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* =========================
    Header / Footer Images
 ========================= */
-
 .image-header{
   position:relative;
   max-width:1200px;
@@ -58,7 +66,6 @@ body{
 /* =========================
    Shadow Nav Buttons
 ========================= */
-
 .nav{
   max-width:1200px;
   margin:12px auto 0;
@@ -95,7 +102,6 @@ body{
 /* =========================
    Layout Shell
 ========================= */
-
 .shell{
   max-width:1200px;
   margin:10px auto 26px;
@@ -105,7 +111,6 @@ body{
 /* =========================
    Sections / Headings
 ========================= */
-
 .section{ margin-top:18px; }
 
 .section-head{
@@ -131,7 +136,6 @@ body{
 /* =========================
    Buttons
 ========================= */
-
 .btn{
   border:1px solid var(--stroke);
   background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
@@ -156,7 +160,6 @@ body{
 /* =========================
    Home Featured Grid
 ========================= */
-
 .grid{
   margin-top:14px;
   display:grid;
@@ -184,7 +187,6 @@ body{
 /* =========================
    CTA
 ========================= */
-
 .cta{
   margin-top:16px;
   padding:16px;
@@ -212,7 +214,6 @@ body{
 /* =========================
    Panels / Forms
 ========================= */
-
 .panel{
   margin-top:14px;
   padding:16px;
@@ -254,7 +255,6 @@ body{
 /* =========================
    Gallery Chips + Rows (Carousel)
 ========================= */
-
 .chips{
   display:flex;
   flex-wrap:wrap;
@@ -360,7 +360,6 @@ body{
 /* =========================
    Footer Image
 ========================= */
-
 .image-footer{
   max-width:1200px;
   margin:0 auto 26px;
@@ -387,7 +386,6 @@ body{
 /* =========================
    Lightbox
 ========================= */
-
 .lightbox{
   position:fixed;
   inset:0;
@@ -436,11 +434,34 @@ body{
 }
 
 /* =========================
+   Admin Status (admin.html)
+========================= */
+.status{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.08);
+  background:rgba(255,255,255,.70);
+  font-weight:900;
+  color:rgba(42,37,48,.85);
+}
+.status.good{ border-color: rgba(50,180,120,.25); }
+.status.bad{ border-color: rgba(230,80,90,.28); }
+
+.codebox{
+  margin-top:12px;
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.08);
+  background:rgba(255,255,255,.78);
+  padding:12px;
+  overflow:auto;
+}
+
+/* =========================
    Responsive
 ========================= */
-
 @media (max-width: 720px){
   .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   .cta{ flex-direction:column; align-items:flex-start; }
   .card img{ height:140px; }
-}
+    }
