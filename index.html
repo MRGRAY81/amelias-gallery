@@ -8,47 +8,27 @@
   <link rel="stylesheet" href="./styles.css?v=4" />
 </head>
 
-<body data-page="home" class="home-two-rows">
+<body data-page="home">
 
-  <header class="topbar">
-    <a class="brand-left" href="./index.html" aria-label="Home">
-      <img class="amark-img" src="./a-mark.png" alt="Amelia’s Gallery mark" onerror="this.style.display='none'">
-      <span class="amark-fallback" aria-hidden="true">A</span>
-    </a>
+  <!-- 🌸 Header Image -->
+  <header class="image-header">
+    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery">
 
-    <nav class="nav nav-buttons" aria-label="Primary">
-      <a class="btnlink active" href="./index.html">Home</a>
-      <a class="btnlink" href="./gallery.html">Gallery</a>
-      <a class="btnlink" href="./commissions.html">Commissions</a>
-      <a class="btnlink" href="./about.html">About / Contact</a>
-      <a class="btnlink admin" href="./admin.html">Login</a>
-    </nav>
+    <!-- 🎯 Hidden login hotspot -->
+    <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
+
+  <!-- 🌸 Navigation -->
+  <nav class="nav nav-buttons" aria-label="Primary">
+    <a class="btnlink active" href="./index.html">Home</a>
+    <a class="btnlink" href="./gallery.html">Gallery</a>
+    <a class="btnlink" href="./contact.html">Contact</a>
+    <a class="btnlink" href="./about.html">About</a>
+  </nav>
 
   <main class="shell">
 
-    <!-- ✅ Japanese frame hero -->
-    <section class="hero-frame">
-      <div class="frame-bg">
-        <div class="frame-inset">
-
-          <div class="hero-copy">
-            <h2 class="hero-title">Welcome to Amelia’s Gallery ✨</h2>
-            <p class="hero-sub">
-              Browse artwork, request commissions, and support a young artist (family managed).
-            </p>
-          </div>
-
-          <div class="home-actions">
-            <a class="btn" href="./gallery.html">Explore Gallery</a>
-            <a class="btn ghost" href="./commissions.html">Request a Commission</a>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ✅ Featured grid (2 rows) -->
+    <!-- ✅ Featured grid -->
     <section class="section">
       <div class="section-head">
         <h2>Featured</h2>
@@ -58,20 +38,23 @@
       <div class="grid" id="homeGrid"></div>
     </section>
 
+    <!-- ✅ CTA -->
     <section class="cta">
       <div>
         <h3>Got an idea for a drawing?</h3>
-        <p>Send a commission request — a grown-up will reply.</p>
+        <p>Send a request — a grown-up will reply 💛</p>
       </div>
-      <a class="btn" href="./commissions.html">Request a Commission</a>
+      <a class="btn" href="./contact.html">Contact</a>
     </section>
-
-    <footer class="footer">
-      Site managed by family • Supported by Uncle G & Del 💛
-    </footer>
 
   </main>
 
+  <!-- 🌸 Footer Image -->
+  <footer class="image-footer">
+    <img src="./amelias-gallery-footer.png" alt="Footer">
+  </footer>
+
+  <!-- 🔍 Lightbox -->
   <div class="lightbox" id="lightbox" aria-hidden="true">
     <div class="lightbox-inner" role="dialog" aria-modal="true">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
