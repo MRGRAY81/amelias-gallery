@@ -10,29 +10,24 @@
   const PORTAL_PAGE = "./admin-portal.html";
   const TOKEN_KEY = "amelias_admin_token";
 
-  // Prefer explicit config if provided
   const CONFIG_BASE =
     (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
 
   function buildCandidates() {
     const candidates = [];
 
-    // Known services (keep as candidates)
     candidates.push("https://amelias-gallery-backend.onrender.com");
     candidates.push("https://amelias-gallery.onrender.com");
 
-    // Derive from current render host
     try {
-      const host = window.location.host; // e.g. amelias-gallery-1.onrender.com
-      const proto = window.location.protocol; // https:
+      const host = window.location.host;
+      const proto = window.location.protocol;
       if (host.endsWith(".onrender.com")) {
         candidates.push(`${proto}//${host}`);
 
-        // remove "-1" / "-2"
         const cleaned = host.replace(/-\d+\.onrender\.com$/, ".onrender.com");
         candidates.push(`${proto}//${cleaned}`);
 
-        // try "-backend"
         const maybeBackend = cleaned.replace(
           ".onrender.com",
           "-backend.onrender.com"
@@ -43,7 +38,6 @@
 
     if (CONFIG_BASE) candidates.unshift(CONFIG_BASE);
 
-    // de-dupe + trim trailing slash
     return Array.from(new Set(candidates.map((c) => String(c).replace(/\/$/, ""))));
   }
 
@@ -56,6 +50,7 @@
     password: document.getElementById("password"),
     loginBtn: document.getElementById("loginBtn"),
     logoutBtn: document.getElementById("logoutBtn"),
+    portalBtn: document.getElementById("portalBtn"),
     adminPanel: document.getElementById("adminPanel"),
     pingBtn: document.getElementById("pingBtn"),
     whoamiBtn: document.getElementById("whoamiBtn"),
@@ -90,6 +85,7 @@
   function setLoggedInUI(isLoggedIn) {
     if (els.logoutBtn) els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
     if (els.adminPanel) els.adminPanel.style.display = isLoggedIn ? "block" : "none";
+    if (els.portalBtn) els.portalBtn.style.display = isLoggedIn ? "inline-flex" : "none";
   }
 
   function authedHeaders(extra = {}) {
@@ -128,10 +124,10 @@
     }
 
     if (!res.ok) {
-      // Token invalid → clear session
       if (res.status === 401 || res.status === 403) {
         setToken("");
         setLoggedInUI(false);
+        window.AMELIAS_SITEAUTH_REFRESH && window.AMELIAS_SITEAUTH_REFRESH();
       }
       const msg =
         (data && (data.message || data.error)) ||
@@ -197,7 +193,6 @@
       return;
     }
 
-    // ✅ Ensure we have a working backend URL before trying login
     if (!API_BASE) {
       const ok = await detectBackend();
       if (!ok) return;
@@ -217,6 +212,10 @@
 
       setToken(token);
       setLoggedInUI(true);
+
+      // ✅ make tower become Logout immediately
+      window.AMELIAS_SITEAUTH_REFRESH && window.AMELIAS_SITEAUTH_REFRESH();
+
       setStatus("Logged in ✅ Redirecting…", true);
       setAdminOut({
         ok: true,
@@ -229,6 +228,7 @@
     } catch (e) {
       setToken("");
       setLoggedInUI(false);
+      window.AMELIAS_SITEAUTH_REFRESH && window.AMELIAS_SITEAUTH_REFRESH();
       setStatus(`Login failed ❌ (${e.message})`, false);
       setAdminOut({ ok: false, error: e.message, apiBase: API_BASE || null });
     }
@@ -237,6 +237,7 @@
   async function logout() {
     setToken("");
     setLoggedInUI(false);
+    window.AMELIAS_SITEAUTH_REFRESH && window.AMELIAS_SITEAUTH_REFRESH();
     setStatus("Logged out.", true);
     setAdminOut("Logged out.");
   }
@@ -268,7 +269,6 @@
     }
   }
 
-  // Init bindings
   if (els.loginBtn) els.loginBtn.addEventListener("click", login);
   if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
   if (els.pingBtn) els.pingBtn.addEventListener("click", ping);
@@ -280,23 +280,24 @@
     });
   });
 
-  // Boot
   (async function boot() {
     if (els.backendUrl) els.backendUrl.textContent = API_BASE || "—";
+
+    // ✅ show portal button immediately if token exists
     setLoggedInUI(!!getToken());
 
-    // detect backend first
     await detectBackend();
 
-    // if token exists, validate it
     if (getToken()) {
       const ok = await validateTokenSilently();
       if (ok) {
         setLoggedInUI(true);
+        window.AMELIAS_SITEAUTH_REFRESH && window.AMELIAS_SITEAUTH_REFRESH();
         setStatus("Session active ✅ (token valid)", true);
       } else {
         setToken("");
         setLoggedInUI(false);
+        window.AMELIAS_SITEAUTH_REFRESH && window.AMELIAS_SITEAUTH_REFRESH();
         setStatus("Session invalid. Please login again.", false);
       }
     }
