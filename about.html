@@ -44,19 +44,26 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Config first (optional here but fine to keep consistent) -->
   <script src="./config.js"></script>
-  <script src="./site-auth.js?v=1"></script>
-  <script src="./script.js"></script>
 
-  <!-- Header Loader -->
+  <!-- Header Loader (MUST run before site-auth) -->
   <script>
-    fetch('./header.html')
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById('site-header').innerHTML = data;
+    fetch("./header.html")
+      .then((res) => res.text())
+      .then((html) => {
+        document.getElementById("site-header").innerHTML = html;
+
+        // IMPORTANT: refresh tower login/logout once header exists
+        if (window.AMELIAS_SITEAUTH_REFRESH) window.AMELIAS_SITEAUTH_REFRESH();
+      })
+      .catch(() => {
+        console.warn("Could not load header.html");
       });
   </script>
+
+  <!-- Site auth AFTER header injection -->
+  <script src="./site-auth.js?v=1"></script>
 
 </body>
 </html>
