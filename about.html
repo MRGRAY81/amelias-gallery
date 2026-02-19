@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About — Amelia’s Gallery</title>
   <meta name="description" content="About — Amelia’s Gallery (family managed)." />
-  <link rel="stylesheet" href="./styles.css?v=5" />
+  <link rel="stylesheet" href="./styles.css?v=7" />
 </head>
 
 <body data-page="about">
 
-  <!-- 🌸 Header Image + Clickable Word Links -->
+  <!-- 🌸 Header Image (with clickable word hotspots) -->
   <header class="image-header">
     <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" />
 
-    <!-- 🎯 Word hotspots (Home | Gallery | Contact | About) -->
-    <a class="nav-hotspot nav-home" href="./index.html" aria-label="Home"></a>
-    <a class="nav-hotspot nav-gallery" href="./gallery.html" aria-label="Gallery"></a>
-    <a class="nav-hotspot nav-contact" href="./commissions.html" aria-label="Contact"></a>
-    <a class="nav-hotspot nav-about" href="./about.html" aria-label="About"></a>
+    <!-- ✅ Clickable words on the header image -->
+    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
+    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
+    <a href="./contact.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
+    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
 
     <!-- 🗼 Hidden admin login hotspot (tower) -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
@@ -34,10 +34,15 @@
 
       <div class="panel">
         <h3>About Amelia</h3>
-        <p>Amelia loves creating drawings and illustrations. This site is managed by family.</p>
+        <p>
+          Amelia loves creating drawings and illustrations. This gallery is managed by family to keep everything safe and friendly.
+        </p>
 
-        <h3 style="margin-top:14px;">A quick note</h3>
-        <p>If you’re looking to request artwork, head to the Contact page — we’ll get back to you as soon as possible.</p>
+        <h3 style="margin-top:14px;">Commissions & enquiries</h3>
+        <p>
+          If you’d like to request artwork or ask about buying a piece, please use the
+          <a href="./contact.html">Contact page</a> and we’ll reply as soon as possible.
+        </p>
       </div>
     </section>
 
@@ -45,10 +50,8 @@
 
   <!-- 🌸 Footer Image -->
   <footer class="image-footer">
-    <img src="./amelias-gallery-footer.png" alt="Amelia’s Gallery footer" />
-    <div class="footer-note">
-      Site managed by family • Supported by Uncle G & Del 💛
-    </div>
+    <img src="./amelias-gallery-footer.png" alt="Footer">
+    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
 </body>
