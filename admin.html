@@ -3,109 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login — Amelia’s Gallery</title>
+  <title>Admin Login — Amelia’s Gallery</title>
   <meta name="description" content="Admin login — family only." />
-  <link rel="stylesheet" href="./styles.css?v=6" />
+  <link rel="stylesheet" href="./styles.css?v=10" />
 </head>
 
 <body data-page="admin">
 
-  <!-- 🌸 Japanese Header -->
   <header class="image-header">
-    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" />
-
-    <!-- 🗼 Hidden admin login hotspot (optional; safe to leave) -->
+    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" loading="eager" />
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
 
-  <!-- 🌸 Navigation (Public nav only) -->
   <nav class="nav nav-buttons" aria-label="Primary">
     <a class="btnlink" href="./index.html">Home</a>
     <a class="btnlink" href="./gallery.html">Gallery</a>
-    <!-- Contact is commissions.html in your build -->
     <a class="btnlink" href="./commissions.html">Contact</a>
     <a class="btnlink" href="./about.html">About</a>
   </nav>
 
   <main class="shell">
-
     <section class="section">
       <div class="section-head">
         <h2>Admin Login</h2>
-        <p>For family use only.</p>
+        <p>Family use only.</p>
       </div>
 
       <div class="panel">
-        <div class="admin-meta">
-          <div class="admin-meta-row">
-            <div class="muted">Backend:</div>
-            <div class="mono" id="backendUrl">—</div>
-          </div>
-          <div class="status" id="status">Checking backend…</div>
-        </div>
+        <div class="muted small">Backend</div>
+        <div class="mono" id="backendUrl">—</div>
+        <div class="status" id="status">Checking backend…</div>
 
-        <!-- LOGIN PANEL -->
-        <div id="loginPanel">
+        <div style="margin-top:14px;">
           <h3>Login</h3>
 
-          <div class="form-grid">
-            <label class="field">
-              <span>Email</span>
-              <input id="email" type="email" autocomplete="username" placeholder="family@email.com" />
+          <form class="form" onsubmit="return false;">
+            <label>
+              Email
+              <input id="email" type="email" autocomplete="username" placeholder="family@example.com" />
             </label>
 
-            <label class="field">
-              <span>Password</span>
+            <label>
+              Password
               <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
             </label>
-          </div>
 
-          <div class="row-actions">
-            <button class="btn primary" id="loginBtn" type="button">Login</button>
-            <button class="btn ghost" id="logoutBtn" type="button" style="display:none;">Logout</button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+              <button class="btn" id="loginBtn" type="button">Login</button>
+              <button class="btn ghost" id="logoutBtn" type="button" style="display:none;">Logout</button>
+              <a class="btn" id="portalBtn" href="./admin-portal.html" style="display:none;">Open Admin Portal</a>
+            </div>
 
-            <!-- Optional: only useful after login -->
-            <a class="btn" id="portalBtn" href="./admin-portal.html" style="display:none;">Open Admin Portal</a>
-          </div>
-
-          <p class="muted small">Tip: Press <b>Enter</b> to login.</p>
+            <div class="fineprint">Tip: Press Enter to login.</div>
+          </form>
         </div>
 
-        <!-- ADMIN PANEL -->
         <div id="adminPanel" style="display:none; margin-top:14px;">
           <h3>Admin Tools</h3>
-
-          <div class="row-actions">
-            <button class="btn" id="pingBtn" type="button">Ping</button>
-            <button class="btn" id="whoamiBtn" type="button">Validate Token</button>
-            <a class="btn" href="./admin-portal.html">Open Admin Portal</a>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn ghost" id="pingBtn" type="button">Ping</button>
+            <button class="btn ghost" id="whoamiBtn" type="button">Validate Token</button>
           </div>
-
           <pre class="codebox" id="adminOutText">{}</pre>
         </div>
       </div>
     </section>
-
   </main>
 
-  <!-- 🌸 Japanese Footer -->
   <footer class="image-footer">
-    <img src="./amelias-gallery-footer.png" alt="Amelia’s Gallery footer" />
+    <img src="./amelias-gallery-footer.png" alt="Footer" />
     <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <!-- ✅ IMPORTANT: config FIRST, then admin wiring -->
+  <script src="./site-auth.js?v=1"></script>
   <script src="./config.js"></script>
-  <script src="./admin.js?v=6"></script>
-
-  <!-- ✅ Show portal button only when token exists -->
-  <script>
-    (function(){
-      const portalBtn = document.getElementById("portalBtn");
-      const token = localStorage.getItem("amelias_admin_token");
-      if (portalBtn && token) portalBtn.style.display = "inline-flex";
-    })();
-  </script>
-
+  <script src="./admin.js?v=10"></script>
 </body>
 </html>
