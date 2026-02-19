@@ -50,6 +50,44 @@ body{
   box-shadow:var(--shadow);
 }
 
+/* =========================
+   Header Nav Hotspots (INVISIBLE)
+   Put <a class="nav-hotspot nav-home"> etc inside .image-header
+========================= */
+.nav-hotspot{
+  position:absolute;
+  display:block;
+  border-radius:12px;
+  /* Debug (optional): turn on to SEE hotspots */
+  /* background: rgba(255,0,0,.18); */
+}
+
+/* These are tuned for your header image (words under "Amelia’s Gallery") */
+.nav-home{
+  left: 36%;
+  top: 32%;
+  width: 8%;
+  height: 12%;
+}
+.nav-gallery{
+  left: 46%;
+  top: 32%;
+  width: 10%;
+  height: 12%;
+}
+.nav-contact{
+  left: 58%;
+  top: 32%;
+  width: 10%;
+  height: 12%;
+}
+.nav-about{
+  left: 70%;
+  top: 32%;
+  width: 8%;
+  height: 12%;
+}
+
 /* Hidden tower login hotspot */
 .tower-login{
   position:absolute;
@@ -64,7 +102,7 @@ body{
 }
 
 /* =========================
-   Shadow Nav Buttons
+   Shadow Nav Buttons (ONLY used if you keep a <nav> block)
 ========================= */
 .nav{
   max-width:1200px;
@@ -464,4 +502,9 @@ body{
   .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   .cta{ flex-direction:column; align-items:flex-start; }
   .card img{ height:140px; }
-    }
+
+  /* Slightly taller hotspots on small screens */
+  .nav-home,.nav-gallery,.nav-contact,.nav-about{
+    height: 14%;
+  }
+  }
