@@ -11,15 +11,16 @@
 <body data-page="contact">
 
   <header class="image-header">
-    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager">
-
-    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
-    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
-    <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
-    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
-
+    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager" />
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
+
+  <nav class="nav nav-buttons" aria-label="Primary">
+    <a class="btnlink" href="./index.html">Home</a>
+    <a class="btnlink" href="./gallery.html">Gallery</a>
+    <a class="btnlink active" href="./commissions.html">Contact</a>
+    <a class="btnlink" href="./about.html">About</a>
+  </nav>
 
   <main class="shell">
     <section class="section">
@@ -65,19 +66,21 @@
   </main>
 
   <footer class="image-footer">
-    <img src="./amelias-gallery-footer.png" alt="Footer">
+    <img src="./amelias-gallery-footer.png" alt="Footer" />
     <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <script src="./config.js?v=10"></script>
-  <script src="./site-auth.js?v=10"></script>
+  <script src="./site-auth.js?v=1"></script>
+  <script src="./config.js"></script>
   <script>
     (function () {
       const form = document.getElementById("contactForm");
       const statusEl = document.getElementById("formStatus");
       if (!form) return;
 
-      function setStatus(msg) { if (statusEl) statusEl.textContent = msg || ""; }
+      function setStatus(msg) {
+        if (statusEl) statusEl.textContent = msg || "";
+      }
 
       const API_BASE = (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
       const base = String(API_BASE).replace(/\/$/, "");
@@ -91,8 +94,15 @@
         const type = String(fd.get("type") || "commission");
         const message = String(fd.get("message") || "").trim();
 
-        if (!name || !email || !message) return setStatus("Please fill in all fields.");
-        if (!base) return setStatus("Backend not set yet. Add API_BASE in config.js to enable sending.");
+        if (!name || !email || !message) {
+          setStatus("Please fill in all fields.");
+          return;
+        }
+
+        if (!base) {
+          setStatus("Backend not set yet. Add API_BASE in config.js to enable sending.");
+          return;
+        }
 
         setStatus("Sending…");
 
