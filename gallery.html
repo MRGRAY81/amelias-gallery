@@ -5,40 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gallery — Amelia’s Gallery</title>
   <meta name="description" content="Artwork gallery by Amelia — family managed." />
-  <link rel="stylesheet" href="./styles.css?v=10" />
+  <link rel="stylesheet" href="./styles.css?v=7" />
 </head>
 
 <body data-page="gallery">
 
+  <!-- 🌸 Japanese Header -->
   <header class="image-header">
     <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager">
+
+    <!-- ✅ Nav word hotspots (clickable text on the header image) -->
+    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
+    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
+    <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
+    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
+
+    <!-- 🎯 Hidden tower login -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
 
-  <nav class="nav nav-buttons" aria-label="Primary">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink active" href="./gallery.html">Gallery</a>
-    <a class="btnlink" href="./commissions.html">Contact</a>
-    <a class="btnlink" href="./about.html">About</a>
-  </nav>
-
   <main class="shell">
+
+    <!-- Gallery Section (UNCHANGED BEHAVIOUR) -->
     <section class="section">
       <div class="section-head">
         <h2>Gallery ✨</h2>
         <p>Tap to view bigger</p>
       </div>
 
+      <!-- Category chips -->
       <div class="chips" id="chipBar"></div>
+
+      <!-- Carousel rows -->
       <div class="rows" id="galleryRows"></div>
     </section>
+
   </main>
 
+  <!-- 🌸 Japanese Footer -->
   <footer class="image-footer">
     <img src="./amelias-gallery-footer.png" alt="Footer">
-    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
+    <div class="footer-note">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </div>
   </footer>
 
+  <!-- 🔍 Lightbox -->
   <div class="lightbox" id="lightbox" aria-hidden="true">
     <div class="lightbox-inner" role="dialog" aria-modal="true">
       <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
@@ -47,7 +59,7 @@
     </div>
   </div>
 
+  <script src="./gallery.js?v=7"></script>
   <script src="./site-auth.js?v=1"></script>
-  <script src="./gallery.js?v=10"></script>
 </body>
 </html>
