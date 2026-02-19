@@ -22,197 +22,76 @@ body{
     linear-gradient(var(--bg), var(--bg2));
 }
 
-/* =========================
-   NEW JAPANESE HEADER / FOOTER
-   (used on Home/Gallery/About/Contact)
-========================= */
+a{ color:inherit; }
+.muted{ color:var(--muted); }
 
-/* Header image container */
-.image-header{
-  position:relative;
-  width:100%;
-  max-width:1200px;
-  margin:16px auto 0;
-  padding:0 16px;
-}
-
-.image-header img{
-  width:100%;
-  height:auto;
-  display:block;
-  border-radius:var(--r);
-  border:1px solid var(--stroke);
-  box-shadow:var(--shadow);
-}
-
-/* Footer image container */
+/* ===== Header / Footer Images ===== */
+.image-header,
 .image-footer{
   width:100%;
-  max-width:1200px;
-  margin:18px auto 22px;
-  padding:0 16px;
+  display:block;
+  position:relative;
+  overflow:hidden;
 }
 
+.image-header img,
 .image-footer img{
   width:100%;
   height:auto;
   display:block;
-  border-radius:var(--r);
-  border:1px solid var(--stroke);
-  box-shadow:var(--shadow);
 }
 
-/* Optional footer note (Gallery has this) */
-.footer-note{
-  margin-top:10px;
-  text-align:center;
-  color:var(--muted);
-  font-weight:800;
-  padding-bottom:10px;
-}
-
-/* =========================
-   HEADER HOTSPOTS
-   clickable word links over the header image
-========================= */
-.nav-hotspot{
-  position:absolute;
-  display:block;
-  /* debug: uncomment to see areas */
-  /* background: rgba(255,0,0,.18); */
-  border-radius:14px;
-}
-
-/* These are safe defaults.
-   You WILL tweak these % values to match your actual header text position. */
-.nav-home    { top: 67%; left: 33%; width: 10%; height: 10%; }
-.nav-gallery  { top: 67%; left: 44%; width: 12%; height: 10%; }
-.nav-contact  { top: 67%; left: 57%; width: 13%; height: 10%; }
-.nav-about    { top: 67%; left: 71%; width: 11%; height: 10%; }
-
-.nav-hotspot:hover{
-  box-shadow: 0 0 0 3px rgba(243,162,126,.22) inset;
-}
-
-/* Hidden tower login hotspot */
-.tower-login{
-  position:absolute;
-  display:block;
-  /* debug: uncomment to see tower area */
-  /* background: rgba(0,255,0,.18); */
-  border-radius:18px;
-  top: 18%;
-  left: 82%;
-  width: 10%;
-  height: 36%;
-}
-
-/* mobile tweak */
-@media (max-width: 720px){
-  .nav-home    { top: 70%; left: 16%; width: 18%; height: 14%; }
-  .nav-gallery  { top: 70%; left: 35%; width: 20%; height: 14%; }
-  .nav-contact  { top: 70%; left: 56%; width: 22%; height: 14%; }
-  .nav-about    { top: 70%; left: 79%; width: 18%; height: 14%; }
-
-  .tower-login{
-    top: 18%;
-    left: 78%;
-    width: 14%;
-    height: 40%;
-  }
-}
-
-/* =========================
-   OLD TOPBAR + BUTTON NAV
-   (keep for Admin pages only)
-========================= */
-
-.topbar{
-  max-width:1200px;
-  margin:18px auto 0;
-  padding:10px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.brand-left{
-  width:56px;
-  display:grid;
-  place-items:center;
-  text-decoration:none;
-}
-
-.amark-img{
-  width:48px;
-  height:auto;
-  object-fit:contain;
-  padding:4px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.72);
-}
-
-.amark-fallback{
-  display:grid;
-  place-items:center;
-  width:42px;
-  height:42px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.72);
-  font-family:"Georgia","Times New Roman",serif;
-  font-style:italic;
-  font-weight:800;
-  color:rgba(42,37,48,.70);
-}
-
-/* Button-style nav (admin pages) */
-.nav{
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
-  flex-wrap:wrap;
-  font-weight:900;
-}
-
-.nav a{
-  text-decoration:none;
-  padding:10px 14px;
-  border-radius:999px;
-  background:rgba(255,255,255,.70);
-  border:1px solid var(--stroke);
-  color:rgba(42,37,48,.72);
-}
-
-.nav a:hover{
-  background:rgba(255,255,255,.82);
-  color:rgba(42,37,48,.92);
-}
-
-.nav a.active{
-  background:rgba(255,255,255,.88);
-  box-shadow:0 12px 28px rgba(20,12,5,.08);
-}
-
-.nav a.admin{
-  background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
-  color:#fff;
-}
-
-/* =========================
-   LAYOUT SHELL
-========================= */
+/* Keep content nicely boxed under the header image */
 .shell{
   max-width:1200px;
   margin:10px auto 26px;
   padding:0 16px 20px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
+/* Footer note overlay (optional but nice) */
+.footer-note{
+  max-width:1200px;
+  margin:0 auto;
+  padding:10px 16px 14px;
+  text-align:center;
+  color:var(--muted);
+  font-weight:800;
+}
+
+/* ===== Clickable header word hotspots =====
+   These are invisible links positioned over the words:
+   Home | Gallery | Contact | About
+*/
+.nav-hotspot{
+  position:absolute;
+  top:61%;
+  height:11%;
+  /* debug if needed:
+  outline:2px solid rgba(255,0,0,.35);
+  background:rgba(255,0,0,.08);
+  */
+}
+
+/* Adjust these values if needed based on your exact header image */
+.nav-home{    left:40.5%; width:8.5%; }
+.nav-gallery{ left:50.0%; width:10.5%; }
+.nav-contact{ left:61.5%; width:10.5%; }
+.nav-about{   left:73.0%; width:9.0%; }
+
+/* Hidden admin hotspot on tower */
+.tower-login{
+  position:absolute;
+  left:10.5%;
+  top:52%;
+  width:12%;
+  height:30%;
+  /* debug if needed:
+  outline:2px solid rgba(0,0,255,.35);
+  background:rgba(0,0,255,.06);
+  */
+}
+
+/* ===== Buttons ===== */
 .btn{
   border:1px solid var(--stroke);
   background:linear-gradient(180deg, rgba(243,162,126,.92), rgba(243,162,126,.76));
@@ -227,7 +106,6 @@ body{
   justify-content:center;
   gap:8px;
 }
-
 .btn:hover{ filter:brightness(.98); }
 
 .btn.ghost{
@@ -235,9 +113,7 @@ body{
   color:rgba(42,37,48,.80);
 }
 
-/* =========================
-   SECTIONS
-========================= */
+/* ===== Sections ===== */
 .section{ margin-top:18px; }
 
 .section-head{
@@ -260,15 +136,57 @@ body{
   font-weight:750;
 }
 
-/* =========================
-   GRID / CARDS
-   (Home featured grid)
-========================= */
+/* ===== Panels & Forms ===== */
+.panel{
+  margin-top:12px;
+  padding:16px;
+  border-radius:var(--r);
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.62);
+  box-shadow:0 14px 30px rgba(20,12,5,.06);
+}
+
+.panel h3{ margin:0 0 10px; font-weight:950; }
+
+.form{
+  display:grid;
+  gap:12px;
+  margin-top:10px;
+}
+
+.form label{
+  display:grid;
+  gap:6px;
+  font-weight:850;
+}
+
+.form input,
+.form textarea,
+.form select{
+  width:100%;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.78);
+  color:var(--ink);
+  outline:none;
+  font-weight:700;
+}
+
+.form textarea{ resize:vertical; }
+
+.fineprint{
+  color:var(--muted);
+  font-weight:800;
+  padding-top:4px;
+}
+
+/* ===== Grid / Cards (homepage) ===== */
 .grid{
-  margin-top:14px;
   display:grid;
   grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:12px;
+  margin-top:12px;
 }
 
 .card{
@@ -288,14 +206,7 @@ body{
   display:block;
 }
 
-/* force 2 rows on desktop if you keep 6 featured items */
-.home-two-rows .grid{
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-/* =========================
-   CTA
-========================= */
+/* ===== CTA ===== */
 .cta{
   margin-top:16px;
   padding:16px;
@@ -320,152 +231,77 @@ body{
   font-weight:750;
 }
 
-/* =========================
-   PANEL / FORM
-   (Contact page)
-========================= */
-.panel{
-  margin-top:14px;
-  padding:16px;
-  border-radius:var(--r);
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.62);
-  box-shadow:var(--shadow);
-}
-
-.panel h3{ margin:0 0 8px; font-weight:950; }
-.panel p{ margin:0 0 10px; color:var(--muted); font-weight:750; }
-
-.form{
-  display:grid;
-  gap:10px;
-  margin-top:10px;
-}
-.form label{
-  display:grid;
-  gap:6px;
-  font-weight:850;
-  color:rgba(42,37,48,.78);
-}
-.form input, .form textarea{
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.80);
-  font:inherit;
-}
-
-.fineprint{
-  margin-top:10px;
-  font-size:13px;
-  color:rgba(42,37,48,.55);
-  font-weight:800;
-}
-
-/* =========================
-   GALLERY CAROUSEL ROWS
-========================= */
+/* ===== Gallery: chips + carousel rows (keeps your moving rows happy) ===== */
 .chips{
   display:flex;
-  flex-wrap:wrap;
   gap:10px;
-  padding:10px 14px 0;
+  flex-wrap:wrap;
+  padding:12px 14px 0;
 }
 
-.chipbtn{
-  border:1px solid var(--stroke);
-  background:rgba(255,255,255,.75);
-  color:rgba(42,37,48,.80);
-  font-weight:900;
+.chip{
   padding:10px 14px;
   border-radius:999px;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.70);
+  color:rgba(42,37,48,.80);
+  font-weight:900;
   cursor:pointer;
+  user-select:none;
 }
-
-.chipbtn.active{
-  background:var(--peach);
-  color:white;
-  border-color:rgba(0,0,0,.06);
+.chip:hover{ background:rgba(255,255,255,.82); }
+.chip.active{
+  background:rgba(255,255,255,.92);
+  box-shadow:0 12px 28px rgba(20,12,5,.08);
 }
 
 .rows{
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-  padding:14px 0 18px;
+  display:grid;
+  gap:14px;
+  margin-top:12px;
+  padding:0 14px 14px;
 }
 
 .row{
-  background:rgba(255,255,255,.62);
+  display:flex;
+  gap:12px;
+  overflow:auto;
+  padding:10px;
+  border-radius:18px;
   border:1px solid var(--stroke);
-  border-radius:24px;
-  box-shadow:var(--shadow);
-  overflow:hidden;
+  background:rgba(255,255,255,.52);
+  scroll-snap-type:x mandatory;
 }
-
-.rowhead{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:12px;
-  padding:16px 16px 10px;
-}
-
-.rowhead h3{ margin:0; font-size:18px; }
-.rowhead .hint{
-  margin:0;
-  color:rgba(42,37,48,.60);
-  font-weight:800;
-  font-size:13px;
-}
-
-.stripWrap{
-  overflow-x:auto;
-  overflow-y:hidden;
-  padding:12px 12px 16px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.strip{
-  display:flex;
-  gap:12px;
+.row::-webkit-scrollbar{ height:10px; }
+.row::-webkit-scrollbar-thumb{
+  background:rgba(42,37,48,.18);
+  border-radius:999px;
 }
 
 .tile{
-  min-width:260px;
-  max-width:260px;
-  border:0;
-  background:rgba(255,255,255,.70);
+  min-width:220px;
+  max-width:220px;
   border-radius:18px;
   overflow:hidden;
+  border:1px solid var(--stroke);
+  background:rgba(255,255,255,.70);
+  box-shadow:0 14px 30px rgba(20,12,5,.06);
   cursor:pointer;
-  box-shadow:0 18px 40px rgba(0,0,0,.12);
-  text-align:left;
-  padding:0;
+  scroll-snap-align:start;
 }
-
 .tile img{
   width:100%;
-  height:170px;
+  height:150px;
   object-fit:cover;
   display:block;
 }
-
 .tile .cap{
-  padding:10px 12px 12px;
+  padding:10px 10px 12px;
   font-weight:900;
-  color:rgba(42,37,48,.78);
+  color:rgba(42,37,48,.86);
 }
 
-.emptyRow{
-  padding:18px;
-  color:rgba(42,37,48,.62);
-  font-weight:900;
-}
-
-/* =========================
-   LIGHTBOX
-========================= */
+/* ===== Lightbox ===== */
 .lightbox{
   position:fixed;
   inset:0;
@@ -513,40 +349,19 @@ body{
   font-weight:800;
 }
 
-/* =========================
-   FOOTER (fallback if needed)
-========================= */
-.footer{
-  margin-top:16px;
-  text-align:center;
-  color:var(--muted);
-  font-weight:800;
-  padding:10px 0;
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
+/* ===== Responsive ===== */
 @media (max-width: 980px){
-  .grid{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card img{ height:140px; }
+
+  /* Make hotspots still usable on smaller screens */
+  .nav-hotspot{ top:60%; height:12%; }
 }
 
 @media (max-width: 720px){
-  .topbar{ flex-wrap:wrap; }
-  .nav{ justify-content:flex-start; }
-  .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   .cta{ flex-direction:column; align-items:flex-start; }
-}
-/* ✅ Evenly-spaced word hotspots (one line) */
-.nav-home    { top: 67%; left: 30%; width: 10%; height: 10%; }
-.nav-gallery  { top: 67%; left: 41%; width: 12%; height: 10%; }
-.nav-contact  { top: 67%; left: 54%; width: 13%; height: 10%; }
-.nav-about    { top: 67%; left: 68%; width: 10%; height: 10%; }
 
-/* Mobile: bigger tap targets */
-@media (max-width: 720px){
-  .nav-home    { top: 70%; left: 10%; width: 20%; height: 14%; }
-  .nav-gallery  { top: 70%; left: 31%; width: 22%; height: 14%; }
-  .nav-contact  { top: 70%; left: 55%; width: 24%; height: 14%; }
-  .nav-about    { top: 70%; left: 80%; width: 18%; height: 14%; }
+  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .tile{ min-width:200px; max-width:200px; }
 }
