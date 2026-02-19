@@ -9,16 +9,9 @@
 </head>
 
 <body data-page="about">
-  <header class="image-header">
-    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery" loading="eager" />
 
-    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
-    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
-    <a href="./commissions.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
-    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
-
-    <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
-  </header>
+  <!-- Shared Header -->
+  <div id="site-header"></div>
 
   <main class="shell">
     <section class="section">
@@ -30,23 +23,40 @@
       <div class="panel">
         <h3>About Amelia</h3>
         <p>
-          Amelia loves creating drawings and illustrations. This gallery is managed by family to keep everything safe and friendly.
+          Amelia loves creating drawings and illustrations. This gallery is a
+          collection of her artwork and creative experiments ✨
         </p>
 
         <h3 style="margin-top:14px;">Commissions & enquiries</h3>
         <p>
-          If you’d like to request artwork or ask about buying a piece, please use the
-          <a href="./commissions.html">Contact page</a> and we’ll reply as soon as possible.
+          If you’d like to request artwork or ask about a piece,
+          please visit the <a href="./commissions.html">Contact page</a>.
         </p>
       </div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="image-footer">
     <img src="./amelias-gallery-footer.png" alt="Footer" />
-    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
+    <div class="footer-note">
+      Site managed by family • Supported by Uncle G & Del 💛
+    </div>
   </footer>
 
+  <!-- Scripts -->
+  <script src="./config.js"></script>
   <script src="./site-auth.js?v=1"></script>
+  <script src="./script.js"></script>
+
+  <!-- Header Loader -->
+  <script>
+    fetch('./header.html')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('site-header').innerHTML = data;
+      });
+  </script>
+
 </body>
 </html>
