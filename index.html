@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Amelia’s Gallery</title>
   <meta name="description" content="Amelia’s Gallery — artwork & commissions (family managed)." />
-  <link rel="stylesheet" href="./styles.css?v=4" />
+  <link rel="stylesheet" href="./styles.css?v=5" />
 </head>
 
 <body data-page="home">
@@ -14,11 +14,17 @@
   <header class="image-header">
     <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery">
 
-    <!-- 🎯 Hidden login hotspot -->
+    <!-- ✅ Nav word hotspots (over the image text) -->
+    <a href="./index.html" class="nav-hotspot nav-home" aria-label="Home"></a>
+    <a href="./gallery.html" class="nav-hotspot nav-gallery" aria-label="Gallery"></a>
+    <a href="./contact.html" class="nav-hotspot nav-contact" aria-label="Contact"></a>
+    <a href="./about.html" class="nav-hotspot nav-about" aria-label="About"></a>
+
+    <!-- 🎯 Hidden login hotspot on tower -->
     <a href="./admin.html" class="tower-login" aria-label="Admin Login"></a>
   </header>
 
-  <!-- 🌸 Navigation -->
+  <!-- 🌸 Navigation (keep this OR remove it) -->
   <nav class="nav nav-buttons" aria-label="Primary">
     <a class="btnlink active" href="./index.html">Home</a>
     <a class="btnlink" href="./gallery.html">Gallery</a>
@@ -63,6 +69,6 @@
     </div>
   </div>
 
-  <script src="./script.js?v=4"></script>
+  <script src="./script.js?v=5"></script>
 </body>
 </html>
