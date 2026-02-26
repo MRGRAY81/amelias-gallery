@@ -1,20 +1,30 @@
-(() => {
+(function () {
   const TOKEN_KEY = "amelias_admin_token";
 
-  const API_BASE = (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
-  const $ = (id) => document.getElementById(id);
+  const API_BASE =
+    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
 
-  const backendUrl = $("backendUrl");
-  const statusEl = $("status");
-  const emailEl = $("email");
-  const passEl = $("password");
-  const loginBtn = $("loginBtn");
-  const portalBtn = $("portalBtn");
+  const els = {
+    backendUrl: document.getElementById("backendUrl"),
+    status: document.getElementById("status"),
+    loginForm: document.getElementById("loginForm"),
+    email: document.getElementById("email"),
+    password: document.getElementById("password"),
+    loginBtn: document.getElementById("loginBtn"),
+    logoutBtn: document.getElementById("logoutBtn"),
+    portalBtn: document.getElementById("portalBtn"),
+    out: document.getElementById("adminOutText"),
+  };
 
-  function setStatus(msg, ok = true) {
-    if (!statusEl) return;
-    statusEl.textContent = msg || "";
-    statusEl.style.color = ok ? "#256d3b" : "#b42318";
+  function setStatus(text, ok = true) {
+    if (!els.status) return;
+    els.status.textContent = text || "";
+    els.status.classList.remove("ok", "bad");
+    els.status.classList.add(ok ? "ok" : "bad");
+  }
+
+  function setBackendLabel() {
+    if (els.backendUrl) els.backendUrl.textContent = API_BASE || "—";
   }
 
   function setToken(t) {
@@ -22,60 +32,103 @@
     else localStorage.setItem(TOKEN_KEY, t);
   }
 
+  function getToken() {
+    return localStorage.getItem(TOKEN_KEY) || "";
+  }
+
+  function showOut(obj) {
+    if (!els.out) return;
+    els.out.style.display = "block";
+    els.out.textContent = JSON.stringify(obj, null, 2);
+  }
+
   async function ping() {
     try {
       const r = await fetch(`${API_BASE}/api/health`);
-      if (!r.ok) throw new Error("bad");
       const j = await r.json();
-      if (!j.ok) throw new Error("bad");
-      setStatus("Backend: online ✅", true);
-      return true;
-    } catch {
+      setStatus(j?.ok ? "Backend: online ✅" : "Backend: unknown", !!j?.ok);
+      return !!j?.ok;
+    } catch (e) {
       setStatus("Backend: offline / sleeping ❌", false);
       return false;
     }
   }
 
-  async function login() {
-    const email = (emailEl?.value || "").trim();
-    const password = (passEl?.value || "").trim();
+  function setLoggedInUI(isLoggedIn) {
+    if (els.logoutBtn) els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    if (els.portalBtn) els.portalBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+  }
 
-    if (!email || !password) {
-      setStatus("Enter email + password.", false);
-      return;
-    }
-
-    setStatus("Logging in…", true);
+  async function whoami() {
+    const token = getToken();
+    if (!token) return false;
 
     try {
-      const r = await fetch(`${API_BASE}/api/admin/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const r = await fetch(`${API_BASE}/api/admin/whoami`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      const data = await r.json().catch(() => null);
-      if (!r.ok) throw new Error((data && data.error) || "Login failed");
-
-      setToken(data.token);
-      setStatus("Logged in ✅", true);
-
-      if (portalBtn) portalBtn.style.display = "inline-flex";
-      // auto-open portal
-      window.location.href = "./admin-portal.html";
-    } catch (e) {
-      setStatus(e.message || "Login failed", false);
+      if (!r.ok) return false;
+      const j = await r.json();
+      showOut(j);
+      return true;
+    } catch {
+      return false;
     }
   }
 
-  // boot
-  if (backendUrl) backendUrl.textContent = API_BASE || "—";
-  ping();
+  async function login(email, password) {
+    const r = await fetch(`${API_BASE}/api/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-  if (loginBtn) loginBtn.addEventListener("click", login);
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data?.error || "Login failed");
 
-  // enter key support
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") login();
-  });
+    setToken(data.token);
+    return data;
+  }
+
+  function logout() {
+    setToken("");
+    setLoggedInUI(false);
+    showOut({ ok: true, message: "Logged out" });
+    setStatus("Logged out.", true);
+  }
+
+  // Events
+  if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
+
+  if (els.loginForm) {
+    els.loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const ok = await ping();
+      if (!ok) return;
+
+      const email = (els.email?.value || "").trim();
+      const password = els.password?.value || "";
+
+      try {
+        setStatus("Logging in…", true);
+        const data = await login(email, password);
+        showOut(data);
+        setStatus("Logged in ✅", true);
+        setLoggedInUI(true);
+      } catch (err) {
+        setLoggedInUI(false);
+        setStatus(err?.message || "Login failed", false);
+      }
+    });
+  }
+
+  // Boot
+  (async function boot() {
+    setBackendLabel();
+    await ping();
+    const ok = await whoami();
+    setLoggedInUI(ok);
+    if (ok) setStatus("Already logged in ✅", true);
+  })();
 })();
