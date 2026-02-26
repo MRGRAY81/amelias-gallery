@@ -1,8 +1,16 @@
-// admin-portal.js — WORKS WITH /api/messages + PATCH /api/messages/:id
+// admin-portal.js — JWT + /api/messages + PATCH /api/messages/:id
+// Requires: config.js sets window.AMELIAS_CONFIG.API_BASE (recommended)
 
 (function () {
-  const TOKEN_KEY = "amelias_admin_ok";
   const LOGIN_PAGE = "./admin.html";
+
+  // Accept tokens saved by different versions so swaps don't brick logins
+  const TOKEN_KEYS = [
+    "amelias_admin_token", // preferred
+    "amelias_admin_jwt",   // alt
+    "amelias_admin",       // alt
+    "admin_token",         // alt
+  ];
 
   const API_BASE =
     (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
@@ -38,15 +46,27 @@
   let searchTerm = "";
 
   function normBase(b) {
-    return String(b || "").replace(/\/$/, "");
+    const s = String(b || "").trim();
+    return s ? s.replace(/\/$/, "") : "";
   }
 
-  function authed() {
-    return localStorage.getItem(TOKEN_KEY) === "yes";
+  function getToken() {
+    for (const k of TOKEN_KEYS) {
+      const t = localStorage.getItem(k);
+      if (t && String(t).trim().length > 10) return String(t).trim();
+    }
+    // Back-compat: some earlier versions used a boolean flag only (no JWT)
+    // If that's all you have, portal can't call protected endpoints.
+    return "";
+  }
+
+  function clearAuth() {
+    for (const k of TOKEN_KEYS) localStorage.removeItem(k);
+    localStorage.removeItem("amelias_admin_ok"); // legacy flag
   }
 
   function logout() {
-    localStorage.removeItem(TOKEN_KEY);
+    clearAuth();
     window.location.href = LOGIN_PAGE;
   }
 
@@ -58,7 +78,11 @@
 
   function fmtDate(iso) {
     if (!iso) return "—";
-    try { return new Date(iso).toLocaleString(); } catch { return iso; }
+    try {
+      return new Date(iso).toLocaleString();
+    } catch {
+      return iso;
+    }
   }
 
   function escapeHtml(s) {
@@ -70,9 +94,36 @@
       .replaceAll("'", "&#039;");
   }
 
+  async function rawFetch(base, path, opts) {
+    const url = (normBase(base) || "").concat(path);
+    const res = await fetch(url, opts);
+    if (res.status === 401 || res.status === 403) {
+      // token missing/expired
+      logout();
+      throw new Error("Unauthorised");
+    }
+    return res;
+  }
+
+  async function apiHealth() {
+    const base = normBase(API_BASE);
+    const r = await rawFetch(base, "/api/health", { method: "GET" });
+    if (!r.ok) throw new Error(`Health failed (${r.status})`);
+    return r.json();
+  }
+
   async function apiGetMessages() {
     const base = normBase(API_BASE);
-    const r = await fetch(`${base}/api/messages`);
+    const token = getToken();
+    if (!token) throw new Error("Missing token (please login again)");
+
+    const r = await rawFetch(base, "/api/messages", {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token,
+      },
+    });
+
     if (!r.ok) throw new Error(`GET /api/messages failed (${r.status})`);
     const j = await r.json();
     return Array.isArray(j.items) ? j.items : [];
@@ -80,11 +131,21 @@
 
   async function apiPatchMessage(id, patch) {
     const base = normBase(API_BASE);
-    const r = await fetch(`${base}/api/messages/${encodeURIComponent(id)}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patch),
-    });
+    const token = getToken();
+    if (!token) throw new Error("Missing token (please login again)");
+
+    const r = await rawFetch(
+      base,
+      `/api/messages/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token,
+        },
+        body: JSON.stringify(patch),
+      }
+    );
 
     if (!r.ok) {
       const t = await r.text();
@@ -166,7 +227,7 @@
     els.nameText.textContent = m.name || "—";
     els.emailText.textContent = m.email || "—";
     els.createdAt.textContent = fmtDate(m.createdAt);
-    els.statusPill.textContent = m.status || "new";
+    if (els.statusPill) els.statusPill.textContent = m.status || "new";
     els.messageText.textContent = m.text || "";
 
     els.statusSelect.value = m.status || "new";
@@ -175,17 +236,21 @@
   }
 
   async function load() {
-    if (!authed()) {
+    const base = normBase(API_BASE);
+    if (els.backendUrl) els.backendUrl.textContent = base || "—";
+
+    const token = getToken();
+    if (!token) {
       window.location.href = LOGIN_PAGE;
       return;
     }
 
-    const base = normBase(API_BASE);
-    if (els.backendUrl) els.backendUrl.textContent = base || "—";
-
-    setStatus("Loading inbox…", true);
+    setStatus("Checking backend…", true);
 
     try {
+      await apiHealth();
+      setStatus("Loading inbox…", true);
+
       items = await apiGetMessages();
       setStatus("Loaded ✅", true);
 
@@ -211,7 +276,6 @@
     try {
       const res = await apiPatchMessage(m.id, { status, notes });
 
-      // backend returns {ok:true,msg}
       const updated = res.msg || res.item || null;
       if (updated) {
         m.status = updated.status || status;
