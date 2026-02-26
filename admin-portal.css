@@ -15,6 +15,8 @@
 .portal-toolbar {
   display:flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 10px;
 }
 
@@ -35,13 +37,8 @@
   cursor:pointer;
 }
 
-.list-item:hover {
-  background:#ececec;
-}
-
-.list-item.active {
-  background:#ffe9dd;
-}
+.list-item:hover { background:#ececec; }
+.list-item.active { background:#ffe9dd; }
 
 .message-box {
   white-space: pre-wrap;
@@ -50,20 +47,19 @@
   border-radius:8px;
 }
 
-.ref-grid {
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.ref-grid img {
-  width:100px;
-  border-radius:8px;
-}
-
 .detail-controls {
   margin-top:15px;
   display:flex;
   flex-direction:column;
   gap:10px;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .portal-grid {
+    grid-template-columns: 1fr;
+  }
+  .portal-toolbar input {
+    width: 100%;
+  }
 }
