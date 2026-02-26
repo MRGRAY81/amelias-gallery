@@ -22,4 +22,49 @@
       <div class="panel">
         <div class="muted small">Backend</div>
         <div class="mono" id="backendUrl">—</div>
-        <div class="status" id="
+        <div class="status" id="status">Checking backend…</div>
+
+        <form class="form" id="loginForm" style="margin-top:14px;">
+          <label>
+            Email
+            <input id="email" type="email" autocomplete="username" placeholder="amelia@demo.com" required />
+          </label>
+
+          <label>
+            Password
+            <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+          </label>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+            <button class="btn" id="loginBtn" type="submit">Login</button>
+            <button class="btn ghost" id="logoutBtn" type="button" style="display:none;">Logout</button>
+            <a class="btn" id="portalBtn" href="./admin-portal.html" style="display:none;">Open Admin Portal</a>
+          </div>
+
+          <div class="fineprint">Tip: Press Enter to login.</div>
+        </form>
+
+        <div id="adminPanel" style="display:none; margin-top:14px;">
+          <h3>Admin Tools</h3>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn ghost" id="pingBtn" type="button">Ping</button>
+            <button class="btn ghost" id="whoamiBtn" type="button">Validate Token</button>
+          </div>
+          <pre class="codebox" id="adminOutText">{}</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="image-footer">
+    <img src="./amelias-gallery-footer.png" alt="Footer" />
+    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="./config.js"></script>
+  <script src="./site-auth.js?v=1"></script>
+  <script src="./admin.js?v=10"></script>
+  <script src="./header-loader.js?v=1"></script>
+</body>
+</html>
