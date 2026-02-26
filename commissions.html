@@ -3,48 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact — Amelia’s Gallery</title>
-  <meta name="description" content="Contact — Amelia’s Gallery (family managed)." />
+  <title>Commissions — Amelia’s Gallery</title>
+  <meta name="description" content="Commission artwork — Amelia’s Gallery (family managed)." />
   <link rel="stylesheet" href="./styles.css?v=12" />
 </head>
 
-<body data-page="contact">
+<body data-page="commissions">
   <!-- Shared Header -->
   <div id="site-header"></div>
 
   <main class="shell">
     <section class="section">
       <div class="section-head">
-        <h2>Contact 💛</h2>
-        <p>Artwork requests & enquiries</p>
+        <h2>Commissions ✨</h2>
+        <p>Request custom artwork</p>
       </div>
 
       <div class="panel">
-        <p>
-          If you’d like to ask about a drawing, commission artwork, or purchase a piece,
-          please send a message below.
-        </p>
+        <div class="pill" id="backendState" style="margin-bottom:12px;">Backend: …</div>
 
-        <form class="form" id="contactForm">
+        <form class="form" id="commissionForm">
           <label>
             Name
-            <input type="text" name="name" placeholder="Your name" required />
+            <input id="name" type="text" name="name" placeholder="Your name" required />
           </label>
 
           <label>
             Email
-            <input type="email" name="email" placeholder="Your email" required />
+            <input id="email" type="email" name="email" placeholder="Your email" required />
           </label>
 
           <label>
-            Message
-            <textarea name="message" rows="4" placeholder="Tell us about your idea ✨" required></textarea>
+            Artwork type
+            <select id="type" name="type" required>
+              <option value="Portrait">Portrait</option>
+              <option value="Pets / Animals">Pets / Animals</option>
+              <option value="Roblox / Gaming">Roblox / Gaming</option>
+              <option value="Scene / Landscape">Scene / Landscape</option>
+              <option value="Other">Other</option>
+            </select>
           </label>
 
-          <button type="submit" class="btn">Send Message ✨</button>
+          <label>
+            Size
+            <select id="size" name="size" required>
+              <option value="Small">Small</option>
+              <option value="Medium">Medium</option>
+              <option value="Large">Large</option>
+            </select>
+          </label>
+
+          <label>
+            Brief
+            <textarea id="brief" name="brief" rows="5" placeholder="Tell us what you’d like ✨" required></textarea>
+          </label>
+
+          <label>
+            Reference images (up to 3)
+            <input id="refs" type="file" accept="image/png,image/jpeg,image/webp" multiple />
+          </label>
+
+          <div id="thumbs" class="thumbs" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;"></div>
+
+          <button type="button" class="btn" id="clearFiles" style="margin-top:10px;">Clear images</button>
+
+          <button type="submit" class="btn" style="margin-top:10px;">Send Request ✨</button>
 
           <div class="fineprint" id="formStatus" aria-live="polite">
-            This form is a placeholder for now. Next step: connect it to email (Formspree/Netlify Forms/etc).
+            Your request will be sent to Amelia’s private inbox.
           </div>
         </form>
       </div>
@@ -58,6 +84,7 @@
 
   <script src="./config.js"></script>
   <script src="./site-auth.js?v=1"></script>
+  <script src="./commissions.js?v=12"></script>
   <script src="./header-loader.js?v=1"></script>
 </body>
 </html>
