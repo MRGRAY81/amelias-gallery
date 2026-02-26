@@ -4,43 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Portal — Amelia’s Gallery</title>
-  <link rel="stylesheet" href="./styles.css?v=101" />
-  <link rel="stylesheet" href="./admin-portal.css?v=1" />
+  <link rel="stylesheet" href="./styles.css?v=200" />
+  <link rel="stylesheet" href="./admin-portal.css?v=200" />
 </head>
 
 <body data-page="admin-portal">
-  <div id="site-header"></div>
+
+  <header class="image-header">
+    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" loading="eager" />
+  </header>
+
+  <nav class="nav nav-buttons" aria-label="Primary">
+    <a class="btnlink" href="./index.html">Home</a>
+    <a class="btnlink" href="./gallery.html">Gallery</a>
+    <a class="btnlink" href="./commissions.html">Contact</a>
+    <a class="btnlink" href="./about.html">About</a>
+  </nav>
 
   <main class="shell">
     <section class="section">
-      <div class="section-head">
-        <h2>Admin Inbox</h2>
-        <p>Messages & commission requests</p>
+      <div class="section-head" style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px;">
+        <div>
+          <h2>Admin Inbox</h2>
+          <p>Messages & commission requests</p>
+        </div>
+        <button class="btn ghost" id="logoutBtn" type="button">Logout</button>
       </div>
 
-      <!-- backend status row (REQUIRED by admin-portal.js) -->
-      <div class="panel" style="margin-bottom:14px;">
+      <div class="panel" style="margin-bottom:12px;">
         <div class="muted small">Backend</div>
         <div class="mono" id="backendUrl">—</div>
-        <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
-          <span id="dot" class="dot bad"></span>
-          <span id="statusText" class="muted">Checking backend…</span>
-          <span style="flex:1;"></span>
-          <button class="btn ghost" id="refreshBtn" type="button">Refresh</button>
-          <button class="btn ghost" id="logoutBtn" type="button">Logout</button>
-        </div>
-      </div>
-
-      <!-- optional tabs (admin-portal.js expects .tab list, safe to include) -->
-      <div class="panel" style="margin-bottom:14px; display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn ghost tab active" type="button" data-filter="all">All</button>
-        <button class="btn ghost tab" type="button" data-filter="new">New</button>
-        <button class="btn ghost tab" type="button" data-filter="progress">In Progress</button>
-        <button class="btn ghost tab" type="button" data-filter="done">Done</button>
+        <div class="status" id="statusText">Loading…</div>
       </div>
 
       <div class="portal-grid">
-        <!-- LEFT -->
         <div class="portal-list">
           <div class="portal-toolbar">
             <input id="searchInput" type="text" placeholder="Search…" />
@@ -49,31 +46,18 @@
           <div id="list"></div>
         </div>
 
-        <!-- RIGHT -->
         <div class="portal-detail">
           <div id="detailHint" class="muted">Select a message from the left.</div>
 
           <div id="detail" style="display:none;">
-            <!-- type badge required -->
-            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-              <span id="typeTag" class="tag tag-enquiry">ENQUIRY</span>
-              <span class="muted small">Created:</span>
-              <span id="createdAt" class="muted small">—</span>
-            </div>
-
             <div class="detail-meta">
               <div><strong>Name:</strong> <span id="nameText"></span></div>
               <div><strong>Email:</strong> <span id="emailText"></span></div>
+              <div><strong>Date:</strong> <span id="createdAt"></span></div>
+              <div><strong>Status:</strong> <span id="statusPill"></span></div>
             </div>
 
-            <div class="detail-body" style="margin-top:10px;">
-              <pre id="messageText" class="message-box"></pre>
-            </div>
-
-            <div id="refsBlock" style="display:none; margin-top:12px;">
-              <h4>Reference Images</h4>
-              <div id="refs" class="ref-grid"></div>
-            </div>
+            <pre id="messageText" class="message-box"></pre>
 
             <div class="detail-controls">
               <label>
@@ -94,10 +78,9 @@
               <div id="saveStatus" class="fineprint"></div>
             </div>
           </div>
-
-          <pre id="debugOut" class="codebox" style="display:none; margin-top:12px;"></pre>
         </div>
       </div>
+
     </section>
   </main>
 
@@ -106,10 +89,7 @@
     <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <!-- Scripts (order matters) -->
-  <script src="./config.js"></script>
-  <script src="./site-auth.js?v=1"></script>
-  <script src="./admin-portal.js?v=10"></script>
-  <script src="./header-loader.js?v=1"></script>
+  <script src="./config.js?v=200"></script>
+  <script src="./admin-portal.js?v=200"></script>
 </body>
 </html>
