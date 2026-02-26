@@ -55,8 +55,10 @@
   }
 
   function setLoggedInUI(isLoggedIn) {
-    if (els.logoutBtn) els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
-    if (els.portalBtn) els.portalBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    if (els.logoutBtn)
+      els.logoutBtn.style.display = isLoggedIn ? "inline-flex" : "none";
+    if (els.portalBtn)
+      els.portalBtn.style.display = isLoggedIn ? "inline-flex" : "none";
   }
 
   async function whoami() {
@@ -97,31 +99,39 @@
     setStatus("Logged out.", true);
   }
 
-  // Events
-  if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
+  async function doLoginFlow() {
+    const ok = await ping();
+    if (!ok) return;
 
-  if (els.loginForm) {
-    els.loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const email = (els.email?.value || "").trim();
+    const password = els.password?.value || "";
 
-      const ok = await ping();
-      if (!ok) return;
-
-      const email = (els.email?.value || "").trim();
-      const password = els.password?.value || "";
-
-      try {
-        setStatus("Logging in…", true);
-        const data = await login(email, password);
-        showOut(data);
-        setStatus("Logged in ✅", true);
-        setLoggedInUI(true);
-      } catch (err) {
-        setLoggedInUI(false);
-        setStatus(err?.message || "Login failed", false);
-      }
-    });
+    try {
+      setStatus("Logging in…", true);
+      const data = await login(email, password);
+      showOut(data);
+      setStatus("Logged in ✅", true);
+      setLoggedInUI(true);
+    } catch (err) {
+      setLoggedInUI(false);
+      setStatus(err?.message || "Login failed", false);
+    }
   }
+
+  // Events
+  els.logoutBtn?.addEventListener("click", logout);
+
+  // ✅ Make the Login button actually do something
+  els.loginBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    doLoginFlow();
+  });
+
+  // ✅ Enter key works too (even if button is type="button")
+  els.loginForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    doLoginFlow();
+  });
 
   // Boot
   (async function boot() {
