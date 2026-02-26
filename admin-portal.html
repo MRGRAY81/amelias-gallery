@@ -9,58 +9,68 @@
 </head>
 
 <body data-page="admin-portal">
-
   <div id="site-header"></div>
 
   <main class="shell">
-
     <section class="section">
       <div class="section-head">
         <h2>Admin Inbox</h2>
         <p>Messages & commission requests</p>
       </div>
 
-      <div class="portal-grid">
+      <!-- backend status row (REQUIRED by admin-portal.js) -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="muted small">Backend</div>
+        <div class="mono" id="backendUrl">—</div>
+        <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+          <span id="dot" class="dot bad"></span>
+          <span id="statusText" class="muted">Checking backend…</span>
+          <span style="flex:1;"></span>
+          <button class="btn ghost" id="refreshBtn" type="button">Refresh</button>
+          <button class="btn ghost" id="logoutBtn" type="button">Logout</button>
+        </div>
+      </div>
 
-        <!-- LEFT: Message List -->
+      <!-- optional tabs (admin-portal.js expects .tab list, safe to include) -->
+      <div class="panel" style="margin-bottom:14px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn ghost tab active" type="button" data-filter="all">All</button>
+        <button class="btn ghost tab" type="button" data-filter="new">New</button>
+        <button class="btn ghost tab" type="button" data-filter="progress">In Progress</button>
+        <button class="btn ghost tab" type="button" data-filter="done">Done</button>
+      </div>
+
+      <div class="portal-grid">
+        <!-- LEFT -->
         <div class="portal-list">
           <div class="portal-toolbar">
             <input id="searchInput" type="text" placeholder="Search…" />
             <div id="countText" class="muted small">0 items</div>
           </div>
-
           <div id="list"></div>
         </div>
 
-        <!-- RIGHT: Message Detail -->
+        <!-- RIGHT -->
         <div class="portal-detail">
-
-          <div id="detailHint" class="muted">
-            Select a message from the left.
-          </div>
+          <div id="detailHint" class="muted">Select a message from the left.</div>
 
           <div id="detail" style="display:none;">
-
-            <div class="detail-meta">
-              <div>
-                <strong>Name:</strong>
-                <span id="nameText"></span>
-              </div>
-              <div>
-                <strong>Email:</strong>
-                <span id="emailText"></span>
-              </div>
-              <div>
-                <strong>Date:</strong>
-                <span id="createdAt"></span>
-              </div>
+            <!-- type badge required -->
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+              <span id="typeTag" class="tag tag-enquiry">ENQUIRY</span>
+              <span class="muted small">Created:</span>
+              <span id="createdAt" class="muted small">—</span>
             </div>
 
-            <div class="detail-body">
+            <div class="detail-meta">
+              <div><strong>Name:</strong> <span id="nameText"></span></div>
+              <div><strong>Email:</strong> <span id="emailText"></span></div>
+            </div>
+
+            <div class="detail-body" style="margin-top:10px;">
               <pre id="messageText" class="message-box"></pre>
             </div>
 
-            <div id="refsBlock" style="display:none;">
+            <div id="refsBlock" style="display:none; margin-top:12px;">
               <h4>Reference Images</h4>
               <div id="refs" class="ref-grid"></div>
             </div>
@@ -80,6 +90,26 @@
                 <textarea id="notesInput" rows="3" placeholder="Internal notes…"></textarea>
               </label>
 
-              <button class="btn" id="saveBtn">Save</button>
+              <button class="btn" id="saveBtn" type="button">Save</button>
               <div id="saveStatus" class="fineprint"></div>
             </div>
+          </div>
+
+          <pre id="debugOut" class="codebox" style="display:none; margin-top:12px;"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="image-footer">
+    <img src="./amelias-gallery-footer.png" alt="Footer" />
+    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
+  </footer>
+
+  <!-- Scripts (order matters) -->
+  <script src="./config.js"></script>
+  <script src="./site-auth.js?v=1"></script>
+  <script src="./admin-portal.js?v=10"></script>
+  <script src="./header-loader.js?v=1"></script>
+</body>
+</html>
