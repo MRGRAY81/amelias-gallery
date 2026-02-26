@@ -1,22 +1,17 @@
-// admin-portal.js — Amelia's Gallery Inbox (messages + uploads)
+// admin-portal.js — WORKS WITH /api/messages + PATCH /api/messages/:id
 
 (function () {
-  const TOKEN_KEY = "amelias_admin_token";
+  const TOKEN_KEY = "amelias_admin_ok";
   const LOGIN_PAGE = "./admin.html";
 
-  const API =
+  const API_BASE =
     (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
 
-  // ---------- DOM ----------
   const els = {
-    dot: document.getElementById("dot"),
-    statusText: document.getElementById("statusText"),
     backendUrl: document.getElementById("backendUrl"),
+    statusText: document.getElementById("statusText"),
 
-    refreshBtn: document.getElementById("refreshBtn"),
     logoutBtn: document.getElementById("logoutBtn"),
-
-    tabs: Array.from(document.querySelectorAll(".tab")),
     searchInput: document.getElementById("searchInput"),
 
     countText: document.getElementById("countText"),
@@ -26,51 +21,44 @@
     detailHint: document.getElementById("detailHint"),
 
     createdAt: document.getElementById("createdAt"),
-    statusSelect: document.getElementById("statusSelect"),
+    statusPill: document.getElementById("statusPill"),
 
     nameText: document.getElementById("nameText"),
     emailText: document.getElementById("emailText"),
     messageText: document.getElementById("messageText"),
 
-    refsBlock: document.getElementById("refsBlock"),
-    refs: document.getElementById("refs"),
-
+    statusSelect: document.getElementById("statusSelect"),
     notesInput: document.getElementById("notesInput"),
     saveBtn: document.getElementById("saveBtn"),
     saveStatus: document.getElementById("saveStatus"),
   };
 
-  // ---------- State ----------
-  let items = []; // {id,name,email,text,status,notes,refs[],createdAt}
+  let items = [];
   let activeId = null;
-  let activeFilter = "all";
   let searchTerm = "";
 
-  // ---------- Helpers ----------
-  function isLoggedIn() {
-    return !!localStorage.getItem(TOKEN_KEY);
+  function normBase(b) {
+    return String(b || "").replace(/\/$/, "");
   }
 
-  function setStatus(text, ok) {
-    if (els.statusText) els.statusText.textContent = text || "";
-    if (els.dot) els.dot.className = "dot " + (ok ? "good" : "bad");
+  function authed() {
+    return localStorage.getItem(TOKEN_KEY) === "yes";
   }
 
-  function setBackendLabel() {
-    if (els.backendUrl) els.backendUrl.textContent = API || "—";
+  function logout() {
+    localStorage.removeItem(TOKEN_KEY);
+    window.location.href = LOGIN_PAGE;
+  }
+
+  function setStatus(msg, ok = true) {
+    if (!els.statusText) return;
+    els.statusText.textContent = msg || "";
+    els.statusText.style.color = ok ? "" : "#b00020";
   }
 
   function fmtDate(iso) {
     if (!iso) return "—";
-    try {
-      return new Date(iso).toLocaleString();
-    } catch {
-      return iso;
-    }
-  }
-
-  function safeLower(s) {
-    return String(s || "").toLowerCase();
+    try { return new Date(iso).toLocaleString(); } catch { return iso; }
   }
 
   function escapeHtml(s) {
@@ -82,37 +70,43 @@
       .replaceAll("'", "&#039;");
   }
 
-  async function health() {
-    try {
-      const r = await fetch(`${API}/api/health`);
-      const j = await r.json();
-      if (j?.ok) {
-        setStatus("Connected ✅", true);
-        return true;
-      }
-    } catch {}
-    setStatus("Backend not reachable ❌", false);
-    return false;
+  async function apiGetMessages() {
+    const base = normBase(API_BASE);
+    const r = await fetch(`${base}/api/messages`);
+    if (!r.ok) throw new Error(`GET /api/messages failed (${r.status})`);
+    const j = await r.json();
+    return Array.isArray(j.items) ? j.items : [];
   }
 
-  function currentFiltered() {
-    const q = safeLower(searchTerm).trim();
-
-    const filtered = items.filter((x) => {
-      const matchesStatus = activeFilter === "all" ? true : x.status === activeFilter;
-
-      const matchesSearch =
-        !q ||
-        safeLower(x.name).includes(q) ||
-        safeLower(x.email).includes(q) ||
-        safeLower(x.text).includes(q) ||
-        safeLower(x.status).includes(q);
-
-      return matchesStatus && matchesSearch;
+  async function apiPatchMessage(id, patch) {
+    const base = normBase(API_BASE);
+    const r = await fetch(`${base}/api/messages/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
     });
 
-    filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    return filtered;
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(t || `PATCH failed (${r.status})`);
+    }
+    return r.json();
+  }
+
+  function filtered() {
+    const q = String(searchTerm || "").trim().toLowerCase();
+    const arr = items.filter((m) => {
+      if (!q) return true;
+      return (
+        String(m.name || "").toLowerCase().includes(q) ||
+        String(m.email || "").toLowerCase().includes(q) ||
+        String(m.text || "").toLowerCase().includes(q) ||
+        String(m.status || "").toLowerCase().includes(q)
+      );
+    });
+
+    arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return arr;
   }
 
   function setCount(n) {
@@ -121,196 +115,130 @@
   }
 
   function renderList() {
-    if (!els.list) return;
-    const data = currentFiltered();
+    const data = filtered();
     setCount(data.length);
 
     els.list.innerHTML = "";
 
     if (!data.length) {
-      const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.textContent = "Nothing here yet.";
-      els.list.appendChild(empty);
+      els.list.innerHTML = `<div class="muted">Nothing here yet.</div>`;
       return;
     }
 
-    data.forEach((x) => {
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = "list-item " + (x.id === activeId ? "active " : "") + "status-" + x.status;
+    data.forEach((m) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "list-item" + (m.id === activeId ? " active" : "");
 
-      const title = x.name || "(no name)";
-      const sub = x.email || "";
-      const snippet = (x.text || "").trim().slice(0, 110);
+      const snippet = String(m.text || "").slice(0, 100);
 
-      row.innerHTML = `
-        <div class="li-top">
-          <div class="li-title">${escapeHtml(title)}</div>
-          <div class="badge">Message</div>
+      btn.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+          <strong>${escapeHtml(m.name || "(no name)")}</strong>
+          <span class="muted small">${escapeHtml(m.status || "new")}</span>
         </div>
-        <div class="li-sub mono">${escapeHtml(sub)}</div>
-        <div class="li-snippet">${escapeHtml(snippet || "—")}</div>
-        <div class="li-meta">
-          <span class="pill ${escapeHtml(x.status)}">${escapeHtml(x.status)}</span>
-          <span class="muted small">${escapeHtml(fmtDate(x.createdAt))}</span>
-        </div>
+        <div class="muted small">${escapeHtml(m.email || "")}</div>
+        <div class="muted">${escapeHtml(snippet || "—")}</div>
+        <div class="muted small">${escapeHtml(fmtDate(m.createdAt))}</div>
       `;
 
-      row.addEventListener("click", () => {
-        activeId = x.id;
+      btn.addEventListener("click", () => {
+        activeId = m.id;
         renderList();
-        renderDetail(x.id);
+        renderDetail();
       });
 
-      els.list.appendChild(row);
+      els.list.appendChild(btn);
     });
   }
 
-  function renderDetail(id) {
-    const x = items.find((m) => m.id === id);
-
-    if (!x) {
-      if (els.detail) els.detail.style.display = "none";
-      if (els.detailHint) els.detailHint.textContent = "Select an item on the left.";
+  function renderDetail() {
+    const m = items.find((x) => x.id === activeId);
+    if (!m) {
+      els.detail.style.display = "none";
+      els.detailHint.textContent = "Select a message from the left.";
       return;
     }
 
-    if (els.detailHint) els.detailHint.textContent = "";
-    if (els.detail) els.detail.style.display = "block";
+    els.detailHint.textContent = "";
+    els.detail.style.display = "block";
 
-    if (els.createdAt) els.createdAt.textContent = fmtDate(x.createdAt);
-    if (els.statusSelect) els.statusSelect.value = x.status || "new";
+    els.nameText.textContent = m.name || "—";
+    els.emailText.textContent = m.email || "—";
+    els.createdAt.textContent = fmtDate(m.createdAt);
+    els.statusPill.textContent = m.status || "new";
+    els.messageText.textContent = m.text || "";
 
-    if (els.nameText) els.nameText.textContent = x.name || "—";
-    if (els.emailText) els.emailText.textContent = x.email || "—";
-    if (els.messageText) els.messageText.textContent = x.text || "—";
-
-    if (els.notesInput) els.notesInput.value = x.notes || "";
-    if (els.saveStatus) els.saveStatus.textContent = "";
-
-    // refs thumbnails
-    if (els.refsBlock && els.refs) {
-      const refs = Array.isArray(x.refs) ? x.refs : [];
-      if (refs.length) {
-        els.refsBlock.style.display = "block";
-        els.refs.innerHTML = "";
-
-        refs.forEach((url) => {
-          const a = document.createElement("a");
-          a.href = url;
-          a.target = "_blank";
-          a.rel = "noreferrer";
-          a.className = "ref-thumb";
-          a.innerHTML = `<img src="${url}" alt="reference" loading="lazy">`;
-          els.refs.appendChild(a);
-        });
-      } else {
-        els.refsBlock.style.display = "none";
-        els.refs.innerHTML = "";
-      }
-    }
+    els.statusSelect.value = m.status || "new";
+    els.notesInput.value = m.notes || "";
+    els.saveStatus.textContent = "";
   }
 
-  async function loadAll() {
-    if (!isLoggedIn()) {
+  async function load() {
+    if (!authed()) {
       window.location.href = LOGIN_PAGE;
       return;
     }
 
+    const base = normBase(API_BASE);
+    if (els.backendUrl) els.backendUrl.textContent = base || "—";
+
     setStatus("Loading inbox…", true);
 
     try {
-      const r = await fetch(`${API}/api/messages`);
-      const j = await r.json();
-      items = Array.isArray(j.items) ? j.items : [];
-
+      items = await apiGetMessages();
       setStatus("Loaded ✅", true);
 
-      const visible = currentFiltered();
-      if (activeId && !items.find((i) => i.id === activeId)) activeId = null;
-      if (!activeId && visible.length) activeId = visible[0].id;
+      const vis = filtered();
+      if (!activeId && vis.length) activeId = vis[0].id;
 
       renderList();
-      renderDetail(activeId);
+      renderDetail();
     } catch (e) {
-      setStatus("Error loading messages ❌", false);
+      setStatus(`Error ❌ ${e.message}`, false);
     }
   }
 
-  async function saveActive() {
-    const x = items.find((m) => m.id === activeId);
-    if (!x) return;
+  async function save() {
+    const m = items.find((x) => x.id === activeId);
+    if (!m) return;
 
-    const status = els.statusSelect ? els.statusSelect.value : x.status;
-    const notes = els.notesInput ? els.notesInput.value : x.notes;
+    const status = els.statusSelect.value;
+    const notes = els.notesInput.value;
 
-    if (els.saveStatus) els.saveStatus.textContent = "Saving…";
+    els.saveStatus.textContent = "Saving…";
 
     try {
-      const r = await fetch(`${API}/api/messages/${encodeURIComponent(x.id)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status, notes }),
-      });
+      const res = await apiPatchMessage(m.id, { status, notes });
 
-      if (!r.ok) throw new Error("Save failed");
-      const j = await r.json();
-      if (j?.msg) {
-        // update local
-        x.status = j.msg.status;
-        x.notes = j.msg.notes;
+      // backend returns {ok:true,msg}
+      const updated = res.msg || res.item || null;
+      if (updated) {
+        m.status = updated.status || status;
+        m.notes = updated.notes || notes;
       } else {
-        x.status = status;
-        x.notes = notes;
+        m.status = status;
+        m.notes = notes;
       }
 
-      if (els.saveStatus) els.saveStatus.textContent = "Saved ✅";
+      els.saveStatus.textContent = "Saved ✅";
       renderList();
-      renderDetail(activeId);
-    } catch {
-      if (els.saveStatus) els.saveStatus.textContent = "Save failed ❌";
+      renderDetail();
+    } catch (e) {
+      els.saveStatus.textContent = `Save failed ❌ ${e.message}`;
     }
   }
 
-  function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    window.location.href = LOGIN_PAGE;
-  }
+  // events
+  els.logoutBtn?.addEventListener("click", logout);
+  els.saveBtn?.addEventListener("click", save);
 
-  // ---------- Events ----------
-  if (els.refreshBtn) els.refreshBtn.addEventListener("click", loadAll);
-  if (els.logoutBtn) els.logoutBtn.addEventListener("click", logout);
-  if (els.saveBtn) els.saveBtn.addEventListener("click", saveActive);
+  els.searchInput?.addEventListener("input", () => {
+    searchTerm = els.searchInput.value || "";
+    renderList();
+    renderDetail();
+  });
 
-  if (els.searchInput) {
-    els.searchInput.addEventListener("input", () => {
-      searchTerm = els.searchInput.value || "";
-      renderList();
-      renderDetail(activeId);
-    });
-  }
-
-  if (els.tabs && els.tabs.length) {
-    els.tabs.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        els.tabs.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        activeFilter = btn.getAttribute("data-filter") || "all";
-
-        const visible = currentFiltered();
-        activeId = visible.length ? visible[0].id : null;
-
-        renderList();
-        renderDetail(activeId);
-      });
-    });
-  }
-
-  // ---------- Boot ----------
-  (async function boot() {
-    setBackendLabel();
-    await health();
-    await loadAll();
-  })();
+  // boot
+  load();
 })();
