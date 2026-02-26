@@ -1,112 +1,81 @@
-// admin.js (root) — SIMPLE WORKING ADMIN GATE
-// Fastest: client-side password gate -> opens admin portal.
-// We'll add JWT later once everything is stable.
+(() => {
+  const TOKEN_KEY = "amelias_admin_token";
 
-(function () {
-  const TOKEN_KEY = "amelias_admin_ok"; // simple flag
-  const PORTAL_URL = "./admin-portal.html";
+  const API_BASE = (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
+  const $ = (id) => document.getElementById(id);
 
-  const API_BASE =
-    (window.AMELIAS_CONFIG && window.AMELIAS_CONFIG.API_BASE) || "";
-
-  const els = {
-    backendUrl: document.getElementById("backendUrl"),
-    statusText: document.getElementById("statusText"),
-    loginForm: document.getElementById("loginForm"),
-    email: document.getElementById("email"),
-    password: document.getElementById("password"),
-    loginHint: document.getElementById("loginHint"),
-  };
+  const backendUrl = $("backendUrl");
+  const statusEl = $("status");
+  const emailEl = $("email");
+  const passEl = $("password");
+  const loginBtn = $("loginBtn");
+  const portalBtn = $("portalBtn");
 
   function setStatus(msg, ok = true) {
-    if (!els.statusText) return;
-    els.statusText.textContent = msg || "";
-    els.statusText.style.color = ok ? "" : "#b00020";
+    if (!statusEl) return;
+    statusEl.textContent = msg || "";
+    statusEl.style.color = ok ? "#256d3b" : "#b42318";
   }
 
-  function setHint(msg, ok = true) {
-    if (!els.loginHint) return;
-    els.loginHint.textContent = msg || "";
-    els.loginHint.style.color = ok ? "" : "#b00020";
-  }
-
-  function normBase(b) {
-    return String(b || "").replace(/\/$/, "");
+  function setToken(t) {
+    if (!t) localStorage.removeItem(TOKEN_KEY);
+    else localStorage.setItem(TOKEN_KEY, t);
   }
 
   async function ping() {
-    const base = normBase(API_BASE);
-    if (els.backendUrl) els.backendUrl.textContent = base || "—";
-    if (!base) {
-      setStatus("Missing API_BASE in config.js ❌", false);
-      return false;
-    }
-
     try {
-      const r = await fetch(`${base}/api/health`, { method: "GET" });
+      const r = await fetch(`${API_BASE}/api/health`);
       if (!r.ok) throw new Error("bad");
       const j = await r.json();
-      if (j && j.ok) {
-        setStatus("Backend: online ✅", true);
-        return true;
-      }
-      setStatus("Backend: unknown ⚠️", false);
-      return false;
-    } catch (e) {
+      if (!j.ok) throw new Error("bad");
+      setStatus("Backend: online ✅", true);
+      return true;
+    } catch {
       setStatus("Backend: offline / sleeping ❌", false);
       return false;
     }
   }
 
-  function isAuthed() {
-    return localStorage.getItem(TOKEN_KEY) === "yes";
+  async function login() {
+    const email = (emailEl?.value || "").trim();
+    const password = (passEl?.value || "").trim();
+
+    if (!email || !password) {
+      setStatus("Enter email + password.", false);
+      return;
+    }
+
+    setStatus("Logging in…", true);
+
+    try {
+      const r = await fetch(`${API_BASE}/api/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await r.json().catch(() => null);
+      if (!r.ok) throw new Error((data && data.error) || "Login failed");
+
+      setToken(data.token);
+      setStatus("Logged in ✅", true);
+
+      if (portalBtn) portalBtn.style.display = "inline-flex";
+      // auto-open portal
+      window.location.href = "./admin-portal.html";
+    } catch (e) {
+      setStatus(e.message || "Login failed", false);
+    }
   }
 
-  function setAuthed(v) {
-    if (v) localStorage.setItem(TOKEN_KEY, "yes");
-    else localStorage.removeItem(TOKEN_KEY);
-  }
-
-  function goPortal() {
-    window.location.href = PORTAL_URL;
-  }
-
-  // If already authed, jump straight in
-  if (isAuthed()) {
-    goPortal();
-    return;
-  }
-
-  // Boot
+  // boot
+  if (backendUrl) backendUrl.textContent = API_BASE || "—";
   ping();
 
-  // Login (simple gate)
-  els.loginForm?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  if (loginBtn) loginBtn.addEventListener("click", login);
 
-    const ok = await ping();
-    if (!ok) {
-      setHint("Backend is asleep/offline. Refresh and try again.", false);
-      return;
-    }
-
-    const email = String(els.email?.value || "").trim().toLowerCase();
-    const pass = String(els.password?.value || "").trim();
-
-    // ✅ SIMPLE FAMILY CHECK:
-    // email can be anything family uses, but password must match your chosen password.
-    // You said: Amelia1 (Render env) — use that.
-    const REQUIRED_PASSWORD = "Amelia1";
-
-    if (!pass) return setHint("Enter password.", false);
-
-    if (pass !== REQUIRED_PASSWORD) {
-      setHint("Wrong password ❌", false);
-      return;
-    }
-
-    setAuthed(true);
-    setHint("Login ok ✅ Redirecting…", true);
-    setTimeout(goPortal, 200);
+  // enter key support
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") login();
   });
 })();
