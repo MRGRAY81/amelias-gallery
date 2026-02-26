@@ -4,37 +4,82 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Portal — Amelia’s Gallery</title>
-  <meta name="description" content="Family-only admin portal." />
-  <link rel="stylesheet" href="./styles.css?v=12" />
-  <link rel="stylesheet" href="./admin-portal.css?v=10" />
+  <link rel="stylesheet" href="./styles.css?v=101" />
+  <link rel="stylesheet" href="./admin-portal.css?v=1" />
 </head>
 
 <body data-page="admin-portal">
-  <!-- Shared Header -->
+
   <div id="site-header"></div>
 
-  <main class="shell portal-shell">
-    <!-- Keep YOUR existing portal markup if you already have it.
-         IMPORTANT: This JS expects these IDs to exist somewhere on the page:
-         dot, statusText, backendUrl, refreshBtn, logoutBtn,
-         searchInput, countText, list,
-         detail, detailHint,
-         createdAt, statusSelect,
-         nameText, emailText, messageText,
-         refsBlock, refs,
-         notesInput, saveBtn, saveStatus
-    -->
-  </main>
+  <main class="shell">
 
-  <footer class="image-footer">
-    <img src="./amelias-gallery-footer.png" alt="Footer" />
-    <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
-  </footer>
+    <section class="section">
+      <div class="section-head">
+        <h2>Admin Inbox</h2>
+        <p>Messages & commission requests</p>
+      </div>
 
-  <!-- Scripts (order matters) -->
-  <script src="./config.js"></script>
-  <script src="./site-auth.js?v=1"></script>
-  <script src="./header-loader.js?v=1"></script>
-  <script src="./admin-portal.js?v=10"></script>
-</body>
-</html>
+      <div class="portal-grid">
+
+        <!-- LEFT: Message List -->
+        <div class="portal-list">
+          <div class="portal-toolbar">
+            <input id="searchInput" type="text" placeholder="Search…" />
+            <div id="countText" class="muted small">0 items</div>
+          </div>
+
+          <div id="list"></div>
+        </div>
+
+        <!-- RIGHT: Message Detail -->
+        <div class="portal-detail">
+
+          <div id="detailHint" class="muted">
+            Select a message from the left.
+          </div>
+
+          <div id="detail" style="display:none;">
+
+            <div class="detail-meta">
+              <div>
+                <strong>Name:</strong>
+                <span id="nameText"></span>
+              </div>
+              <div>
+                <strong>Email:</strong>
+                <span id="emailText"></span>
+              </div>
+              <div>
+                <strong>Date:</strong>
+                <span id="createdAt"></span>
+              </div>
+            </div>
+
+            <div class="detail-body">
+              <pre id="messageText" class="message-box"></pre>
+            </div>
+
+            <div id="refsBlock" style="display:none;">
+              <h4>Reference Images</h4>
+              <div id="refs" class="ref-grid"></div>
+            </div>
+
+            <div class="detail-controls">
+              <label>
+                Status
+                <select id="statusSelect">
+                  <option value="new">New</option>
+                  <option value="progress">In Progress</option>
+                  <option value="done">Done</option>
+                </select>
+              </label>
+
+              <label>
+                Notes
+                <textarea id="notesInput" rows="3" placeholder="Internal notes…"></textarea>
+              </label>
+
+              <button class="btn" id="saveBtn">Save</button>
+              <div id="saveStatus" class="fineprint"></div>
+            </div>
