@@ -554,4 +554,21 @@ body{
   .nav-home,.nav-gallery,.nav-contact,.nav-about{
     height: 14%;
   }
+  /* --- Admin login input fix (Android/Samsung) --- */
+.form label { display:block; }
+
+.form input,
+.form textarea,
+.form select{
+  display:block;
+  width:100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  line-height: 1.2;
+  box-sizing: border-box;
+}
+
+.form input[type="password"]{
+  -webkit-text-security: disc;
+}
   }
