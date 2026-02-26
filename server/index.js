@@ -8,36 +8,29 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 
-/**
- * ENV on Render:
- * ADMIN_EMAIL=amelia@demo.com
- * ADMIN_PASSWORD=Amelia1
- * JWT_SECRET=super-long-random-string
- * FRONTEND_ORIGIN=https://amelias-gallery-1.onrender.com
- * PUBLIC_BASE_URL=https://<YOUR-NODE-SERVICE>.onrender.com   (optional, only needed for uploads)
- */
-
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*";
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+// -------------------- ENV --------------------
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "*"; // set to your static site url
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "amelia@demo.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Amelia1";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Gallery123";
+const JWT_SECRET = process.env.JWT_SECRET || "change-me";
 
-// --- CORS (allow your static frontend)
+// -------------------- MIDDLEWARE --------------------
 app.use(
   cors({
     origin: FRONTEND_ORIGIN === "*" ? true : FRONTEND_ORIGIN,
-    credentials: false,
+    methods: ["GET", "POST", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json({ limit: "10mb" }));
 
-// ---------- uploads folder
+// -------------------- UPLOADS --------------------
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
 app.use("/uploads", express.static(UPLOAD_DIR));
 
-// ---------- multer
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
   filename: (_req, file, cb) => {
@@ -46,56 +39,68 @@ const storage = multer.diskStorage({
     cb(null, safe);
   },
 });
+
 const upload = multer({ storage });
 
-// ---------- in-memory store
-const MESSAGES = []; // {id,name,email,text,status,notes,refs[],createdAt}
+// -------------------- STORE --------------------
+// {id, type, name, email, text, refs[], status, notes, createdAt}
+const MESSAGES = [];
 
-// ---------- helpers
+// -------------------- HELPERS --------------------
+function safeStatus(s) {
+  const allowed = new Set(["new", "progress", "done"]);
+  return allowed.has(s) ? s : "new";
+}
+
 function publicBase(req) {
   const env = process.env.PUBLIC_BASE_URL;
   if (env) return env.replace(/\/$/, "");
   return `${req.protocol}://${req.get("host")}`;
 }
 
-function safeStatus(s) {
-  const allowed = new Set(["new", "progress", "done"]);
-  return allowed.has(s) ? s : "new";
-}
-
 function requireAuth(req, res, next) {
-  const header = req.headers.authorization || "";
-  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+  const h = req.headers.authorization || "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : "";
   if (!token) return res.status(401).json({ error: "Missing token" });
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     req.user = payload;
-    return next();
+    next();
   } catch {
     return res.status(401).json({ error: "Invalid token" });
   }
 }
 
-// ---------- routes
+// -------------------- ROUTES --------------------
+
+// Keep this so hitting root doesn’t confuse you
+app.get("/", (_req, res) => res.json({ ok: true }));
+
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
-// admin login
+// ---- Admin auth
 app.post("/api/admin/login", (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: "Missing credentials" });
+  const e = String(email || "").trim().toLowerCase();
+  const p = String(password || "");
 
-  const ok =
-    String(email).toLowerCase() === String(ADMIN_EMAIL).toLowerCase() &&
-    String(password) === String(ADMIN_PASSWORD);
+  if (e !== String(ADMIN_EMAIL).toLowerCase() || p !== String(ADMIN_PASSWORD)) {
+    return res.status(401).json({ error: "Invalid login" });
+  }
 
-  if (!ok) return res.status(401).json({ error: "Invalid login" });
+  const token = jwt.sign({ email: e, role: "admin" }, JWT_SECRET, {
+    expiresIn: "7d",
+  });
 
-  const token = jwt.sign({ email: ADMIN_EMAIL, role: "admin" }, JWT_SECRET, { expiresIn: "7d" });
   res.json({ ok: true, token });
 });
 
-// upload image (admin only)
+app.get("/api/admin/whoami", requireAuth, (req, res) => {
+  res.json({ ok: true, user: req.user });
+});
+
+// ---- Upload (admin-only)
 app.post("/api/upload", requireAuth, upload.single("file"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   const base = publicBase(req);
@@ -103,13 +108,14 @@ app.post("/api/upload", requireAuth, upload.single("file"), (req, res) => {
   res.json({ ok: true, url });
 });
 
-// PUBLIC: create message (from contact/commissions)
+// ---- Public message create (contact + commissions can hit this)
 app.post("/api/messages", (req, res) => {
-  const { name, email, text, refs } = req.body || {};
+  const { name, email, text, refs, type } = req.body || {};
   if (!text) return res.status(400).json({ error: "Missing message text" });
 
   const msg = {
     id: crypto.randomUUID(),
+    type: type === "commission" ? "commission" : "enquiry",
     name: String(name || "Unknown"),
     email: String(email || ""),
     text: String(text),
@@ -123,13 +129,13 @@ app.post("/api/messages", (req, res) => {
   res.json({ ok: true, msg });
 });
 
-// ADMIN: list messages
-app.get("/api/admin/messages", requireAuth, (_req, res) => {
+// ---- Admin list
+app.get("/api/messages", requireAuth, (_req, res) => {
   res.json({ ok: true, items: MESSAGES });
 });
 
-// ADMIN: update message status/notes
-app.patch("/api/admin/messages/:id", requireAuth, (req, res) => {
+// ---- Admin update
+app.patch("/api/messages/:id", requireAuth, (req, res) => {
   const { id } = req.params;
   const { status, notes } = req.body || {};
 
@@ -142,9 +148,6 @@ app.patch("/api/admin/messages/:id", requireAuth, (req, res) => {
   res.json({ ok: true, msg });
 });
 
-// OPTIONAL: keep old endpoint for quick testing (not admin)
-app.get("/api/messages", (_req, res) => res.json({ ok: true, items: MESSAGES }));
-
-// ---------- start
+// -------------------- START --------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on", PORT));
