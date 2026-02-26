@@ -9,17 +9,7 @@
 </head>
 
 <body data-page="admin">
-
-  <header class="image-header">
-    <img src="./amelias-gallery-header.png" alt="Amelia’s Gallery header" loading="eager" />
-  </header>
-
-  <nav class="nav nav-buttons" aria-label="Primary">
-    <a class="btnlink" href="./index.html">Home</a>
-    <a class="btnlink" href="./gallery.html">Gallery</a>
-    <a class="btnlink" href="./commissions.html">Contact</a>
-    <a class="btnlink" href="./about.html">About</a>
-  </nav>
+  <div id="site-header"></div>
 
   <main class="shell">
     <section class="section">
@@ -31,7 +21,7 @@
       <div class="panel">
         <div class="muted small">Backend</div>
         <div class="mono" id="backendUrl">—</div>
-        <div class="status" id="statusText">Checking backend…</div>
+        <div class="status" id="status">Checking backend…</div>
 
         <form class="form" id="loginForm" style="margin-top:14px;">
           <label>
@@ -44,12 +34,16 @@
             <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
           </label>
 
-          <button type="submit" class="btn" id="loginBtn">Login</button>
-
-          <div class="fineprint" id="loginHint" aria-live="polite">
-            Tip: use your family password.
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+            <button class="btn" id="loginBtn" type="submit">Login</button>
+            <button class="btn ghost" id="logoutBtn" type="button" style="display:none;">Logout</button>
+            <a class="btn" id="portalBtn" href="./admin-portal.html" style="display:none;">Open Admin Portal</a>
           </div>
+
+          <div class="fineprint">Tip: Press Enter to login.</div>
         </form>
+
+        <pre class="codebox" id="adminOutText" style="display:none;">{}</pre>
       </div>
     </section>
   </main>
@@ -59,8 +53,9 @@
     <div class="footer-note">Site managed by family • Supported by Uncle G & Del 💛</div>
   </footer>
 
-  <!-- order matters -->
   <script src="./config.js?v=200"></script>
+  <script src="./site-auth.js?v=200"></script>
+  <script src="./header-loader.js?v=200"></script>
   <script src="./admin.js?v=200"></script>
 </body>
 </html>
