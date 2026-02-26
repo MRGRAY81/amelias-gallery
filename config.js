@@ -1,4 +1,5 @@
-// Amelia’s Gallery — Frontend config
+// config.js
+// Change this if your backend URL changes.
 window.AMELIAS_CONFIG = {
-  API_BASE: "https://amelias-gallery-ytkr.onrender.com"
+  API_BASE: "https://amelias-gallery-vtkr.onrender.com"
 };
